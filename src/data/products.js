@@ -1,7 +1,7 @@
-import jacket from "../assets/images/jacket.jpg";
-import hoodie from "../assets/images/hoodie.jpg";
-import tshirt from "../assets/images/tshirt.jpg";
-import sneakers from "../assets/images/sneakers.jpg";
+import jacket from "../assets/images/products/jacket.jpg";
+import hoodie from "../assets/images/products/hoodie.jpg";
+import tshirt from "../assets/images/products/tshirt.jpg";
+import sneakers from "../assets/images/products/sneakers.jpg";
 
 const products = [
     {
