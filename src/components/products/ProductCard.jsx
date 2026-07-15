@@ -1,0 +1,101 @@
+import { Heart, ShoppingBag, Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import Button from "../common/Button";
+
+const ProductCard = ({ product }) => {
+    const {
+        id,
+        name,
+        category,
+        image,
+        price,
+        oldPrice,
+        rating,
+        reviews,
+        badge,
+    } = product;
+
+    return (
+        <article className="group overflow-hidden rounded-card bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+            {/* Image */}
+
+            <div className="relative overflow-hidden">
+                {/* Badge */}
+
+                {badge && (
+                    <span className="absolute left-4 top-4 z-10 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white">
+                        {badge}
+                    </span>
+                )}
+
+                {/* Wishlist */}
+
+                <button className="absolute right-4 top-4 z-10 rounded-full bg-white p-2 shadow transition hover:bg-accent hover:text-white">
+                    <Heart size={18} />
+                </button>
+
+                {/* Product Image */}
+
+                <Link to={`/products/${id}`}>
+                    <img
+                        src={image}
+                        alt={name}
+                        className="aspect-4/5 w-full object-cover transition duration-500 group-hover:scale-110"
+                    />
+                </Link>
+            </div>
+
+            {/* Content */}
+
+            <div className="space-y-4 p-5">
+                <div>
+                    <p className="text-sm text-gray-500">{category}</p>
+
+                    <Link to={`/products/${id}`}>
+                        <h3 className="mt-1 text-xl font-semibold text-primary transition group-hover:text-accent">
+                            {name}
+                        </h3>
+                    </Link>
+                </div>
+
+                {/* Price */}
+
+                <div className="flex items-center gap-3">
+                    <span className="text-xl font-bold text-primary">
+                        ${price}
+                    </span>
+
+                    {oldPrice && (
+                        <span className="text-gray-400 line-through">
+                            ${oldPrice}
+                        </span>
+                    )}
+                </div>
+
+                {/* Rating */}
+
+                <div className="flex items-center gap-2">
+                    <Star
+                        size={18}
+                        className="fill-yellow-400 text-yellow-400"
+                    />
+
+                    <span className="text-sm font-medium">{rating}</span>
+
+                    <span className="text-sm text-gray-500">
+                        ({reviews} Reviews)
+                    </span>
+                </div>
+
+                {/* Button */}
+
+                <Button className="w-full">
+                    <ShoppingBag size={18} />
+                    Add to Cart
+                </Button>
+            </div>
+        </article>
+    );
+};
+
+export default ProductCard;
