@@ -8,21 +8,25 @@ const categories = [
         id: 1,
         title: "Men",
         image: men,
+        products: 28,
     },
     {
         id: 2,
         title: "Women",
         image: women,
+        products: 36,
     },
     {
         id: 3,
         title: "Accessories",
         image: accessories,
+        products: 18,
     },
     {
         id: 4,
         title: "Footwear",
         image: footwear,
+        products: 24,
     },
 ];
 
