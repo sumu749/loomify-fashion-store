@@ -16,7 +16,7 @@ const ProductCard = ({ product }) => {
     } = product;
 
     return (
-        <article className="group overflow-hidden rounded-card border border-border bg-white shadow-sm transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
+        <article className="relative group overflow-hidden rounded-card border border-border bg-white shadow-sm transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
             {/* Image */}
 
             <div className="relative overflow-hidden">
