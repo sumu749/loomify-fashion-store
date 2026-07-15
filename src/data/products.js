@@ -14,6 +14,7 @@ const products = [
         rating: 4.8,
         reviews: 42,
         badge: "SALE",
+        featured: true,
     },
     {
         id: 2,
@@ -25,6 +26,7 @@ const products = [
         rating: 4.7,
         reviews: 28,
         badge: "NEW",
+        featured: true,
     },
     {
         id: 3,
@@ -36,6 +38,7 @@ const products = [
         rating: 4.9,
         reviews: 73,
         badge: "",
+        featured: true,
     },
     {
         id: 4,
@@ -47,6 +50,7 @@ const products = [
         rating: 5.0,
         reviews: 18,
         badge: "HOT",
+        featured: true,
     },
     {
         id: 5,
@@ -58,6 +62,7 @@ const products = [
         rating: 4.8,
         reviews: 42,
         badge: "SALE",
+        featured: true,
     },
     {
         id: 6,
@@ -69,6 +74,7 @@ const products = [
         rating: 4.7,
         reviews: 28,
         badge: "NEW",
+        featured: true,
     },
     {
         id: 7,
@@ -80,6 +86,7 @@ const products = [
         rating: 4.9,
         reviews: 73,
         badge: "",
+        featured: true,
     },
     {
         id: 8,
@@ -91,6 +98,7 @@ const products = [
         rating: 5.0,
         reviews: 18,
         badge: "HOT",
+        featured: true,
     },
     {
         id: 9,
@@ -102,6 +110,7 @@ const products = [
         rating: 4.8,
         reviews: 42,
         badge: "SALE",
+        featured: true,
     },
     {
         id: 10,
@@ -113,6 +122,7 @@ const products = [
         rating: 4.7,
         reviews: 28,
         badge: "NEW",
+        featured: true,
     },
     {
         id: 11,
@@ -124,6 +134,7 @@ const products = [
         rating: 4.9,
         reviews: 73,
         badge: "",
+        featured: true,
     },
     {
         id: 12,
@@ -135,6 +146,7 @@ const products = [
         rating: 5.0,
         reviews: 18,
         badge: "HOT",
+        featured: true,
     },
 ];
 
