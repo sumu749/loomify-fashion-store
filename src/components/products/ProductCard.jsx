@@ -16,7 +16,7 @@ const ProductCard = ({ product }) => {
     } = product;
 
     return (
-        <article className="group overflow-hidden rounded-card bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+        <article className="group overflow-hidden rounded-card border border-border bg-white shadow-sm transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl">
             {/* Image */}
 
             <div className="relative overflow-hidden">
@@ -30,7 +30,7 @@ const ProductCard = ({ product }) => {
 
                 {/* Wishlist */}
 
-                <button className="absolute right-4 top-4 z-10 rounded-full bg-white p-2 shadow transition hover:bg-accent hover:text-white">
+                <button className="absolute right-4 top-4 z-10 rounded-full bg-white/90 p-2 backdrop-blur transition-all duration-300 hover:scale-110 hover:bg-accent hover:text-white">
                     <Heart size={18} />
                 </button>
 
@@ -40,7 +40,7 @@ const ProductCard = ({ product }) => {
                     <img
                         src={image}
                         alt={name}
-                        className="aspect-4/5 w-full object-cover transition duration-500 group-hover:scale-110"
+                        className="aspect-4/5 w-full object-cover transition duration-700 ease-out group-hover:scale-110"
                     />
                 </Link>
             </div>
@@ -89,10 +89,12 @@ const ProductCard = ({ product }) => {
 
                 {/* Button */}
 
-                <Button className="w-full">
-                    <ShoppingBag size={18} />
-                    Add to Cart
-                </Button>
+                <div className="absolute inset-x-0 bottom-0 translate-y-full bg-white/90 p-3 backdrop-blur-md transition duration-500 group-hover:translate-y-0">
+                    <Button className="w-full">
+                        <ShoppingBag size={18} />
+                        Add to Cart
+                    </Button>
+                </div>
             </div>
         </article>
     );
