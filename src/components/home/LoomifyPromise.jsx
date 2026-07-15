@@ -1,6 +1,9 @@
-import { Check } from "lucide-react";
+import { motion } from "framer-motion";
+import { Check, ArrowRight } from "lucide-react";
+
 import Container from "../common/Container";
 import Button from "../common/Button";
+
 import promiseImage from "../../assets/images/promise.jpg";
 
 const features = [
@@ -12,56 +15,132 @@ const features = [
 
 const LoomifyPromise = () => {
     return (
-        <section className="py-24">
+        <section className="relative overflow-hidden py-24">
+            {/* Background Decoration */}
+
+            <div className="absolute -left-32 top-20 h-72 w-72 rounded-full bg-accent/10 blur-3xl"></div>
+
+            <div className="absolute -right-20 bottom-0 h-64 w-64 rounded-full bg-primary/5 blur-3xl"></div>
+
             <Container>
                 <div className="grid items-center gap-16 lg:grid-cols-2">
-                    {/* Left */}
+                    {/* ================= Left Image ================= */}
 
-                    <div>
-                        <img
-                            src={promiseImage}
-                            alt="Loomify Promise"
-                            className="aspect-4/5 w-full rounded-card object-cover shadow-card"
-                        />
-                    </div>
+                    <motion.div
+                        initial={{
+                            opacity: 0,
+                            x: -60,
+                        }}
+                        whileInView={{
+                            opacity: 1,
+                            x: 0,
+                        }}
+                        viewport={{ once: true }}
+                        transition={{
+                            duration: 0.8,
+                        }}
+                        className="mx-auto w-full max-w-lg"
+                    >
+                        <motion.div
+                            whileHover={{
+                                scale: 1.03,
+                                rotate: -1,
+                            }}
+                            transition={{
+                                duration: 0.35,
+                            }}
+                            className="overflow-hidden rounded-card shadow-card"
+                        >
+                            <img
+                                src={promiseImage}
+                                alt="Loomify Promise"
+                                className="aspect-4/5 w-full object-cover transition duration-700 hover:scale-110"
+                            />
+                        </motion.div>
+                    </motion.div>
 
-                    {/* Right */}
+                    {/* ================= Right Content ================= */}
 
-                    <div>
-                        <span className="text-sm font-semibold uppercase tracking-[0.25em] text-accent">
+                    <motion.div
+                        initial={{
+                            opacity: 0,
+                            x: 60,
+                        }}
+                        whileInView={{
+                            opacity: 1,
+                            x: 0,
+                        }}
+                        viewport={{ once: true }}
+                        transition={{
+                            duration: 0.8,
+                        }}
+                    >
+                        <span className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
                             The Loomify Promise
                         </span>
 
-                        <h2 className="mt-4 text-4xl font-bold text-primary lg:text-5xl">
-                            Designed for Everyday Luxury.
+                        <h2 className="mt-5 text-4xl font-bold leading-tight text-primary md:text-5xl">
+                            Designed for
+                            <br />
+                            Everyday Luxury.
                         </h2>
 
-                        <p className="mt-6 max-w-lg leading-8 text-gray-600">
-                            Every piece at Loomify is crafted with premium
-                            fabrics and timeless design, giving you comfort,
-                            confidence, and quality that lasts.
+                        <p className="mt-6 max-w-lg text-lg leading-8 text-gray-600">
+                            Every piece at Loomify is thoughtfully crafted with
+                            premium fabrics, timeless aesthetics, and
+                            exceptional attention to detail—bringing comfort,
+                            confidence, and effortless style into your everyday
+                            life.
                         </p>
 
+                        {/* Divider */}
+
+                        <div className="mt-8 h-1 w-20 rounded-full bg-accent"></div>
+
+                        {/* Features */}
+
                         <div className="mt-10 space-y-5">
-                            {features.map((item) => (
-                                <div
+                            {features.map((item, index) => (
+                                <motion.div
                                     key={item}
-                                    className="flex items-center gap-4"
+                                    initial={{
+                                        opacity: 0,
+                                        x: 30,
+                                    }}
+                                    whileInView={{
+                                        opacity: 1,
+                                        x: 0,
+                                    }}
+                                    viewport={{ once: true }}
+                                    transition={{
+                                        delay: index * 0.15,
+                                        duration: 0.45,
+                                    }}
+                                    className="group flex items-center gap-4"
                                 >
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-accent">
                                         <Check
                                             size={18}
-                                            className="text-accent"
+                                            className="text-accent transition duration-300 group-hover:text-white"
                                         />
                                     </div>
 
-                                    <span className="font-medium">{item}</span>
-                                </div>
+                                    <span className="text-base font-medium transition duration-300 group-hover:text-primary">
+                                        {item}
+                                    </span>
+                                </motion.div>
                             ))}
                         </div>
 
-                        <Button className="mt-10">Learn More</Button>
-                    </div>
+                        {/* CTA */}
+
+                        <div className="mt-12">
+                            <Button size="lg">
+                                Learn More
+                                <ArrowRight size={18} />
+                            </Button>
+                        </div>
+                    </motion.div>
                 </div>
             </Container>
         </section>
