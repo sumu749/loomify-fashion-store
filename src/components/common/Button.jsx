@@ -13,6 +13,9 @@ const Button = ({
 
         secondary:
             "border border-gray-300 bg-white text-[#111827] hover:bg-gray-100",
+
+        outline:
+            "border border-gray-900 bg-transparent text-gray-900 hover:bg-gray-900 hover:text-white",
     };
     return (
         <button
