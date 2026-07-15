@@ -1,14 +1,10 @@
-import Container from "../components/common/Container";
-import SectionTitle from "../components/common/SectionTitle";
+import Hero from "../components/home/Hero";
 
 const Home = () => {
     return (
-        <Container className="py-20">
-            <SectionTitle
-                subtitle="Featured"
-                title="Discover Premium Fashion"
-            />
-        </Container>
+        <>
+            <Hero />
+        </>
     );
 };
 
