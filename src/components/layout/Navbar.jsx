@@ -1,18 +1,29 @@
 import { NavLink } from "react-router-dom";
 import { Menu, X, Search, ShoppingBag } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Container from "../common/Container";
 import { navItems } from "../../constants/navigation";
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+
+        window.addEventListener("scroll", handleScroll);
+
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     // Active NavLink Style
     const getNavLinkClass = ({ isActive }) =>
-        `transition-colors duration-300 ${
+        `relative transition-colors duration-300 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:rounded-full after:bg-accent after:transition-all after:duration-300 ${
             isActive
-                ? "text-accent font-semibold"
-                : "text-primary hover:text-accent"
+                ? "text-accent after:w-full"
+                : "text-primary after:w-0 hover:text-accent hover:after:w-full"
         }`;
 
     // Reusable Navigation Links
@@ -27,16 +38,24 @@ const Navbar = () => {
             </NavLink>
         </li>
     ));
+
     return (
-        <header className="sticky top-0 z-50 border-b border-border bg-white/90 backdrop-blur-md">
+        <header
+            className={`sticky top-0 z-50 transition-all duration-300 ${
+                isScrolled
+                    ? "border-b border-border bg-white/95 shadow-sm backdrop-blur-md"
+                    : "bg-transparent"
+            }`}
+        >
             <Container>
                 <nav className="flex h-20 items-center justify-between">
                     {/* Logo */}
                     <NavLink
                         to="/"
-                        className="text-3xl font-bold tracking-wide text-primary"
+                        className="text-3xl font-bold tracking-wide transition-transform duration-300 hover:scale-105"
                     >
-                        <span className="text-accent">L</span>oomify
+                        <span className="text-accent">L</span>
+                        <span className="text-primary">oomify</span>
                     </NavLink>
 
                     {/* Desktop Navigation */}
@@ -48,7 +67,7 @@ const Navbar = () => {
                     <div className="flex items-center gap-4">
                         {/* Search */}
                         <button
-                            className="rounded-full p-2 transition hover:bg-gray-100"
+                            className="rounded-full p-2 transition-all duration-300 hover:bg-accent hover:text-white"
                             aria-label="Search"
                         >
                             <Search size={20} />
@@ -56,12 +75,12 @@ const Navbar = () => {
 
                         {/* Cart */}
                         <button
-                            className="relative rounded-full p-2 transition hover:bg-gray-100"
+                            className="group relative rounded-full p-2 transition-all duration-300 hover:bg-accent hover:text-white"
                             aria-label="Shopping Cart"
                         >
                             <ShoppingBag size={22} />
 
-                            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-medium text-white">
+                            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-medium text-white transition-transform duration-300 group-hover:scale-110">
                                 0
                             </span>
                         </button>
