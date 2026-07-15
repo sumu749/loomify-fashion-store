@@ -16,7 +16,7 @@ const ProductCard = ({ product }) => {
     } = product;
 
     return (
-        <article className="group overflow-hidden rounded-card border border-border bg-white shadow-sm transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl">
+        <article className="group overflow-hidden rounded-card border border-border bg-white shadow-sm transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
             {/* Image */}
 
             <div className="relative overflow-hidden">
@@ -30,7 +30,7 @@ const ProductCard = ({ product }) => {
 
                 {/* Wishlist */}
 
-                <button className="absolute right-4 top-4 z-10 rounded-full bg-white/90 p-2 backdrop-blur transition-all duration-300 hover:scale-110 hover:bg-accent hover:text-white">
+                <button className="absolute right-4 top-4 z-10 rounded-full bg-white/90 p-2 backdrop-blur transition-all duration-300 active:scale-95 hover:bg-accent hover:text-white">
                     <Heart size={18} />
                 </button>
 
@@ -40,7 +40,7 @@ const ProductCard = ({ product }) => {
                     <img
                         src={image}
                         alt={name}
-                        className="aspect-4/5 w-full object-cover transition duration-700 ease-out group-hover:scale-110"
+                        className="aspect-4/5 w-full object-cover transition duration-700 ease-out group-hover:rotate-1"
                     />
                 </Link>
             </div>

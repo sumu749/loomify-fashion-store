@@ -1,9 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-
 import products from "../../data/products";
-
 import Container from "../common/Container";
 import ProductCard from "../products/ProductCard";
 
@@ -43,7 +41,23 @@ const FeaturedProducts = () => {
             <Container>
                 {/* Header */}
 
-                <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 40,
+                    }}
+                    whileInView={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    viewport={{
+                        once: true,
+                    }}
+                    transition={{
+                        duration: 0.6,
+                    }}
+                    className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between"
+                >
                     <div>
                         <span className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
                             Featured Collection
@@ -66,7 +80,7 @@ const FeaturedProducts = () => {
                         View All
                         <ArrowRight size={18} />
                     </Link>
-                </div>
+                </motion.div>
 
                 {/* Products */}
 
