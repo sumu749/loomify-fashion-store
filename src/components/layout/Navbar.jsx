@@ -1,10 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { Menu, Search, ShoppingBag } from "lucide-react";
-
+import { Menu, X, Search, ShoppingBag } from "lucide-react";
+import { useState } from "react";
 import Container from "../common/Container";
 import { navItems } from "../../constants/navigation";
 
 const Navbar = () => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
     // Active NavLink Style
     const getNavLinkClass = ({ isActive }) =>
         `transition-colors duration-300 ${
@@ -16,12 +18,15 @@ const Navbar = () => {
     // Reusable Navigation Links
     const navigationLinks = navItems.map((item) => (
         <li key={item.path}>
-            <NavLink to={item.path} className={getNavLinkClass}>
+            <NavLink
+                to={item.path}
+                className={getNavLinkClass}
+                onClick={() => setIsMenuOpen(false)}
+            >
                 {item.name}
             </NavLink>
         </li>
     ));
-
     return (
         <header className="sticky top-0 z-50 border-b border-border bg-white/90 backdrop-blur-md">
             <Container>
@@ -39,7 +44,7 @@ const Navbar = () => {
                         {navigationLinks}
                     </ul>
 
-                    {/* Right Side */}
+                    {/* Right Side Icons */}
                     <div className="flex items-center gap-4">
                         {/* Search */}
                         <button
@@ -63,13 +68,25 @@ const Navbar = () => {
 
                         {/* Mobile Menu Button */}
                         <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="rounded-full p-2 transition hover:bg-gray-100 md:hidden"
-                            aria-label="Open Menu"
+                            aria-label="Toggle Menu"
                         >
-                            <Menu size={22} />
+                            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
                         </button>
                     </div>
                 </nav>
+                <div
+                    className={`overflow-hidden transition-all duration-300 md:hidden ${
+                        isMenuOpen
+                            ? "max-h-96 opacity-100"
+                            : "max-h-0 opacity-0"
+                    }`}
+                >
+                    <ul className="flex flex-col gap-4 py-6">
+                        {navigationLinks}
+                    </ul>
+                </div>
             </Container>
         </header>
     );
