@@ -21,7 +21,7 @@ const Newsletter = () => {
                     transition={{
                         duration: 0.7,
                     }}
-                    className="relative overflow-hidden rounded-card border border-border bg-stone-50 px-6 py-16 md:px-12"
+                    className="relative overflow-hidden rounded-card border border-border bg-stone-50 px-4 py-12 sm:px-6 sm:py-16 md:px-12"
                 >
                     {/* Decorative Blur */}
 
@@ -35,11 +35,11 @@ const Newsletter = () => {
                             Stay Connected
                         </span>
 
-                        <h2 className="mt-6 text-4xl font-bold text-primary md:text-5xl">
+                        <h2 className="mt-6 text-3xl font-bold text-primary sm:text-4xl md:text-5xl">
                             Join the Loomify Community
                         </h2>
 
-                        <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600">
+                        <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg sm:leading-8">
                             Be the first to discover new arrivals, exclusive
                             collections, seasonal offers, and timeless fashion
                             inspiration delivered directly to your inbox.
@@ -51,10 +51,13 @@ const Newsletter = () => {
                             <input
                                 type="email"
                                 placeholder="Enter your email"
-                                className="h-14 flex-1 rounded-full border border-border bg-white px-6 outline-none transition-all duration-300 focus:border-accent focus:ring-4 focus:ring-accent/10"
+                                className="h-12 flex-1 rounded-full border border-border bg-white px-6 outline-none transition-all duration-300 focus:border-accent focus:ring-4 focus:ring-accent/10 sm:h-14"
                             />
 
-                            <Button size="lg" className="rounded-full px-8">
+                            <Button
+                                size="lg"
+                                className="w-full rounded-full px-8 sm:w-auto"
+                            >
                                 Subscribe
                                 <ArrowRight size={18} />
                             </Button>

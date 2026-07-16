@@ -13,23 +13,23 @@ const Footer = () => {
     return (
         <footer className="border-t border-border bg-stone-50">
             <Container>
-                <div className="grid gap-12 py-20 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-8 py-14 sm:gap-12 sm:py-20 md:grid-cols-2 lg:grid-cols-4">
                     {/* Brand */}
 
                     <div>
                         <Link
                             to="/"
-                            className="text-3xl font-extrabold text-primary"
+                            className="text-2xl font-extrabold text-primary sm:text-3xl"
                         >
                             Loomify
                         </Link>
 
-                        <p className="mt-5 leading-7 text-gray-600">
+                        <p className="mt-4 text-sm leading-7 text-gray-600 sm:mt-5 sm:text-base">
                             Timeless fashion crafted with premium quality,
                             designed to inspire confidence every day.
                         </p>
 
-                        <div className="mt-8 flex gap-4">
+                        <div className="mt-6 flex gap-4 sm:mt-8">
                             {socialLinks.map((social, index) => {
                                 const Icon = social.icon;
 
@@ -61,7 +61,7 @@ const Footer = () => {
 
                 {/* Bottom */}
 
-                <div className="flex flex-col items-center justify-between gap-4 border-t border-border py-6 text-sm text-gray-500 md:flex-row">
+                <div className="flex flex-col items-center justify-between gap-3 border-t border-border py-6 text-sm text-gray-500 sm:gap-4 md:flex-row">
                     <p>
                         © {new Date().getFullYear()} Loomify. All Rights
                         Reserved.
@@ -75,9 +75,11 @@ const Footer = () => {
 const FooterColumn = ({ title, links }) => {
     return (
         <div>
-            <h3 className="mb-5 text-lg font-semibold text-primary">{title}</h3>
+            <h3 className="mb-4 text-base font-semibold text-primary sm:mb-5 sm:text-lg">
+                {title}
+            </h3>
 
-            <ul className="space-y-3">
+            <ul className="space-y-2 sm:space-y-3">
                 {links.map((link) => (
                     <li key={link.name}>
                         <Link

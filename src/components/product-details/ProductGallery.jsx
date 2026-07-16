@@ -11,7 +11,7 @@ const ProductGallery = ({ product }) => {
         <div className="flex flex-col-reverse gap-5 md:flex-row">
             {/* ================= Thumbnails ================= */}
 
-            <div className="flex gap-4 overflow-x-auto md:w-24 md:flex-col">
+            <div className="flex gap-3 overflow-x-auto md:w-24 md:flex-col md:gap-4">
                 {images.map((image, index) => (
                     <button
                         key={index}
@@ -27,9 +27,11 @@ const ProductGallery = ({ product }) => {
                             src={image}
                             alt={`Thumbnail ${index + 1}`}
                             className="
-                                h-24
-                                w-20
+                                h-20
+                                w-16
                                 object-cover
+                                sm:h-24
+                                sm:w-20
                             "
                         />
                     </button>

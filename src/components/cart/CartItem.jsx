@@ -6,11 +6,11 @@ const CartItem = ({ item }) => {
     const { increaseQuantity, decreaseQuantity, removeFromCart } = useCart();
 
     return (
-        <div className="flex flex-col gap-6 rounded-card border border-border p-5 md:flex-row md:items-center">
+        <div className="flex flex-col gap-5 rounded-card border border-border p-4 sm:gap-6 sm:p-5 md:flex-row md:items-center">
             <img
                 src={item.image}
                 alt={item.name}
-                className="h-36 w-28 rounded-lg object-cover"
+                className="h-28 w-24 rounded-lg object-cover sm:h-36 sm:w-28"
             />
 
             <div className="flex-1">
@@ -31,7 +31,7 @@ const CartItem = ({ item }) => {
                 </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 self-start sm:self-auto">
                 <button
                     onClick={() =>
                         decreaseQuantity(item.id, item.size, item.color)

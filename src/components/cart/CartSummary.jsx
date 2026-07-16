@@ -12,8 +12,8 @@ const CartSummary = ({ cartItems }) => {
     const total = subtotal + shipping;
 
     return (
-        <div className="rounded-card border border-border p-6">
-            <h2 className="text-2xl font-bold">Order Summary</h2>
+        <div className="rounded-card border border-border p-5 sm:p-6">
+            <h2 className="text-xl font-bold sm:text-2xl">Order Summary</h2>
 
             <div className="mt-8 space-y-4">
                 <div className="flex justify-between">

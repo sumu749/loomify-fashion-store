@@ -62,24 +62,24 @@ const Navbar = () => {
         >
             <Container>
                 <nav
-                    className={`flex  items-center  justify-between  transition-all duration-300 ${isScrolled ? "h-16" : "h-20"}`}
+                    className={`flex items-center justify-between transition-all duration-300 ${isScrolled ? "h-16" : "h-16 sm:h-20"}`}
                 >
                     {/* Logo */}
                     <NavLink
                         to="/"
-                        className="text-3xl font-bold tracking-wide transition-transform duration-300 hover:scale-105 hover:tracking-wider"
+                        className="text-2xl font-bold tracking-wide transition-transform duration-300 hover:scale-105 hover:tracking-wider sm:text-3xl"
                     >
                         <span className="text-accent">L</span>
                         <span className="text-primary">oomify</span>
                     </NavLink>
 
                     {/* Desktop Navigation */}
-                    <ul className="hidden items-center gap-10 lg:gap-12 md:flex">
+                    <ul className="hidden items-center gap-8 md:flex lg:gap-12">
                         {navigationLinks}
                     </ul>
 
                     {/* Right Side Icons */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
                         {/* Search */}
                         <button
                             className="rounded-full p-2 transition-all duration-300 hover:scale-110 hover:bg-accent hover:text-white"

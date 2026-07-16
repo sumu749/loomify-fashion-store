@@ -20,7 +20,7 @@ const SectionTitle = ({
                 </p>
             )}
 
-            <h2 className="mt-3 text-3xl font-bold text-primary md:text-4xl lg:text-5xl">
+            <h2 className="mt-3 text-2xl font-bold text-primary sm:text-3xl md:text-4xl lg:text-5xl">
                 {title}
             </h2>
 
@@ -29,7 +29,7 @@ const SectionTitle = ({
 
             {description && (
                 <p
-                    className={`mt-6 max-w-2xl leading-8 text-gray-600 ${descriptionClassName}`}
+                    className={`mt-4 max-w-2xl text-sm leading-7 text-gray-600 sm:mt-6 sm:text-base sm:leading-8 ${descriptionClassName}`}
                 >
                     {description}
                 </p>

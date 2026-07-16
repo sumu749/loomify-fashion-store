@@ -26,7 +26,7 @@ const ProductActions = ({ product }) => {
     };
 
     return (
-        <div className="mt-8 space-y-8">
+        <div className="mt-8 space-y-6 sm:space-y-8">
             {/* Size */}
             <div>
                 <h3 className="mb-3 font-semibold text-primary">Select Size</h3>
@@ -36,7 +36,7 @@ const ProductActions = ({ product }) => {
                         <button
                             key={size}
                             onClick={() => setSelectedSize(size)}
-                            className={`h-10 w-10 rounded-lg border transition
+                            className={`h-10 w-10 rounded-lg border transition sm:h-11 sm:w-11
                                 ${
                                     selectedSize === size
                                         ? "border-primary bg-primary text-white"
@@ -77,7 +77,7 @@ const ProductActions = ({ product }) => {
             <div>
                 <h3 className="mb-3 font-semibold text-primary">Quantity</h3>
 
-                <div className="flex w-fit items-center rounded-lg border border-border">
+                <div className="flex w-full items-center rounded-lg border border-border sm:w-fit">
                     <button
                         onClick={decrease}
                         className="p-3 hover:bg-gray-100"
@@ -99,8 +99,11 @@ const ProductActions = ({ product }) => {
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-4">
-                <Button onClick={handleAddToCart} className="flex-1">
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+                <Button
+                    onClick={handleAddToCart}
+                    className="w-full flex-1 sm:w-auto"
+                >
                     Add To Cart
                 </Button>
 
@@ -109,6 +112,7 @@ const ProductActions = ({ product }) => {
                         flex
                         h-12
                         w-12
+                        self-start
                         items-center
                         justify-center
                         rounded-xl

@@ -25,7 +25,9 @@ const ProductInfo = ({ product }) => {
                 {category}
             </p>
 
-            <h1 className="mt-2 text-4xl font-bold text-primary">{name}</h1>
+            <h1 className="mt-2 text-3xl font-bold text-primary sm:text-4xl">
+                {name}
+            </h1>
 
             <div className="mt-4 flex items-center gap-2">
                 <Star size={18} className="fill-yellow-400 text-yellow-400" />
@@ -36,18 +38,20 @@ const ProductInfo = ({ product }) => {
             </div>
 
             <div className="mt-6 flex items-center gap-4">
-                <span className="text-4xl font-bold text-primary">
+                <span className="text-3xl font-bold text-primary sm:text-4xl">
                     {formatCurrency(price)}
                 </span>
 
                 {oldPrice && (
-                    <span className="text-xl text-gray-400 line-through">
+                    <span className="text-lg text-gray-400 line-through sm:text-xl">
                         {formatCurrency(oldPrice)}
                     </span>
                 )}
             </div>
 
-            <p className="mt-6 leading-8 text-gray-600">{description}</p>
+            <p className="mt-6 text-sm leading-7 text-gray-600 sm:text-base sm:leading-8">
+                {description}
+            </p>
             <ProductActions product={product} />
         </div>
     );

@@ -25,8 +25,8 @@ const CategoryCard = ({ category }) => {
 
                     {/* Bottom Content */}
 
-                    <div className="absolute inset-x-0 bottom-0 p-6">
-                        <h3 className="text-3xl font-bold text-white">
+                    <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
+                        <h3 className="text-2xl font-bold text-white sm:text-3xl">
                             {title}
                         </h3>
 

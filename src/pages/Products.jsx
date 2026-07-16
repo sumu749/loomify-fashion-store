@@ -23,21 +23,21 @@ const Products = () => {
         filteredProducts,
     } = useProductFilters(products);
     return (
-        <section className="py-24">
+        <section className="py-16 sm:py-24">
             <Container>
-                <h1 className="text-5xl font-bold text-primary">
+                <h1 className="text-3xl font-bold text-primary sm:text-4xl lg:text-5xl">
                     All Products
                 </h1>
 
-                <p className="mt-4 max-w-xl text-gray-600">
+                <p className="mt-3 max-w-xl text-sm text-gray-600 sm:mt-4 sm:text-base">
                     Discover our curated collection of premium fashion
                     essentials.
                 </p>
 
-                <div className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="mt-8 flex flex-col gap-4 sm:mt-10 lg:flex-row lg:items-center lg:justify-between">
                     <ProductSearch value={search} onChange={setSearch} />
 
-                    <div className="flex flex-col gap-4 sm:flex-row">
+                    <div className="flex flex-col gap-3 sm:flex-row">
                         <ProductFilters
                             categories={categories}
                             value={category}

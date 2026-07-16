@@ -12,7 +12,7 @@ const Hero = () => {
             <div className="absolute -left-20 bottom-10 h-60 w-60 rounded-full bg-primary/5 blur-3xl"></div>
 
             <Container>
-                <div className="grid min-h-[calc(100vh-80px)] items-center gap-16 lg:grid-cols-2">
+                <div className="grid lg:min-h-[calc(100vh-80px)] items-center gap-10 sm:gap-16 lg:grid-cols-2">
                     {/* ================= Left Content ================= */}
 
                     <motion.div
@@ -28,7 +28,7 @@ const Hero = () => {
 
                         {/* Heading */}
 
-                        <h1 className="mt-8 text-5xl font-extrabold leading-tight text-primary md:text-6xl lg:text-7xl">
+                        <h1 className="mt-8 text-4xl font-extrabold leading-tight text-primary sm:text-5xl md:text-6xl lg:text-7xl">
                             Wear Your
                             <br />
                             Confidence
@@ -36,7 +36,7 @@ const Hero = () => {
 
                         {/* Description */}
 
-                        <p className="mt-8 max-w-lg text-lg leading-8 text-gray-600">
+                        <p className="mt-6 max-w-lg text-base leading-7 text-gray-600 sm:mt-8 sm:text-lg sm:leading-8">
                             Premium fashion crafted for modern lifestyles.
                             Discover timeless pieces designed to elevate your
                             everyday wardrobe with elegance and comfort.
@@ -44,7 +44,7 @@ const Hero = () => {
 
                         {/* CTA */}
 
-                        <div className="mt-10 flex items-center gap-5">
+                        <div className="mt-8 flex flex-wrap items-center gap-4 sm:mt-10 sm:gap-5">
                             <Button size="lg">
                                 Shop Collection
                                 <ArrowRight size={18} />
@@ -53,7 +53,7 @@ const Hero = () => {
 
                         {/* Small Text */}
 
-                        <p className="mt-5 text-sm text-gray-500">
+                        <p className="mt-4 text-sm text-gray-500 sm:mt-5">
                             Free shipping on orders over $100
                         </p>
                     </motion.div>

@@ -112,18 +112,12 @@ const ProductCard = ({ product }) => {
                     className="
                         absolute
                         inset-0
-
                         bg-linear-to-t
                         from-black/60
                         via-black/10
                         to-transparent
-
-                        opacity-0
-
                         transition-all
-                        duration-500
-
-                        group-hover:opacity-100
+                        duration-500 opacity-100 lg:opacity-0 lg:group-hover:opacity-100
                     "
                 />
 
@@ -197,14 +191,14 @@ const ProductCard = ({ product }) => {
 
             {/* CONTENT */}
 
-            <div className="space-y-4 p-6">
+            <div className="space-y-3 p-4 sm:space-y-4 sm:p-6">
                 <div>
                     <p className="text-sm uppercase tracking-wider text-gray-500">
                         {category}
                     </p>
 
                     <Link to={`/products/${id}`}>
-                        <h3 className="mt-2 text-xl font-semibold text-primary transition group-hover:text-accent">
+                        <h3 className="mt-2 text-lg font-semibold text-primary transition group-hover:text-accent sm:text-xl">
                             {name}
                         </h3>
                     </Link>
@@ -226,7 +220,7 @@ const ProductCard = ({ product }) => {
                 {/* Price */}
 
                 <div className="flex items-center gap-3">
-                    <span className="text-2xl font-bold text-primary">
+                    <span className="text-xl font-bold text-primary sm:text-2xl">
                         {formatCurrency(price)}
                     </span>
 
