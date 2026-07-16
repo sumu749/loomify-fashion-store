@@ -12,7 +12,7 @@ const Hero = () => {
             <div className="absolute -left-20 bottom-10 h-60 w-60 rounded-full bg-primary/5 blur-3xl"></div>
 
             <Container>
-                <div className="grid lg:min-h-[calc(100vh-80px)] items-center gap-10 sm:gap-16 lg:grid-cols-2">
+                <div className="grid items-center gap-10 py-16 sm:gap-16 lg:min-h-[calc(100vh-80px)] lg:grid-cols-2 lg:py-0">
                     {/* ================= Left Content ================= */}
 
                     <motion.div

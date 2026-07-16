@@ -16,7 +16,7 @@ const ProductGallery = ({ product }) => {
                     <button
                         key={index}
                         onClick={() => setSelectedImage(image)}
-                        className={`overflow-hidden rounded-xl border-2 transition-all duration-300 ${
+                        className={`shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-300 ${
                             selectedImage === image
                                 ? "scale-105 border-accent shadow-lg"
                                 : "border-transparent opacity-70 hover:scale-105 hover:border-gray-300 hover:opacity-100"

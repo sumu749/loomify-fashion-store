@@ -131,16 +131,18 @@ const ProductCard = ({ product }) => {
 
                         flex
                         -translate-x-1/2
-                        translate-y-8
+                        translate-y-0
                         gap-3
 
-                        opacity-0
+                        opacity-100
 
                         transition-all
                         duration-500
 
-                        group-hover:translate-y-0
-                        group-hover:opacity-100
+                        lg:translate-y-8
+                        lg:opacity-0
+                        lg:group-hover:translate-y-0
+                        lg:group-hover:opacity-100
                     "
                 >
                     <Link
@@ -238,14 +240,16 @@ const ProductCard = ({ product }) => {
                     className="
                         w-full
 
-                        translate-y-3
-                        opacity-0
+                        translate-y-0
+                        opacity-100
 
                         transition-all
                         duration-500
 
-                        group-hover:translate-y-0
-                        group-hover:opacity-100
+                        lg:translate-y-3
+                        lg:opacity-0
+                        lg:group-hover:translate-y-0
+                        lg:group-hover:opacity-100
                     "
                 >
                     <ShoppingBag size={18} />

@@ -31,34 +31,38 @@ const CartItem = ({ item }) => {
                 </p>
             </div>
 
-            <div className="flex items-center gap-3 self-start sm:self-auto">
+            <div className="flex items-center justify-between gap-3 self-stretch sm:self-auto md:justify-start">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() =>
+                            decreaseQuantity(item.id, item.size, item.color)
+                        }
+                        className="rounded-lg border p-2"
+                    >
+                        <Minus size={18} />
+                    </button>
+
+                    <span className="w-8 text-center">{item.quantity}</span>
+
+                    <button
+                        onClick={() =>
+                            increaseQuantity(item.id, item.size, item.color)
+                        }
+                        className="rounded-lg border p-2"
+                    >
+                        <Plus size={18} />
+                    </button>
+                </div>
+
                 <button
                     onClick={() =>
-                        decreaseQuantity(item.id, item.size, item.color)
+                        removeFromCart(item.id, item.size, item.color)
                     }
-                    className="rounded-lg border p-2"
+                    className="text-red-500 transition hover:scale-110 md:ml-3"
                 >
-                    <Minus size={18} />
-                </button>
-
-                <span className="w-8 text-center">{item.quantity}</span>
-
-                <button
-                    onClick={() =>
-                        increaseQuantity(item.id, item.size, item.color)
-                    }
-                    className="rounded-lg border p-2"
-                >
-                    <Plus size={18} />
+                    <Trash2 size={22} />
                 </button>
             </div>
-
-            <button
-                onClick={() => removeFromCart(item.id, item.size, item.color)}
-                className="text-red-500 transition hover:scale-110"
-            >
-                <Trash2 size={22} />
-            </button>
         </div>
     );
 };
