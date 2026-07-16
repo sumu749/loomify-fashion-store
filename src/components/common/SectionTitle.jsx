@@ -1,25 +1,39 @@
 const SectionTitle = ({
     title,
     subtitle,
+    description,
     align = "center",
     className = "",
+    descriptionClassName = "",
 }) => {
     const alignment = {
-        left: "text-left",
-        center: "text-center",
-        right: "text-right",
+        left: "items-start text-left",
+        center: "items-center text-center",
+        right: "items-end text-right",
     };
+
     return (
-        <div className={`mb-12 ${alignment[align]} ${className}`}>
+        <div className={`mb-14 flex flex-col ${alignment[align]} ${className}`}>
             {subtitle && (
-                <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-accent">
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-accent">
                     {subtitle}
                 </p>
             )}
 
-            <h2 className="text-3xl font-bold text-primary md:text-4xl">
+            <h2 className="mt-3 text-3xl font-bold text-primary md:text-4xl lg:text-5xl">
                 {title}
             </h2>
+
+            {/* Accent Line */}
+            <div className="mt-5 h-1 w-20 rounded-full bg-accent"></div>
+
+            {description && (
+                <p
+                    className={`mt-6 max-w-2xl leading-8 text-gray-600 ${descriptionClassName}`}
+                >
+                    {description}
+                </p>
+            )}
         </div>
     );
 };

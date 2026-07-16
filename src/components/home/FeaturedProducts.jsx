@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import products from "../../data/products";
 import Container from "../common/Container";
 import ProductCard from "../products/ProductCard";
+import SectionTitle from "../common/SectionTitle";
 
 const featuredProducts = products.slice(0, 4);
 
@@ -42,36 +43,19 @@ const FeaturedProducts = () => {
                 {/* Header */}
 
                 <motion.div
-                    initial={{
-                        opacity: 0,
-                        y: 40,
-                    }}
-                    whileInView={{
-                        opacity: 1,
-                        y: 0,
-                    }}
-                    viewport={{
-                        once: true,
-                    }}
-                    transition={{
-                        duration: 0.6,
-                    }}
-                    className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between"
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="mb-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between"
                 >
-                    <div>
-                        <span className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
-                            Featured Collection
-                        </span>
-
-                        <h2 className="mt-3 text-4xl font-bold text-primary md:text-5xl">
-                            Our Best Picks
-                        </h2>
-
-                        <p className="mt-4 max-w-xl leading-8 text-gray-600">
-                            Handpicked fashion essentials crafted with premium
-                            quality to elevate your everyday wardrobe.
-                        </p>
-                    </div>
+                    <SectionTitle
+                        align="left"
+                        subtitle="Featured Collection"
+                        title="Our Best Picks"
+                        description="Handpicked fashion essentials crafted with premium quality to elevate your everyday wardrobe."
+                        descriptionClassName="max-w-xl"
+                    />
 
                     <Link
                         to="/products"
