@@ -1,6 +1,10 @@
-import { Heart, ShoppingBag, Star } from "lucide-react";
+import { Heart, Eye, ShoppingBag, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import Button from "../common/Button";
+import formatCurrency from "../../utils/formatCurrency";
+import useCart from "../../hooks/useCart";
+import toast from "react-hot-toast";
 
 const ProductCard = ({ product }) => {
     const {
@@ -15,88 +19,246 @@ const ProductCard = ({ product }) => {
         badge,
     } = product;
 
+    const { addToCart } = useCart();
+
+    const handleAddToCart = (e) => {
+        e.preventDefault();
+
+        addToCart(product, 1);
+
+        toast.success(`${name} added to cart`);
+    };
+
     return (
-        <article className="relative group overflow-hidden rounded-card border border-border bg-white shadow-sm transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
-            {/* Image */}
+        <motion.article
+            whileHover={{ y: -8 }}
+            transition={{ duration: 0.25 }}
+            className="
+                group
+                overflow-hidden
+                rounded-card
+                border
+                border-border
+                bg-white
+                shadow-sm
+                transition-all
+                duration-300
+                hover:shadow-2xl
+            "
+        >
+            {/* IMAGE */}
 
             <div className="relative overflow-hidden">
                 {/* Badge */}
 
                 {badge && (
-                    <span className="absolute left-4 top-4 z-10 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white">
+                    <span className="absolute left-4 top-4 z-20 rounded-full bg-accent px-3 py-1 text-xs font-semibold tracking-wide text-white">
                         {badge}
                     </span>
                 )}
 
                 {/* Wishlist */}
 
-                <button className="absolute right-4 top-4 z-10 rounded-full bg-white/90 p-2 backdrop-blur transition-all duration-300 active:scale-95 hover:bg-accent hover:text-white">
+                <button
+                    className="
+                        absolute
+                        right-4
+                        top-4
+                        z-20
+
+                        flex
+                        h-10
+                        w-10
+                        items-center
+                        justify-center
+
+                        rounded-full
+                        bg-white/90
+                        shadow
+
+                        transition-all
+                        duration-300
+
+                        hover:scale-110
+                        hover:bg-accent
+                        hover:text-white
+                    "
+                >
                     <Heart size={18} />
                 </button>
 
-                {/* Product Image */}
+                {/* IMAGE */}
 
-                <Link to={`/products/${id}`} className="block">
+                <Link to={`/products/${id}`}>
                     <img
                         src={image}
                         alt={name}
-                        className="aspect-4/5 w-full object-cover transition-all duration-700 group-hover:scale-110"
+                        className="
+                            aspect-4/5
+                            w-full
+                            object-cover
+
+                            transition-transform
+                            duration-700
+
+                            group-hover:scale-110
+                        "
                     />
                 </Link>
+
+                {/* Overlay */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        bg-linear-to-t
+                        from-black/60
+                        via-black/10
+                        to-transparent
+
+                        opacity-0
+
+                        transition-all
+                        duration-500
+
+                        group-hover:opacity-100
+                    "
+                />
+
+                {/* Hover Actions */}
+
+                <div
+                    className="
+                        absolute
+                        bottom-4
+                        left-1/2
+
+                        flex
+                        -translate-x-1/2
+                        translate-y-8
+                        gap-3
+
+                        opacity-0
+
+                        transition-all
+                        duration-500
+
+                        group-hover:translate-y-0
+                        group-hover:opacity-100
+                    "
+                >
+                    <Link
+                        to={`/products/${id}`}
+                        className="
+                            flex
+                            h-11
+                            w-11
+                            items-center
+                            justify-center
+
+                            rounded-full
+
+                            bg-white
+
+                            transition
+
+                            hover:bg-accent
+                            hover:text-white
+                        "
+                    >
+                        <Eye size={18} />
+                    </Link>
+
+                    <button
+                        onClick={handleAddToCart}
+                        className="
+                            flex
+                            h-11
+                            w-11
+                            items-center
+                            justify-center
+
+                            rounded-full
+
+                            bg-primary
+                            text-white
+
+                            transition
+
+                            hover:bg-accent
+                        "
+                    >
+                        <ShoppingBag size={18} />
+                    </button>
+                </div>
             </div>
 
-            {/* Content */}
+            {/* CONTENT */}
 
-            <div className="space-y-4 p-5">
+            <div className="space-y-4 p-6">
                 <div>
-                    <p className="text-sm text-gray-500">{category}</p>
+                    <p className="text-sm uppercase tracking-wider text-gray-500">
+                        {category}
+                    </p>
 
                     <Link to={`/products/${id}`}>
-                        <h3 className="mt-1 text-xl font-semibold text-primary transition group-hover:text-accent">
+                        <h3 className="mt-2 text-xl font-semibold text-primary transition group-hover:text-accent">
                             {name}
                         </h3>
                     </Link>
-                </div>
-
-                {/* Price */}
-
-                <div className="flex items-center gap-3">
-                    <span className="text-xl font-bold text-primary">
-                        ${price}
-                    </span>
-
-                    {oldPrice && (
-                        <span className="text-gray-400 line-through">
-                            ${oldPrice}
-                        </span>
-                    )}
                 </div>
 
                 {/* Rating */}
 
                 <div className="flex items-center gap-2">
                     <Star
-                        size={18}
+                        size={16}
                         className="fill-yellow-400 text-yellow-400"
                     />
 
                     <span className="text-sm font-medium">{rating}</span>
 
-                    <span className="text-sm text-gray-500">
-                        ({reviews} Reviews)
+                    <span className="text-sm text-gray-500">({reviews})</span>
+                </div>
+
+                {/* Price */}
+
+                <div className="flex items-center gap-3">
+                    <span className="text-2xl font-bold text-primary">
+                        {formatCurrency(price)}
                     </span>
+
+                    {oldPrice && (
+                        <span className="text-gray-400 line-through">
+                            {formatCurrency(oldPrice)}
+                        </span>
+                    )}
                 </div>
 
                 {/* Button */}
 
-                <div className="absolute inset-x-0 bottom-0 translate-y-full bg-white/90 p-3 backdrop-blur-md transition duration-500 group-hover:translate-y-0">
-                    <Button className="w-full">
-                        <ShoppingBag size={18} />
-                        Add to Cart
-                    </Button>
-                </div>
+                <Button
+                    onClick={handleAddToCart}
+                    className="
+                        w-full
+
+                        translate-y-3
+                        opacity-0
+
+                        transition-all
+                        duration-500
+
+                        group-hover:translate-y-0
+                        group-hover:opacity-100
+                    "
+                >
+                    <ShoppingBag size={18} />
+                    Add to Cart
+                </Button>
             </div>
-        </article>
+        </motion.article>
     );
 };
 
