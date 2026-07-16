@@ -1,6 +1,6 @@
 import { Star } from "lucide-react";
 import formatCurrency from "../../utils/formatCurrency";
-
+import ProductActions from "./ProductActions";
 const ProductInfo = ({ product }) => {
     const {
         badge,
@@ -27,7 +27,7 @@ const ProductInfo = ({ product }) => {
 
             <h1 className="mt-2 text-4xl font-bold text-primary">{name}</h1>
 
-            <div className="mt-6 flex items-center gap-2">
+            <div className="mt-4 flex items-center gap-2">
                 <Star size={18} className="fill-yellow-400 text-yellow-400" />
 
                 <span>{rating}</span>
@@ -35,7 +35,7 @@ const ProductInfo = ({ product }) => {
                 <span className="text-gray-400">({reviews} Reviews)</span>
             </div>
 
-            <div className="mt-8 flex items-center gap-4">
+            <div className="mt-6 flex items-center gap-4">
                 <span className="text-4xl font-bold text-primary">
                     {formatCurrency(price)}
                 </span>
@@ -47,7 +47,8 @@ const ProductInfo = ({ product }) => {
                 )}
             </div>
 
-            <p className="mt-8 leading-8 text-gray-600">{description}</p>
+            <p className="mt-6 leading-8 text-gray-600">{description}</p>
+            <ProductActions product={product} />
         </div>
     );
 };
