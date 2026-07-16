@@ -61,18 +61,20 @@ const Navbar = () => {
     `}
         >
             <Container>
-                <nav className="flex h-20 items-center justify-between">
+                <nav
+                    className={`flex  items-center  justify-between  transition-all duration-300 ${isScrolled ? "h-16" : "h-20"}`}
+                >
                     {/* Logo */}
                     <NavLink
                         to="/"
-                        className="text-3xl font-bold tracking-wide transition-transform duration-300 hover:scale-105"
+                        className="text-3xl font-bold tracking-wide transition-transform duration-300 hover:scale-105 hover:tracking-wider"
                     >
                         <span className="text-accent">L</span>
                         <span className="text-primary">oomify</span>
                     </NavLink>
 
                     {/* Desktop Navigation */}
-                    <ul className="hidden items-center gap-8 md:flex">
+                    <ul className="hidden items-center gap-10 lg:gap-12 md:flex">
                         {navigationLinks}
                     </ul>
 
@@ -80,7 +82,7 @@ const Navbar = () => {
                     <div className="flex items-center gap-4">
                         {/* Search */}
                         <button
-                            className="rounded-full p-2 transition-all duration-300 hover:bg-accent hover:text-white"
+                            className="rounded-full p-2 transition-all duration-300 hover:scale-110 hover:bg-accent hover:text-white"
                             aria-label="Search"
                         >
                             <Search size={20} />
@@ -88,7 +90,10 @@ const Navbar = () => {
 
                         {/* Cart */}
                         <Link to="/cart" className="relative flex items-center">
-                            <ShoppingBag size={22} />
+                            <ShoppingBag
+                                size={22}
+                                className="transition-transform duration-300 hover:scale-110"
+                            />
 
                             <AnimatePresence>
                                 {cartCount > 0 && (
@@ -102,8 +107,7 @@ const Navbar = () => {
                                             stiffness: 500,
                                             damping: 18,
                                         }}
-                                        className="
-                absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-white "
+                                        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-white "
                                     >
                                         {cartCount}
                                     </motion.span>
