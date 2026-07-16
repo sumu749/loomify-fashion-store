@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Menu, X, Search, ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 import Container from "../common/Container";
@@ -8,7 +9,7 @@ import useCart from "../../hooks/useCart";
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-    const { cartItems } = useCart();
+    const { cartCount } = useCart();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -76,18 +77,31 @@ const Navbar = () => {
                         </button>
 
                         {/* Cart */}
-                        <button
-                            className="group relative rounded-full p-2 transition-all duration-300 hover:bg-accent hover:text-white"
-                            aria-label="Shopping Cart"
-                        >
+                        <Link to="/cart" className="relative flex items-center">
                             <ShoppingBag size={22} />
 
-                            {cartItems.length > 0 && (
-                                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-medium text-white transition-transform duration-300 group-hover:scale-110">
-                                    {cartItems.length}
+                            {cartCount > 0 && (
+                                <span
+                                    className="
+                absolute
+                -right-2
+                -top-2
+                flex
+                h-5
+                w-5
+                items-center
+                justify-center
+                rounded-full
+                bg-accent
+                text-[10px]
+                font-semibold
+                text-white
+            "
+                                >
+                                    {cartCount}
                                 </span>
                             )}
-                        </button>
+                        </Link>
 
                         {/* Mobile Menu Button */}
                         <button
