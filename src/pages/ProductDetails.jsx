@@ -5,6 +5,7 @@ import ProductGallery from "../components/product-details/ProductGallery";
 import ProductInfo from "../components/product-details/ProductInfo";
 import { getProductById } from "../services/productService";
 import RelatedProducts from "../components/product-details/RelatedProducts";
+import Breadcrumb from "../components/common/Breadcrumb";
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -29,6 +30,21 @@ const ProductDetails = () => {
                 className="border-t border-border bg-stone-50 py-20"
             >
                 <Container>
+                    <Breadcrumb
+                        items={[
+                            {
+                                label: "Home",
+                                path: "/",
+                            },
+                            {
+                                label: "Products",
+                                path: "/products",
+                            },
+                            {
+                                label: product.name,
+                            },
+                        ]}
+                    />
                     <div className="grid gap-16 lg:grid-cols-2">
                         <ProductGallery product={product} />
                         <ProductInfo product={product} />
