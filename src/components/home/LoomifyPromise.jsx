@@ -1,9 +1,8 @@
 import { motion } from "framer-motion";
 import { Check, ArrowRight } from "lucide-react";
-
+import SectionTitle from "../common/SectionTitle";
 import Container from "../common/Container";
 import Button from "../common/Button";
-
 import promiseImage from "../../assets/images/promise.jpg";
 
 const features = [
@@ -75,27 +74,14 @@ const LoomifyPromise = () => {
                             duration: 0.8,
                         }}
                     >
-                        <span className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
-                            The Loomify Promise
-                        </span>
-
-                        <h2 className="mt-5 text-4xl font-bold leading-tight text-primary md:text-5xl">
-                            Designed for
-                            <br />
-                            Everyday Luxury.
-                        </h2>
-
-                        <p className="mt-6 max-w-lg text-lg leading-8 text-gray-600">
-                            Every piece at Loomify is thoughtfully crafted with
-                            premium fabrics, timeless aesthetics, and
-                            exceptional attention to detail—bringing comfort,
-                            confidence, and effortless style into your everyday
-                            life.
-                        </p>
-
-                        {/* Divider */}
-
-                        <div className="mt-8 h-1 w-20 rounded-full bg-accent"></div>
+                        <SectionTitle
+                            align="left"
+                            subtitle="The Loomify Promise"
+                            title="Designed for Everyday Luxury."
+                            description="Every piece at Loomify is thoughtfully crafted with premium fabrics, timeless aesthetics, and exceptional attention to detail—bringing comfort, confidence, and effortless style into your everyday life."
+                            className="mb-10"
+                            descriptionClassName="max-w-lg text-lg"
+                        />
 
                         {/* Features */}
 
