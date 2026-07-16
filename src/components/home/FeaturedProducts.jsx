@@ -7,27 +7,27 @@ import ProductCard from "../products/ProductCard";
 
 const featuredProducts = products.slice(0, 4);
 
-const cardVariants = [
-    {
-        hidden: { opacity: 0, x: -80 },
-        visible: { opacity: 1, x: 0 },
-    },
+// const cardVariants = [
+//     {
+//         hidden: { opacity: 0, x: -80 },
+//         visible: { opacity: 1, x: 0 },
+//     },
 
-    {
-        hidden: { opacity: 0, y: 80 },
-        visible: { opacity: 1, y: 0 },
-    },
+//     {
+//         hidden: { opacity: 0, y: 80 },
+//         visible: { opacity: 1, y: 0 },
+//     },
 
-    {
-        hidden: { opacity: 0, y: -80 },
-        visible: { opacity: 1, y: 0 },
-    },
+//     {
+//         hidden: { opacity: 0, y: -80 },
+//         visible: { opacity: 1, y: 0 },
+//     },
 
-    {
-        hidden: { opacity: 0, x: 80 },
-        visible: { opacity: 1, x: 0 },
-    },
-];
+//     {
+//         hidden: { opacity: 0, x: 80 },
+//         visible: { opacity: 1, x: 0 },
+//     },
+// ];
 
 const FeaturedProducts = () => {
     return (
@@ -84,24 +84,16 @@ const FeaturedProducts = () => {
 
                 {/* Products */}
 
-                <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+                <div className="mt-14 grid gap-8 md:grid-cols-2 xl:grid-cols-4">
                     {featuredProducts.map((product, index) => (
-                        <motion.div
+                        <div
                             key={product.id}
-                            variants={cardVariants[index]}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{
-                                once: true,
-                                amount: 0.3,
-                            }}
-                            transition={{
-                                duration: 0.7,
-                                delay: index * 0.15,
-                            }}
+                            className={`
+                ${index % 2 !== 0 ? "xl:mt-10" : ""}
+            `}
                         >
                             <ProductCard product={product} />
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             </Container>
