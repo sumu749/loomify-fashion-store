@@ -2,6 +2,7 @@
 import { NavLink } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Menu, X, Search, ShoppingBag } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import Container from "../common/Container";
 import { navItems } from "../../constants/navigation";
@@ -89,27 +90,25 @@ const Navbar = () => {
                         <Link to="/cart" className="relative flex items-center">
                             <ShoppingBag size={22} />
 
-                            {cartCount > 0 && (
-                                <span
-                                    className="
-                absolute
-                -right-2
-                -top-2
-                flex
-                h-5
-                w-5
-                items-center
-                justify-center
-                rounded-full
-                bg-accent
-                text-[10px]
-                font-semibold
-                text-white
-            "
-                                >
-                                    {cartCount}
-                                </span>
-                            )}
+                            <AnimatePresence>
+                                {cartCount > 0 && (
+                                    <motion.span
+                                        key={cartCount}
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        exit={{ scale: 0 }}
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 500,
+                                            damping: 18,
+                                        }}
+                                        className="
+                absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-white "
+                                    >
+                                        {cartCount}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
                         </Link>
 
                         {/* Mobile Menu Button */}
