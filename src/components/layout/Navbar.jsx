@@ -3,10 +3,12 @@ import { Menu, X, Search, ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 import Container from "../common/Container";
 import { navItems } from "../../constants/navigation";
+import useCart from "../../hooks/useCart";
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const { cartItems } = useCart();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -81,7 +83,7 @@ const Navbar = () => {
                             <ShoppingBag size={22} />
 
                             <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-medium text-white transition-transform duration-300 group-hover:scale-110">
-                                0
+                                {cartItems.length}
                             </span>
                         </button>
 
