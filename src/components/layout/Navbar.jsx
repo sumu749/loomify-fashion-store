@@ -82,9 +82,11 @@ const Navbar = () => {
                         >
                             <ShoppingBag size={22} />
 
-                            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-medium text-white transition-transform duration-300 group-hover:scale-110">
-                                {cartItems.length}
-                            </span>
+                            {cartItems.length > 0 && (
+                                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-medium text-white transition-transform duration-300 group-hover:scale-110">
+                                    {cartItems.length}
+                                </span>
+                            )}
                         </button>
 
                         {/* Mobile Menu Button */}

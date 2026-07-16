@@ -12,6 +12,11 @@ const CartProvider = ({ children }) => {
         return storedCart ? JSON.parse(storedCart) : [];
     });
 
+    const cartCount = cartItems.reduce(
+        (total, item) => total + item.quantity,
+        0,
+    );
+
     // Save cart whenever it changes
     useEffect(() => {
         localStorage.setItem("loomify-cart", JSON.stringify(cartItems));
@@ -108,9 +113,8 @@ const CartProvider = ({ children }) => {
         <CartContext.Provider
             value={{
                 cartItems,
-
                 addToCart,
-
+                cartCount,
                 removeFromCart,
 
                 increaseQuantity,

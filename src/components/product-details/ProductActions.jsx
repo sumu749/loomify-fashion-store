@@ -3,14 +3,20 @@ import { useState } from "react";
 import { Heart, Minus, Plus, ShieldCheck, Truck } from "lucide-react";
 import Button from "../common/Button";
 import useCart from "../../hooks/useCart";
+import toast from "react-hot-toast";
 
 const ProductActions = ({ product }) => {
     const { sizes, colors, inStock } = product;
-    const { addToCart } = useCart();
     const [selectedSize, setSelectedSize] = useState(sizes[0]);
     const [selectedColor, setSelectedColor] = useState(colors[0]);
     const [quantity, setQuantity] = useState(1);
+    const { addToCart } = useCart();
 
+    const handleAddToCart = () => {
+        addToCart(product, quantity, selectedSize, selectedColor);
+
+        toast.success("Product added to cart!");
+    };
     const increase = () => setQuantity((prev) => prev + 1);
 
     const decrease = () => {
@@ -94,17 +100,7 @@ const ProductActions = ({ product }) => {
 
             {/* Buttons */}
             <div className="flex gap-4">
-                <Button
-                    onClick={() =>
-                        addToCart(
-                            product,
-                            quantity,
-                            selectedSize,
-                            selectedColor,
-                        )
-                    }
-                    className="flex-1"
-                >
+                <Button onClick={handleAddToCart} className="flex-1">
                     Add To Cart
                 </Button>
 
