@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { NavLink } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Menu, X, Search, ShoppingBag } from "lucide-react";
@@ -44,11 +45,19 @@ const Navbar = () => {
 
     return (
         <header
-            className={`sticky top-0 z-50 transition-all duration-300 ${
-                isScrolled
-                    ? "border-b border-border bg-white/95 shadow-sm backdrop-blur-md"
-                    : "bg-transparent"
-            }`}
+            className={`
+        fixed
+        inset-x-0
+        top-0
+        z-50
+        transition-all
+        duration-300
+        ${
+            isScrolled
+                ? "border-b border-border bg-white/80 backdrop-blur-xl shadow-sm"
+                : "bg-transparent"
+        }
+    `}
         >
             <Container>
                 <nav className="flex h-20 items-center justify-between">
