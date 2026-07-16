@@ -36,11 +36,11 @@ const ProductCard = ({ product }) => {
 
                 {/* Product Image */}
 
-                <Link to={`/products/${id}`}>
+                <Link to={`/products/${id}`} className="block">
                     <img
                         src={image}
                         alt={name}
-                        className="aspect-4/5 w-full object-cover transition duration-700 ease-out group-hover:rotate-1"
+                        className="aspect-4/5 w-full object-cover transition-all duration-700 group-hover:scale-110"
                     />
                 </Link>
             </div>
