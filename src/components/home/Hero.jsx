@@ -56,35 +56,6 @@ const Hero = () => {
                         <p className="mt-5 text-sm text-gray-500">
                             Free shipping on orders over $100
                         </p>
-
-                        <div className="mt-12 flex gap-10">
-                            <div>
-                                <h3 className="text-2xl font-bold text-primary">
-                                    20K+
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                    Happy Customers
-                                </p>
-                            </div>
-
-                            <div>
-                                <h3 className="text-2xl font-bold text-primary">
-                                    500+
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                    Premium Products
-                                </p>
-                            </div>
-
-                            <div>
-                                <h3 className="text-2xl font-bold text-primary">
-                                    4.9★
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                    Customer Rating
-                                </p>
-                            </div>
-                        </div>
                     </motion.div>
 
                     {/* ================= Right Image ================= */}
