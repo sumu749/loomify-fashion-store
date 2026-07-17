@@ -6,11 +6,20 @@ import ProductInfo from "../components/product-details/ProductInfo";
 import { getProductById } from "../services/productService";
 import RelatedProducts from "../components/product-details/RelatedProducts";
 import Breadcrumb from "../components/common/Breadcrumb";
+import { useEffect, useState } from "react";
+import ProductDetailsSkeleton from "../components/skeleton/ProductDetailsSkeleton";
 
 const ProductDetails = () => {
     const { id } = useParams();
-
     const product = getProductById(id);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 700);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     if (!product) {
         return (
@@ -18,6 +27,9 @@ const ProductDetails = () => {
                 <div className="py-32 text-center">Product Not Found</div>
             </Container>
         );
+    }
+    if (loading) {
+        return <ProductDetailsSkeleton />;
     }
 
     return (

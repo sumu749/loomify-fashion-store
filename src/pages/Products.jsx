@@ -25,6 +25,7 @@ const Products = () => {
 
         filteredProducts,
     } = useProductFilters(products);
+
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
