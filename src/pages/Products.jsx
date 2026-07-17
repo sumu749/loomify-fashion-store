@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import ProductGridSkeleton from "../components/skeleton/ProductGridSkeleton";
 import Container from "../components/common/Container";
 import ProductFilters from "../components/products/ProductFilters";
 import ProductGrid from "../components/products/ProductGrid";
@@ -8,6 +10,7 @@ import useProducts from "../hooks/useProducts";
 
 const Products = () => {
     const products = useProducts();
+
     const {
         search,
         setSearch,
@@ -22,6 +25,26 @@ const Products = () => {
 
         filteredProducts,
     } = useProductFilters(products);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 800);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (loading) {
+        return (
+            <section className="py-20">
+                <Container>
+                    <ProductGridSkeleton />
+                </Container>
+            </section>
+        );
+    }
+
     return (
         <section className="py-16 sm:py-24">
             <Container>
