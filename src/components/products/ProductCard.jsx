@@ -1,12 +1,15 @@
+/* eslint-disable indent */
 import { Heart, Eye, ShoppingBag, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Button from "../common/Button";
 import formatCurrency from "../../utils/formatCurrency";
 import useCart from "../../hooks/useCart";
+import useWishlist from "../../hooks/useWishlist";
 import toast from "react-hot-toast";
 
 const ProductCard = ({ product }) => {
+    const { toggleWishlist, isInWishlist } = useWishlist();
     const {
         id,
         name,
@@ -18,6 +21,7 @@ const ProductCard = ({ product }) => {
         reviews,
         badge,
     } = product;
+    const liked = isInWishlist(id);
 
     const { addToCart } = useCart();
 
@@ -60,31 +64,25 @@ const ProductCard = ({ product }) => {
                 {/* Wishlist */}
 
                 <button
-                    className="
-                        absolute
-                        right-4
-                        top-4
-                        z-20
-
-                        flex
-                        h-10
-                        w-10
-                        items-center
-                        justify-center
-
-                        rounded-full
-                        bg-white/90
-                        shadow
-
-                        transition-all
-                        duration-300
-
-                        hover:scale-110
-                        hover:bg-accent
-                        hover:text-white
-                    "
+                    onClick={() => toggleWishlist(product)}
+                    className={`
+        absolute
+        right-4
+        top-4
+        z-10
+        rounded-full
+        p-2
+        shadow
+        transition-all
+        duration-300
+        ${
+            liked
+                ? "bg-accent text-white"
+                : "bg-white hover:bg-accent hover:text-white"
+        }
+    `}
                 >
-                    <Heart size={18} />
+                    <Heart size={18} fill={liked ? "currentColor" : "none"} />
                 </button>
 
                 {/* IMAGE */}
