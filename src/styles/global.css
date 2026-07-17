@@ -13,7 +13,7 @@
     --color-primary: #111827;
     --color-accent: #c8a96a;
 
-    --color-background: #fafafa;
+    --color-background: #fcfbf8;
     --color-surface: #ffffff;
 
     --color-text: #374151;
@@ -31,7 +31,7 @@
 
     /* ---------- Shadow ---------- */
 
-    --shadow-card: 0 8px 24px rgb(0 0 0 / 0.08);
+    --shadow-card: 0 12px 30px rgb(17 24 39 / 0.08);
 
     /* ---------- Transition ---------- */
 
@@ -55,8 +55,12 @@
         font-family: var(--font-body);
         background: var(--color-background);
         color: var(--color-text);
-    }
 
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+
+        text-rendering: optimizeLegibility;
+    }
     h1,
     h2,
     h3,
@@ -74,14 +78,36 @@
     img {
         display: block;
         max-width: 100%;
+        height: auto;
     }
 
     button {
         cursor: pointer;
+        transition: all 300ms ease;
     }
 
     ::selection {
         background: var(--color-accent);
         color: white;
+    }
+
+    /* Scrollbar */
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f4f4f4;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #c8a96a;
+        border-radius: 999px;
+        border: 2px solid #f4f4f4;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #b89254;
     }
 }
