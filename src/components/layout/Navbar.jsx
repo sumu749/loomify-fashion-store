@@ -1,17 +1,19 @@
 /* eslint-disable indent */
 import { NavLink } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { Menu, X, Search, ShoppingBag } from "lucide-react";
+import { Menu, X, Search, ShoppingBag, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import Container from "../common/Container";
 import { navItems } from "../../constants/navigation";
 import useCart from "../../hooks/useCart";
+import useWishlist from "../../hooks/useWishlist";
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const { cartCount } = useCart();
+    const { wishlistCount } = useWishlist();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -87,6 +89,37 @@ const Navbar = () => {
                         >
                             <Search size={20} />
                         </button>
+
+                        {/* Wishlist */}
+
+                        <Link
+                            to="/wishlist"
+                            className="relative flex items-center transition hover:text-accent"
+                        >
+                            <Heart size={22} />
+
+                            {wishlistCount > 0 && (
+                                <span
+                                    className="
+                absolute
+                -right-2
+                -top-2
+                flex
+                h-5
+                w-5
+                items-center
+                justify-center
+                rounded-full
+                bg-accent
+                text-[10px]
+                font-semibold
+                text-white
+            "
+                                >
+                                    {wishlistCount}
+                                </span>
+                            )}
+                        </Link>
 
                         {/* Cart */}
                         <Link to="/cart" className="relative flex items-center">
