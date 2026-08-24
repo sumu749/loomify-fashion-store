@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-
+import { Toaster } from "react-hot-toast";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/poppins/600.css";
@@ -24,6 +24,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <html lang="en">
             <body>
                 <MainLayout>{children}</MainLayout>
+                <Toaster position="top-right" />
             </body>
         </html>
     );

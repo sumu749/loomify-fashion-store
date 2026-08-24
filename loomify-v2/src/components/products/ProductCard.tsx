@@ -1,17 +1,45 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingBag, Star } from "lucide-react";
+import Image from "next/image";
 import { motion } from "framer-motion";
+import { Heart, Eye, ShoppingBag, Star } from "lucide-react";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
-import type { Product } from "@/data/products";
+import Button from "@/components/common/Button";
+import formatCurrency from "@/utils/formatCurrency";
+import type { Product } from "@/types/product";
 
 interface ProductCardProps {
     product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+    const [liked, setLiked] = useState(false);
+
+    const {
+        id,
+        name,
+        category,
+        image,
+        price,
+        oldPrice,
+        rating,
+        reviews,
+        badge,
+    } = product;
+
+    const handleAddToCart = () => {
+        // Redux Toolkit integration will replace this later.
+        toast.success(`${name} added to cart`);
+    };
+
+    const handleWishlist = () => {
+        // Redux Toolkit integration will replace this later.
+        setLiked((prev) => !prev);
+    };
+
     return (
         <motion.article
             whileHover={{ y: -8 }}
@@ -19,67 +47,99 @@ const ProductCard = ({ product }: ProductCardProps) => {
             className="group overflow-hidden rounded-card border border-border bg-white shadow-sm transition-all duration-300 hover:shadow-2xl"
         >
             <div className="relative overflow-hidden">
-                {product.badge && (
-                    <span className="absolute left-4 top-4 z-10 rounded-full bg-accent px-3 py-1 text-xs font-semibold tracking-wide text-white">
-                        {product.badge}
+                {badge && (
+                    <span className="absolute left-4 top-4 z-20 rounded-full bg-accent px-3 py-1 text-xs font-semibold tracking-wide text-white">
+                        {badge}
                     </span>
                 )}
+
                 <button
                     type="button"
-                    aria-label={`Add ${product.name} to wishlist`}
-                    className="absolute right-4 top-4 z-10 rounded-full bg-white p-2 shadow transition hover:bg-accent hover:text-white"
+                    onClick={handleWishlist}
+                    aria-label={
+                        liked
+                            ? `Remove ${name} from wishlist`
+                            : `Add ${name} to wishlist`
+                    }
+                    className={`absolute right-4 top-4 z-10 rounded-full p-2 shadow transition-all duration-300 ${
+                        liked
+                            ? "bg-accent text-white"
+                            : "bg-white hover:bg-accent hover:text-white"
+                    }`}
                 >
-                    <Heart size={18} />
+                    <Heart size={18} fill={liked ? "currentColor" : "none"} />
                 </button>
-                <Link href={`/products/${product.id}`}>
+
+                <Link href={`/products/${id}`}>
                     <Image
-                        src={product.image}
-                        alt={product.name}
+                        src={image}
+                        alt={name}
                         width={600}
                         height={750}
                         className="aspect-4/5 w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                 </Link>
+
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent opacity-100 transition-all duration-500 lg:opacity-0 lg:group-hover:opacity-100" />
+
+                <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 translate-y-0 gap-3 opacity-100 transition-all duration-500 lg:translate-y-8 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
+                    <Link
+                        href={`/products/${id}`}
+                        aria-label={`View ${name}`}
+                        className="flex h-11 w-11 items-center justify-center rounded-full bg-white transition hover:bg-accent hover:text-white"
+                    >
+                        <Eye size={18} />
+                    </Link>
+
+                    <button
+                        type="button"
+                        onClick={handleAddToCart}
+                        aria-label={`Add ${name} to cart`}
+                        className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white transition hover:bg-accent"
+                    >
+                        <ShoppingBag size={18} />
+                    </button>
+                </div>
             </div>
-            <div className="space-y-3 p-4 sm:p-6">
+
+            <div className="space-y-3 p-4 sm:space-y-4 sm:p-6">
                 <div>
                     <p className="text-sm uppercase tracking-wider text-gray-500">
-                        {product.category}
+                        {category}
                     </p>
-                    <Link href={`/products/${product.id}`}>
+
+                    <Link href={`/products/${id}`}>
                         <h3 className="mt-2 text-lg font-semibold text-primary transition group-hover:text-accent sm:text-xl">
-                            {product.name}
+                            {name}
                         </h3>
                     </Link>
                 </div>
+
                 <div className="flex items-center gap-2">
                     <Star
                         size={16}
                         className="fill-yellow-400 text-yellow-400"
                     />
-                    <span className="text-sm font-medium">
-                        {product.rating}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                        ({product.reviews})
-                    </span>
+                    <span className="text-sm font-medium">{rating}</span>
+                    <span className="text-sm text-gray-500">({reviews})</span>
                 </div>
+
                 <div className="flex items-center gap-3">
                     <span className="text-xl font-bold text-primary sm:text-2xl">
-                        ${product.price}
+                        {formatCurrency(price)}
                     </span>
-                    {product.oldPrice && (
+
+                    {oldPrice && (
                         <span className="text-gray-400 line-through">
-                            ${product.oldPrice}
+                            {formatCurrency(oldPrice)}
                         </span>
                     )}
                 </div>
-                <Link
-                    href={`/products/${product.id}`}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-medium text-white transition hover:bg-accent"
-                >
-                    <ShoppingBag size={18} /> View Product
-                </Link>
+
+                <Button onClick={handleAddToCart} className="w-full">
+                    <ShoppingBag size={18} />
+                    Add to Cart
+                </Button>
             </div>
         </motion.article>
     );
