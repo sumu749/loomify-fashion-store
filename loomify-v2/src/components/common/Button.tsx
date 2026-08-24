@@ -1,42 +1,72 @@
+import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+type ButtonVariant = "primary" | "secondary" | "outline";
+type ButtonSize = "sm" | "md" | "lg";
+
+interface BaseButtonProps {
     children: ReactNode;
-    size?: "sm" | "md" | "lg";
-    variant?: "primary" | "secondary" | "outline" | "ghost";
+    variant?: ButtonVariant;
+    size?: ButtonSize;
+    className?: string;
 }
 
-const Button = ({
-    children,
-    size = "md",
-    variant = "primary",
-    className = "",
-    type = "button",
-    ...props
-}: ButtonProps) => {
-    const baseClasses =
-        "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50";
+interface NativeButtonProps
+    extends
+        BaseButtonProps,
+        Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof BaseButtonProps> {
+    asChild?: false;
+}
 
-    const sizeClasses = {
-        sm: "h-10 px-5 text-sm",
-        md: "h-11 px-6 text-sm",
-        lg: "h-12 px-7 text-base sm:h-14 sm:px-8",
+interface LinkButtonProps extends BaseButtonProps {
+    asChild: true;
+    href: string;
+}
+
+type ButtonProps = NativeButtonProps | LinkButtonProps;
+
+const Button = (props: ButtonProps) => {
+    const {
+        children,
+        variant = "primary",
+        size = "md",
+        className = "",
+        asChild = false,
+    } = props;
+
+    const sizes = {
+        sm: "px-4 py-2 text-sm",
+        md: "px-6 py-3 text-base",
+        lg: "px-8 py-4 text-base",
     };
 
-    const variantClasses = {
-        primary: "bg-primary text-white hover:bg-accent",
-        secondary: "bg-accent text-white hover:bg-primary",
+    const baseStyle =
+        "inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-medium transition-all duration-300";
+
+    const variants = {
+        primary: "bg-[#111827] text-white hover:bg-[#C8A96A]",
+        secondary:
+            "border border-gray-300 bg-white text-[#111827] hover:bg-gray-100",
         outline:
-            "border border-primary bg-transparent text-primary hover:bg-primary hover:text-white",
-        ghost: "bg-transparent text-primary hover:bg-gray-100",
+            "border border-gray-900 bg-transparent text-gray-900 hover:bg-gray-900 hover:text-white",
     };
+
+    const classes = `${baseStyle} ${variants[variant]} ${sizes[size]} ${className}`;
+
+    if (asChild) {
+        const { href } = props as LinkButtonProps;
+
+        return (
+            <Link href={href} className={classes}>
+                {children}
+            </Link>
+        );
+    }
+
+    const { type = "button", ...buttonProps } = props as NativeButtonProps;
 
     return (
-        <button
-            type={type}
-            className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
-            {...props}
-        >
+        <button type={type} className={classes} {...buttonProps}>
             {children}
         </button>
     );

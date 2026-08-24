@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 
@@ -118,11 +117,9 @@ const LoomifyPromise = () => {
                         </div>
 
                         <div className="mt-12">
-                            <Button asChild size="lg">
-                                <Link href="/products">
-                                    Learn More
-                                    <ArrowRight size={18} />
-                                </Link>
+                            <Button asChild href="/products" size="lg">
+                                Learn More
+                                <ArrowRight size={18} />
                             </Button>
                         </div>
                     </motion.div>
