@@ -6,7 +6,9 @@ import toast from "react-hot-toast";
 
 import Button from "@/components/common/Button";
 import type { Product } from "@/types/product";
-
+import { addToCart } from "@/features/cart/cartSlice";
+import { toggleWishlist } from "@/features/wishlist/wishlistSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 interface ProductActionsProps {
     product: Product;
 }
@@ -19,17 +21,24 @@ const ProductActions = ({ product }: ProductActionsProps) => {
     const [quantity, setQuantity] = useState(1);
     const [liked, setLiked] = useState(false);
 
-    const handleAddToCart = () => {
-        toast.success(`${product.name} added to cart!`);
+    const dispatch = useAppDispatch();
 
-        // Redux Toolkit integration will be added later.
-        console.log({
-            product,
-            quantity,
-            selectedSize,
-            selectedColor,
-        });
+    const handleAddToCart = () => {
+        dispatch(
+            addToCart({
+                product,
+                quantity,
+                size: selectedSize,
+                color: selectedColor,
+            }),
+        );
+
+        toast.success("Product added to cart!");
     };
+
+    const isInWishlist = useAppSelector((state) =>
+        state.wishlist.items.some((item) => item.id === product.id),
+    );
 
     const increase = () => {
         setQuantity((prev) => prev + 1);
@@ -128,17 +137,25 @@ const ProductActions = ({ product }: ProductActionsProps) => {
 
                 <button
                     type="button"
-                    onClick={() => setLiked((prev) => !prev)}
-                    aria-label={
-                        liked ? "Remove from wishlist" : "Add to wishlist"
-                    }
+                    onClick={() => {
+                        dispatch(toggleWishlist(product));
+
+                        toast.success(
+                            isInWishlist
+                                ? "Removed from Wishlist"
+                                : "Added to Wishlist ❤️",
+                        );
+                    }}
                     className={`flex h-12 w-12 self-start items-center justify-center rounded-xl border transition ${
-                        liked
+                        isInWishlist
                             ? "border-accent bg-accent text-white"
                             : "border-border hover:border-primary"
                     }`}
                 >
-                    <Heart size={20} fill={liked ? "currentColor" : "none"} />
+                    <Heart
+                        size={20}
+                        fill={isInWishlist ? "currentColor" : "none"}
+                    />
                 </button>
             </div>
 
