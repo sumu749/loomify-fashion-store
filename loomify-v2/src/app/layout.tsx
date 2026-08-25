@@ -9,6 +9,7 @@ import "@fontsource/poppins/800.css";
 
 import "./globals.css";
 import MainLayout from "@/components/layout/MainLayout";
+import StoreProvider from "@/store/StoreProvider";
 
 export const metadata: Metadata = {
     title: "Loomify",
@@ -23,8 +24,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
     return (
         <html lang="en">
             <body>
-                <MainLayout>{children}</MainLayout>
-                <Toaster position="top-right" />
+                <StoreProvider>
+                    <MainLayout>{children}</MainLayout>
+                    <Toaster position="top-right" />
+                </StoreProvider>
             </body>
         </html>
     );
