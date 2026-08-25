@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 
 import Container from "../common/Container";
 import { navItems } from "@/constants/navigation";
+import { useAppSelector } from "@/store/hooks";
 
 const Navbar = () => {
     const pathname = usePathname();
@@ -15,10 +16,12 @@ const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
-    // Temporary values.
-    // These will be connected to Redux Toolkit later.
-    const cartCount = 0;
-    const wishlistCount = 0;
+    const cartCount = useAppSelector((state) =>
+        state.cart.items.reduce((total, item) => total + item.quantity, 0),
+    );
+    const wishlistCount = useAppSelector(
+        (state) => state.wishlist.items.length,
+    );
 
     useEffect(() => {
         const handleScroll = () => {
