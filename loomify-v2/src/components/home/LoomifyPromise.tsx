@@ -8,6 +8,7 @@ import Button from "@/components/common/Button";
 import Container from "@/components/common/Container";
 import SectionTitle from "@/components/common/SectionTitle";
 import promiseImage from "@/assets/images/promise.jpg";
+import Link from "next/link";
 
 const features = [
     "Premium Materials",
@@ -117,9 +118,11 @@ const LoomifyPromise = () => {
                         </div>
 
                         <div className="mt-12">
-                            <Button asChild href="/products" size="lg">
-                                Learn More
-                                <ArrowRight size={18} />
+                            <Button asChild size="lg">
+                                <Link href="/products">
+                                    Learn More
+                                    <ArrowRight size={18} />
+                                </Link>
                             </Button>
                         </div>
                     </motion.div>

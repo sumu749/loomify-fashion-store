@@ -8,6 +8,7 @@ import { ArrowRight } from "lucide-react";
 import Button from "@/components/common/Button";
 import Container from "@/components/common/Container";
 import heroImage from "@/assets/images/hero.jpg";
+import Link from "next/link";
 
 const Hero = () => {
     return (
@@ -41,9 +42,11 @@ const Hero = () => {
                         </p>
 
                         <div className="mt-8 flex flex-wrap items-center gap-4 sm:mt-10 sm:gap-5">
-                            <Button asChild href="/products" size="lg">
-                                Shop Collection
-                                <ArrowRight size={18} />
+                            <Button asChild size="lg">
+                                <Link href="/products">
+                                    Shop Collection
+                                    <ArrowRight size={18} />
+                                </Link>
                             </Button>
                         </div>
 

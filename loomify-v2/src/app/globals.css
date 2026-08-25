@@ -1,12 +1,66 @@
 @import "tailwindcss";
 
+/* =========================================================
+   Loomify Design Tokens
+   ========================================================= */
+
 :root {
+    /* Colors */
     --background: #ffffff;
     --foreground: #111827;
 
+    --primary: #111827;
+    --accent: #c8a96a;
+
+    --border: #e5e7eb;
+
+    --card: #ffffff;
+    --card-foreground: #111827;
+
+    /* Supporting colors */
+    --muted: #6b7280;
+    --muted-background: #f9fafb;
+
+    /* Typography */
     --font-inter: "Inter", sans-serif;
     --font-poppins: "Poppins", sans-serif;
 }
+
+/* =========================================================
+   Tailwind v4 Theme
+   ========================================================= */
+
+@theme inline {
+    /* Colors */
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-primary: var(--primary);
+    --color-accent: var(--accent);
+
+    --color-border: var(--border);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-background: var(--muted-background);
+
+    /* Fonts */
+    --font-sans: var(--font-inter);
+    --font-inter: var(--font-inter);
+    --font-poppins: var(--font-poppins);
+
+    /* Custom radius */
+    --radius-card: 1rem;
+
+    /* Custom shadow */
+    --shadow-card: 0 10px 30px rgba(17, 24, 39, 0.08);
+}
+
+/* =========================================================
+   Global Reset
+   ========================================================= */
 
 * {
     box-sizing: border-box;
@@ -24,6 +78,23 @@ body {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
+
+/* =========================================================
+   Typography
+   ========================================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-poppins);
+}
+
+/* =========================================================
+   Elements
+   ========================================================= */
 
 button,
 input,
@@ -44,13 +115,4 @@ a {
 img {
     max-width: 100%;
     display: block;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    font-family: var(--font-poppins);
 }
