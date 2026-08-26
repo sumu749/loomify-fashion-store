@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { toast } from "react-hot-toast";
-
+import EmptyWishlist from "@/components/wishlist/EmptyWishlist";
 import Container from "@/components/common/Container";
 import Button from "@/components/common/Button";
 
@@ -40,29 +40,7 @@ const WishlistPage = () => {
     };
 
     if (wishlistItems.length === 0) {
-        return (
-            <section className="py-24">
-                <Container>
-                    <div className="mx-auto max-w-lg text-center">
-                        <Heart size={70} className="mx-auto text-accent" />
-
-                        <h2 className="mt-6 text-3xl font-bold text-primary">
-                            Your Wishlist is Empty
-                        </h2>
-
-                        <p className="mt-4 text-gray-600">
-                            Save your favorite products here and shop later.
-                        </p>
-
-                        <div className="mt-8">
-                            <Button asChild>
-                                <Link href="/products">Continue Shopping</Link>
-                            </Button>
-                        </div>
-                    </div>
-                </Container>
-            </section>
-        );
+        return <EmptyWishlist />;
     }
 
     return (
