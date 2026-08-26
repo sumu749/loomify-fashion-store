@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { Heart } from "lucide-react";
+
 import { toast } from "react-hot-toast";
 import EmptyWishlist from "@/components/wishlist/EmptyWishlist";
 import Container from "@/components/common/Container";
