@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import Container from "@/components/common/Container";
 import ProductFilters from "@/components/products/ProductFilters";
 import ProductGrid from "@/components/products/ProductGrid";
@@ -13,7 +11,7 @@ import useProductFilters from "@/hooks/useProductFilters";
 import useProducts from "@/hooks/useProducts";
 
 export default function ProductsPage() {
-    const products = useProducts();
+    const { data: products = [], isLoading, isError } = useProducts();
 
     const {
         search,
@@ -30,21 +28,29 @@ export default function ProductsPage() {
         filteredProducts,
     } = useProductFilters(products);
 
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false);
-        }, 800);
-
-        return () => clearTimeout(timer);
-    }, []);
-
-    if (loading) {
+    if (isLoading) {
         return (
             <section className="py-20">
                 <Container>
                     <ProductGridSkeleton />
+                </Container>
+            </section>
+        );
+    }
+
+    if (isError) {
+        return (
+            <section className="py-20">
+                <Container>
+                    <div className="py-20 text-center">
+                        <h2 className="text-2xl font-semibold text-primary">
+                            Failed to load products
+                        </h2>
+
+                        <p className="mt-3 text-gray-500">
+                            Please try again later.
+                        </p>
+                    </div>
                 </Container>
             </section>
         );

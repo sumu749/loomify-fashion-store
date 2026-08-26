@@ -16,3 +16,8 @@ export interface Product {
     colors: string[];
     sizes: string[];
 }
+
+export interface ProductsResponse {
+    success: boolean;
+    data: Product[];
+}

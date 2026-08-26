@@ -1,10 +1,14 @@
-import { useMemo } from "react";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
 
 import { getAllProducts } from "@/services/productService";
-import type { Product } from "@/types/product";
 
-const useProducts = (): Product[] => {
-    return useMemo(() => getAllProducts(), []);
+const useProducts = () => {
+    return useQuery({
+        queryKey: ["products"],
+        queryFn: getAllProducts,
+    });
 };
 
 export default useProducts;

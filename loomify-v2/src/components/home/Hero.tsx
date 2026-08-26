@@ -69,6 +69,7 @@ const Hero = () => {
                                 src={heroImage}
                                 alt="Loomify Fashion Collection"
                                 priority
+                                loading="eager"
                                 className="aspect-4/5 w-full object-cover transition-transform duration-700 hover:scale-105"
                             />
                         </div>
