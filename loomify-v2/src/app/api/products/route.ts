@@ -1,10 +1,41 @@
 import { NextResponse } from "next/server";
 
-import products from "@/data/products";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-    return NextResponse.json({
-        success: true,
-        data: products,
-    });
+    try {
+        const products = await prisma.product.findMany({
+            where: {
+                published: true,
+            },
+            include: {
+                category: true,
+                images: {
+                    orderBy: {
+                        sortOrder: "asc",
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        return NextResponse.json({
+            success: true,
+            data: products,
+        });
+    } catch (error) {
+        console.error("Failed to fetch products:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to fetch products",
+            },
+            {
+                status: 500,
+            },
+        );
+    }
 }
