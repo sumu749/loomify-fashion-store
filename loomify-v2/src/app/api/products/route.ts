@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { mapProduct } from "@/lib/mappers/productMapper";
 
 export async function GET() {
     try {
@@ -21,9 +22,11 @@ export async function GET() {
             },
         });
 
+        const data = products.map(mapProduct);
+
         return NextResponse.json({
             success: true,
-            data: products,
+            data,
         });
     } catch (error) {
         console.error("Failed to fetch products:", error);
