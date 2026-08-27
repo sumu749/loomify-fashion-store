@@ -1,18 +1,26 @@
 export interface Product {
-    id: number;
+    id: string;
     name: string;
-    category: string;
-    image: string;
-    images: string[];
+    slug: string;
+    sku: string;
+    description: string;
+
     price: number;
     oldPrice?: number;
+
+    category: string;
+
+    image: string;
+    images: string[];
+
+    stock: number;
+    featured: boolean;
+    published: boolean;
+
     rating: number;
     reviews: number;
     badge: string;
-    featured: boolean;
-    inStock: boolean;
-    sku: string;
-    description: string;
+
     colors: string[];
     sizes: string[];
 }

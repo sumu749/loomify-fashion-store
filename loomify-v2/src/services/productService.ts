@@ -1,5 +1,3 @@
-import products from "@/data/products";
-
 import type { Product, ProductsResponse } from "@/types/product";
 
 export const getAllProducts = async (): Promise<Product[]> => {
@@ -16,12 +14,4 @@ export const getAllProducts = async (): Promise<Product[]> => {
     }
 
     return result.data;
-};
-
-export const getProductById = (id: number | string): Product | undefined => {
-    return products.find((product) => product.id === Number(id));
-};
-
-export const getFeaturedProducts = (): Product[] => {
-    return products.filter((product) => product.featured);
 };
