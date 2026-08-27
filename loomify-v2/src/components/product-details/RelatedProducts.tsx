@@ -1,8 +1,11 @@
+"use client";
+
 import Container from "@/components/common/Container";
 import SectionTitle from "@/components/common/SectionTitle";
 import ProductCard from "@/components/products/ProductCard";
+import ProductGridSkeleton from "@/components/skeleton/ProductGridSkeleton";
 
-import products from "@/data/products";
+import useRelatedProducts from "@/hooks/useRelatedProducts";
 import type { Product } from "@/types/product";
 
 interface RelatedProductsProps {
@@ -10,15 +13,31 @@ interface RelatedProductsProps {
 }
 
 const RelatedProducts = ({ currentProduct }: RelatedProductsProps) => {
-    const relatedProducts = products
-        .filter(
-            (product) =>
-                product.category === currentProduct.category &&
-                product.id !== currentProduct.id,
-        )
-        .slice(0, 4);
+    const {
+        data: relatedProducts = [],
+        isLoading,
+        isError,
+    } = useRelatedProducts(currentProduct.slug);
 
-    if (relatedProducts.length === 0) {
+    if (isLoading) {
+        return (
+            <section className="border-t border-border bg-stone-50 py-20">
+                <Container>
+                    <SectionTitle
+                        subtitle="You May Also Like"
+                        title="Complete Your Look"
+                        description="Hand-picked pieces that perfectly complement your style."
+                    />
+
+                    <div className="mt-14">
+                        <ProductGridSkeleton />
+                    </div>
+                </Container>
+            </section>
+        );
+    }
+
+    if (isError || relatedProducts.length === 0) {
         return null;
     }
 
