@@ -26,12 +26,25 @@ interface PrismaProduct {
     published: boolean;
     category: PrismaCategory;
     images: PrismaProductImage[];
+    reviews: PrismaProductReview[];
+}
+
+interface PrismaProductReview {
+    rating: number;
 }
 
 export const mapProduct = (product: PrismaProduct): Product => {
     const images = product.images
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map((image) => image.url);
+
+    const totalReviews = product.reviews.length;
+
+    const averageRating =
+        totalReviews > 0
+            ? product.reviews.reduce((sum, review) => sum + review.rating, 0) /
+              totalReviews
+            : 0;
 
     return {
         id: product.id,
@@ -56,10 +69,9 @@ export const mapProduct = (product: PrismaProduct): Product => {
         featured: product.featured,
         published: product.published,
 
-        // Temporary fields.
-        // These will come from database later.
-        rating: 0,
-        reviews: 0,
+        rating: Number(averageRating.toFixed(1)),
+        reviews: totalReviews,
+
         badge: "",
 
         colors: [],
