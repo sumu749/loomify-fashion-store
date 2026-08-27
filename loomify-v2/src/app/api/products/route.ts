@@ -33,9 +33,7 @@ export async function GET() {
                 success: false,
                 message: "Failed to fetch products",
             },
-            {
-                status: 500,
-            },
+            { status: 500 },
         );
     }
 }
