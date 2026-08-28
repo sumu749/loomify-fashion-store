@@ -23,6 +23,7 @@ const WishlistPage = () => {
         dispatch(
             addToCart({
                 product,
+                variantId: product.variants[0]?.id ?? product.id,
                 quantity: 1,
             }),
         );
@@ -32,7 +33,7 @@ const WishlistPage = () => {
         toast.success("Moved to Cart");
     };
 
-    const handleRemove = (id: number) => {
+    const handleRemove = (id: string) => {
         dispatch(removeFromWishlist(id));
 
         toast.success("Removed from Wishlist");

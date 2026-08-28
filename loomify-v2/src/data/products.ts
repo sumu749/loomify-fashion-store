@@ -5,7 +5,8 @@ import type { Product } from "@/types/product";
 
 const products: Product[] = [
     {
-        id: 1,
+        id: "1",
+        slug: "classic-wool-jacket",
         name: "Classic Wool Jacket",
         category: "Men",
         image: heroImage.src,
@@ -16,7 +17,9 @@ const products: Product[] = [
         reviews: 42,
         badge: "SALE",
         featured: true,
-        inStock: true,
+        stock: 20,
+        published: true,
+        variants: [],
         sku: "LM-MJ-001",
         description:
             "A timeless wool jacket crafted with premium fabric for everyday comfort and effortless style.",
@@ -25,7 +28,8 @@ const products: Product[] = [
     },
 
     {
-        id: 2,
+        id: "2",
+        slug: "casual-denim-jacket",
         name: "Casual Denim Jacket",
         category: "Men",
         image: promiseImage.src,
@@ -36,7 +40,9 @@ const products: Product[] = [
         reviews: 31,
         badge: "NEW",
         featured: true,
-        inStock: true,
+        stock: 25,
+        published: true,
+        variants: [],
         sku: "LM-MJ-002",
         description:
             "Stylish denim jacket with a slim fit and premium cotton fabric for everyday wear.",
@@ -45,7 +51,8 @@ const products: Product[] = [
     },
 
     {
-        id: 3,
+        id: "3",
+        slug: "premium-cotton-hoodie",
         name: "Premium Cotton Hoodie",
         category: "Men",
         image: heroImage.src,
@@ -56,7 +63,9 @@ const products: Product[] = [
         reviews: 56,
         badge: "HOT",
         featured: true,
-        inStock: true,
+        stock: 30,
+        published: true,
+        variants: [],
         sku: "LM-HD-003",
         description:
             "Soft fleece hoodie with adjustable hood and kangaroo pocket for maximum comfort.",
@@ -65,7 +74,8 @@ const products: Product[] = [
     },
 
     {
-        id: 4,
+        id: "4",
+        slug: "slim-fit-t-shirt",
         name: "Slim Fit T-Shirt",
         category: "Men",
         image: heroImage.src,
@@ -76,7 +86,9 @@ const products: Product[] = [
         reviews: 87,
         badge: "SALE",
         featured: false,
-        inStock: true,
+        stock: 50,
+        published: true,
+        variants: [],
         sku: "LM-TS-004",
         description:
             "Breathable cotton t-shirt designed with a slim fit for a modern casual look.",
@@ -85,7 +97,8 @@ const products: Product[] = [
     },
 
     {
-        id: 5,
+        id: "5",
+        slug: "leather-sneakers",
         name: "Leather Sneakers",
         category: "Shoes",
         image: heroImage.src,
@@ -96,7 +109,9 @@ const products: Product[] = [
         reviews: 103,
         badge: "BEST",
         featured: true,
-        inStock: true,
+        stock: 18,
+        published: true,
+        variants: [],
         sku: "LM-SH-005",
         description:
             "Premium leather sneakers with cushioned sole and lightweight construction.",
@@ -105,7 +120,8 @@ const products: Product[] = [
     },
 
     {
-        id: 6,
+        id: "6",
+        slug: "elegant-summer-dress",
         name: "Elegant Summer Dress",
         category: "Women",
         image: heroImage.src,
@@ -116,7 +132,9 @@ const products: Product[] = [
         reviews: 49,
         badge: "NEW",
         featured: true,
-        inStock: true,
+        stock: 22,
+        published: true,
+        variants: [],
         sku: "LM-WD-006",
         description:
             "Lightweight floral summer dress with soft fabric and elegant silhouette.",
@@ -125,7 +143,8 @@ const products: Product[] = [
     },
 
     {
-        id: 7,
+        id: "7",
+        slug: "classic-formal-shirt",
         name: "Classic Formal Shirt",
         category: "Men",
         image: heroImage.src,
@@ -136,7 +155,9 @@ const products: Product[] = [
         reviews: 38,
         badge: "",
         featured: false,
-        inStock: true,
+        stock: 35,
+        published: true,
+        variants: [],
         sku: "LM-FS-007",
         description:
             "Wrinkle-resistant formal shirt made with premium cotton fabric.",
@@ -145,7 +166,8 @@ const products: Product[] = [
     },
 
     {
-        id: 8,
+        id: "8",
+        slug: "womens-handbag",
         name: "Women's Handbag",
         category: "Accessories",
         image: heroImage.src,
@@ -156,7 +178,9 @@ const products: Product[] = [
         reviews: 64,
         badge: "SALE",
         featured: true,
-        inStock: false,
+        stock: 0,
+        published: true,
+        variants: [],
         sku: "LM-HB-008",
         description:
             "Elegant handbag crafted with premium faux leather and spacious compartments.",
@@ -165,7 +189,8 @@ const products: Product[] = [
     },
 
     {
-        id: 9,
+        id: "9",
+        slug: "sports-running-shoes",
         name: "Sports Running Shoes",
         category: "Shoes",
         image: heroImage.src,
@@ -176,7 +201,9 @@ const products: Product[] = [
         reviews: 91,
         badge: "HOT",
         featured: true,
-        inStock: true,
+        stock: 26,
+        published: true,
+        variants: [],
         sku: "LM-RS-009",
         description:
             "Lightweight running shoes with breathable mesh and shock-absorbing sole.",
@@ -185,7 +212,8 @@ const products: Product[] = [
     },
 
     {
-        id: 10,
+        id: "10",
+        slug: "womens-oversized-sweater",
         name: "Women's Oversized Sweater",
         category: "Women",
         image: heroImage.src,
@@ -196,7 +224,9 @@ const products: Product[] = [
         reviews: 52,
         badge: "NEW",
         featured: false,
-        inStock: true,
+        stock: 28,
+        published: true,
+        variants: [],
         sku: "LM-SW-010",
         description:
             "Cozy oversized sweater perfect for chilly days with soft knitted fabric.",
@@ -205,7 +235,8 @@ const products: Product[] = [
     },
 
     {
-        id: 11,
+        id: "11",
+        slug: "luxury-analog-watch",
         name: "Luxury Analog Watch",
         category: "Accessories",
         image: heroImage.src,
@@ -216,7 +247,9 @@ const products: Product[] = [
         reviews: 76,
         badge: "BEST",
         featured: true,
-        inStock: true,
+        stock: 15,
+        published: true,
+        variants: [],
         sku: "LM-WT-011",
         description:
             "Elegant stainless steel analog watch with water-resistant design.",
@@ -225,7 +258,8 @@ const products: Product[] = [
     },
 
     {
-        id: 12,
+        id: "12",
+        slug: "travel-backpack",
         name: "Travel Backpack",
         category: "Accessories",
         image: heroImage.src,
@@ -236,7 +270,9 @@ const products: Product[] = [
         reviews: 58,
         badge: "SALE",
         featured: false,
-        inStock: true,
+        stock: 30,
+        published: true,
+        variants: [],
         sku: "LM-BP-012",
         description:
             "Durable travel backpack with multiple compartments and waterproof material.",
