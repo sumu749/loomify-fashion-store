@@ -5,52 +5,143 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import Button from "@/components/common/Button";
-import type { Product } from "@/types/product";
 import { addToCart } from "@/features/cart/cartSlice";
 import { toggleWishlist } from "@/features/wishlist/wishlistSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+
+import type { Product } from "@/types/product";
+
 interface ProductActionsProps {
     product: Product;
 }
 
 const ProductActions = ({ product }: ProductActionsProps) => {
-    const { sizes, colors, inStock } = product;
-
-    const [selectedSize, setSelectedSize] = useState(sizes[0]);
-    const [selectedColor, setSelectedColor] = useState(colors[0]);
-    const [quantity, setQuantity] = useState(1);
-    const [liked, setLiked] = useState(false);
+    const { sizes, colors, variants } = product;
 
     const dispatch = useAppDispatch();
 
+    /*
+     * --------------------------------------------------
+     * Selected options
+     * --------------------------------------------------
+     */
+
+    const [selectedSize, setSelectedSize] = useState(sizes[0] ?? "");
+
+    const [selectedColor, setSelectedColor] = useState(colors[0] ?? "");
+
+    const [quantity, setQuantity] = useState(1);
+
+    /*
+     * --------------------------------------------------
+     * Wishlist state from Redux
+     * --------------------------------------------------
+     */
+
+    const isInWishlist = useAppSelector((state) =>
+        state.wishlist.items.some((item) => item.id === product.id),
+    );
+
+    /*
+     * --------------------------------------------------
+     * Find selected variant
+     * --------------------------------------------------
+     *
+     * Example:
+     *
+     * selectedSize  = "M"
+     * selectedColor = "Black"
+     *
+     * ↓
+     *
+     * variants.find(...)
+     *
+     * ↓
+     *
+     * Black + M variant
+     */
+
+    const selectedVariant = variants.find(
+        (variant) =>
+            variant.size === selectedSize && variant.color === selectedColor,
+    );
+
+    /*
+     * --------------------------------------------------
+     * Quantity handlers
+     * --------------------------------------------------
+     */
+
+    const increaseQuantity = () => {
+        if (!selectedVariant) {
+            return;
+        }
+
+        if (quantity >= selectedVariant.stock) {
+            toast.error(`Only ${selectedVariant.stock} item(s) available.`);
+            return;
+        }
+
+        setQuantity((prev) => prev + 1);
+    };
+
+    const decreaseQuantity = () => {
+        setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+    };
+
+    /*
+     * --------------------------------------------------
+     * Add to Cart
+     * --------------------------------------------------
+     */
+
     const handleAddToCart = () => {
+        if (!selectedVariant) {
+            toast.error("Please select a valid size and color.");
+            return;
+        }
+
+        if (selectedVariant.stock <= 0) {
+            toast.error("This variant is out of stock.");
+            return;
+        }
+
+        if (quantity > selectedVariant.stock) {
+            toast.error(`Only ${selectedVariant.stock} item(s) available.`);
+            return;
+        }
+
         dispatch(
             addToCart({
                 product,
+                variantId: selectedVariant.id,
                 quantity,
-                size: selectedSize,
-                color: selectedColor,
             }),
         );
 
         toast.success("Product added to cart!");
     };
 
-    const isInWishlist = useAppSelector((state) =>
-        state.wishlist.items.some((item) => item.id === product.id),
-    );
+    /*
+     * --------------------------------------------------
+     * Wishlist
+     * --------------------------------------------------
+     */
 
-    const increase = () => {
-        setQuantity((prev) => prev + 1);
-    };
+    const handleToggleWishlist = () => {
+        dispatch(toggleWishlist(product));
 
-    const decrease = () => {
-        setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+        if (isInWishlist) {
+            toast.success("Removed from Wishlist");
+        } else {
+            toast.success("Added to Wishlist ❤️");
+        }
     };
 
     return (
         <div className="mt-8 space-y-6 sm:space-y-8">
-            {/* Size */}
+            {/* ================= Size ================= */}
+
             <div>
                 <h3 className="mb-3 font-semibold text-primary">Select Size</h3>
 
@@ -59,7 +150,10 @@ const ProductActions = ({ product }: ProductActionsProps) => {
                         <button
                             key={size}
                             type="button"
-                            onClick={() => setSelectedSize(size)}
+                            onClick={() => {
+                                setSelectedSize(size);
+                                setQuantity(1);
+                            }}
                             className={`h-10 w-10 rounded-lg border transition sm:h-11 sm:w-11 ${
                                 selectedSize === size
                                     ? "border-primary bg-primary text-white"
@@ -72,7 +166,8 @@ const ProductActions = ({ product }: ProductActionsProps) => {
                 </div>
             </div>
 
-            {/* Color */}
+            {/* ================= Color ================= */}
+
             <div>
                 <h3 className="mb-3 font-semibold text-primary">
                     Select Color
@@ -83,7 +178,10 @@ const ProductActions = ({ product }: ProductActionsProps) => {
                         <button
                             key={color}
                             type="button"
-                            onClick={() => setSelectedColor(color)}
+                            onClick={() => {
+                                setSelectedColor(color);
+                                setQuantity(1);
+                            }}
                             className={`rounded-full border px-3 py-2 transition ${
                                 selectedColor === color
                                     ? "border-primary bg-primary text-white"
@@ -94,17 +192,28 @@ const ProductActions = ({ product }: ProductActionsProps) => {
                         </button>
                     ))}
                 </div>
+
+                {/* Selected Variant Status */}
+
+                {selectedVariant && (
+                    <p className="mt-3 text-sm text-gray-500">
+                        {selectedVariant.stock > 0
+                            ? `${selectedVariant.stock} available`
+                            : "Out of stock"}
+                    </p>
+                )}
             </div>
 
-            {/* Quantity */}
+            {/* ================= Quantity ================= */}
+
             <div>
                 <h3 className="mb-3 font-semibold text-primary">Quantity</h3>
 
                 <div className="flex w-full items-center rounded-lg border border-border sm:w-fit">
                     <button
                         type="button"
-                        onClick={decrease}
-                        className="p-3 hover:bg-gray-100"
+                        onClick={decreaseQuantity}
+                        className="p-3 transition hover:bg-gray-100"
                         aria-label="Decrease quantity"
                     >
                         <Minus size={18} />
@@ -116,8 +225,8 @@ const ProductActions = ({ product }: ProductActionsProps) => {
 
                     <button
                         type="button"
-                        onClick={increase}
-                        className="p-3 hover:bg-gray-100"
+                        onClick={increaseQuantity}
+                        className="p-3 transition hover:bg-gray-100"
                         aria-label="Increase quantity"
                     >
                         <Plus size={18} />
@@ -125,27 +234,27 @@ const ProductActions = ({ product }: ProductActionsProps) => {
                 </div>
             </div>
 
-            {/* Buttons */}
+            {/* ================= Buttons ================= */}
+
             <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <Button
                     onClick={handleAddToCart}
                     className="w-full flex-1 sm:w-auto"
-                    disabled={!inStock}
+                    disabled={!selectedVariant || selectedVariant.stock <= 0}
                 >
-                    {inStock ? "Add To Cart" : "Out of Stock"}
+                    {!selectedVariant || selectedVariant.stock <= 0
+                        ? "Out of Stock"
+                        : "Add To Cart"}
                 </Button>
 
                 <button
                     type="button"
-                    onClick={() => {
-                        dispatch(toggleWishlist(product));
-
-                        toast.success(
-                            isInWishlist
-                                ? "Removed from Wishlist"
-                                : "Added to Wishlist ❤️",
-                        );
-                    }}
+                    onClick={handleToggleWishlist}
+                    aria-label={
+                        isInWishlist
+                            ? "Remove from wishlist"
+                            : "Add to wishlist"
+                    }
                     className={`flex h-12 w-12 self-start items-center justify-center rounded-xl border transition ${
                         isInWishlist
                             ? "border-accent bg-accent text-white"
@@ -159,7 +268,8 @@ const ProductActions = ({ product }: ProductActionsProps) => {
                 </button>
             </div>
 
-            {/* Extra Info */}
+            {/* ================= Extra Info ================= */}
+
             <div className="space-y-2 rounded-card bg-stone-50 p-4">
                 <div className="flex items-center gap-3">
                     <Truck size={18} />
@@ -168,7 +278,14 @@ const ProductActions = ({ product }: ProductActionsProps) => {
 
                 <div className="flex items-center gap-3">
                     <ShieldCheck size={18} />
-                    <span>{inStock ? "In Stock" : "Out of Stock"}</span>
+
+                    <span>
+                        {selectedVariant
+                            ? selectedVariant.stock > 0
+                                ? "In Stock"
+                                : "Out of Stock"
+                            : "Select a size and color"}
+                    </span>
                 </div>
             </div>
         </div>

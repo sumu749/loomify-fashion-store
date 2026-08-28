@@ -37,9 +37,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
     } = product;
 
     const handleAddToCart = () => {
+        const defaultVariant = product.variants.find(
+            (variant) => variant.stock > 0,
+        );
+
+        if (!defaultVariant) {
+            toast.error("Product is out of stock");
+            return;
+        }
+
         dispatch(
             addToCart({
                 product,
+                variantId: defaultVariant.id,
                 quantity: 1,
             }),
         );

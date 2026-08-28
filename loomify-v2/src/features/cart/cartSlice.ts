@@ -5,9 +5,8 @@ import type { Product } from "@/types/product";
 
 interface AddToCartPayload {
     product: Product;
+    variantId: string;
     quantity?: number;
-    size?: string;
-    color?: string;
 }
 
 interface CartState {
@@ -24,18 +23,11 @@ const cartSlice = createSlice({
 
     reducers: {
         addToCart: (state, action: PayloadAction<AddToCartPayload>) => {
-            const {
-                product,
-                quantity = 1,
-                size = "",
-                color = "",
-            } = action.payload;
+            const { product, variantId, quantity = 1 } = action.payload;
 
             const existingItem = state.items.find(
                 (item) =>
-                    item.id === product.id &&
-                    item.size === size &&
-                    item.color === color,
+                    item.id === product.id && item.variantId === variantId,
             );
 
             if (existingItem) {
@@ -46,46 +38,35 @@ const cartSlice = createSlice({
             state.items.push({
                 ...product,
                 quantity,
-                size,
-                color,
+                variantId,
             });
         },
 
         removeFromCart: (
             state,
             action: PayloadAction<{
-                id: number;
-                size: string;
-                color: string;
+                id: string;
+                variantId: string;
             }>,
         ) => {
-            const { id, size, color } = action.payload;
+            const { id, variantId } = action.payload;
 
             state.items = state.items.filter(
-                (item) =>
-                    !(
-                        item.id === id &&
-                        item.size === size &&
-                        item.color === color
-                    ),
+                (item) => !(item.id === id && item.variantId === variantId),
             );
         },
 
         increaseQuantity: (
             state,
             action: PayloadAction<{
-                id: number;
-                size: string;
-                color: string;
+                id: string;
+                variantId: string;
             }>,
         ) => {
-            const { id, size, color } = action.payload;
+            const { id, variantId } = action.payload;
 
             const item = state.items.find(
-                (item) =>
-                    item.id === id &&
-                    item.size === size &&
-                    item.color === color,
+                (item) => item.id === id && item.variantId === variantId,
             );
 
             if (item) {
@@ -96,18 +77,14 @@ const cartSlice = createSlice({
         decreaseQuantity: (
             state,
             action: PayloadAction<{
-                id: number;
-                size: string;
-                color: string;
+                id: string;
+                variantId: string;
             }>,
         ) => {
-            const { id, size, color } = action.payload;
+            const { id, variantId } = action.payload;
 
             const item = state.items.find(
-                (item) =>
-                    item.id === id &&
-                    item.size === size &&
-                    item.color === color,
+                (item) => item.id === id && item.variantId === variantId,
             );
 
             if (item) {
@@ -118,6 +95,7 @@ const cartSlice = createSlice({
         clearCart: (state) => {
             state.items = [];
         },
+
         restoreCart: (state, action: PayloadAction<CartItem[]>) => {
             state.items = action.payload;
         },

@@ -29,7 +29,7 @@ const CartPage = () => {
                     <div className="space-y-6">
                         {cartItems.map((item) => (
                             <CartItem
-                                key={`${item.id}-${item.size}-${item.color}`}
+                                key={`${item.id}-${item.variantId}`}
                                 item={item}
                             />
                         ))}
