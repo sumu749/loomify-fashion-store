@@ -55,6 +55,7 @@ export const ModelName = {
   Address: 'Address',
   Category: 'Category',
   Product: 'Product',
+  ProductVariant: 'ProductVariant',
   ProductImage: 'ProductImage',
   Cart: 'Cart',
   CartItem: 'CartItem',
@@ -146,6 +147,21 @@ export const ProductScalarFieldEnum = {
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
 
 
+export const ProductVariantScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  sku: 'sku',
+  size: 'size',
+  color: 'color',
+  price: 'price',
+  stock: 'stock',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductVariantScalarFieldEnum = (typeof ProductVariantScalarFieldEnum)[keyof typeof ProductVariantScalarFieldEnum]
+
+
 export const ProductImageScalarFieldEnum = {
   id: 'id',
   productId: 'productId',
@@ -169,9 +185,8 @@ export const CartItemScalarFieldEnum = {
   id: 'id',
   cartId: 'cartId',
   productId: 'productId',
-  quantity: 'quantity',
-  size: 'size',
-  color: 'color'
+  variantId: 'variantId',
+  quantity: 'quantity'
 } as const
 
 export type CartItemScalarFieldEnum = (typeof CartItemScalarFieldEnum)[keyof typeof CartItemScalarFieldEnum]
@@ -215,7 +230,9 @@ export const OrderItemScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
   productId: 'productId',
+  variantId: 'variantId',
   productName: 'productName',
+  variantSku: 'variantSku',
   productPrice: 'productPrice',
   quantity: 'quantity',
   size: 'size',

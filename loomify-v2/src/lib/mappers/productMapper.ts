@@ -13,6 +13,15 @@ interface PrismaCategory {
     slug: string;
 }
 
+interface PrismaProductVariant {
+    id: string;
+    sku: string;
+    size: string;
+    color: string;
+    price: unknown;
+    stock: number;
+}
+
 interface PrismaProduct {
     id: string;
     name: string;
@@ -24,14 +33,34 @@ interface PrismaProduct {
     stock: number;
     featured: boolean;
     published: boolean;
+
     category: PrismaCategory;
     images: PrismaProductImage[];
+    variants: PrismaProductVariant[];
+
+    reviews: {
+        rating: number;
+    }[];
 }
 
 export const mapProduct = (product: PrismaProduct): Product => {
-    const images = product.images
+    const images = [...product.images]
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map((image) => image.url);
+
+    const colors = [
+        ...new Set(product.variants.map((variant) => variant.color)),
+    ];
+
+    const sizes = [...new Set(product.variants.map((variant) => variant.size))];
+
+    const totalReviews = product.reviews.length;
+
+    const averageRating =
+        totalReviews > 0
+            ? product.reviews.reduce((sum, review) => sum + review.rating, 0) /
+              totalReviews
+            : 0;
 
     return {
         id: product.id,
@@ -56,13 +85,21 @@ export const mapProduct = (product: PrismaProduct): Product => {
         featured: product.featured,
         published: product.published,
 
-        // Temporary fields.
-        // These will come from database later.
-        rating: 0,
-        reviews: 0,
+        rating: Number(averageRating.toFixed(1)),
+        reviews: totalReviews,
+
         badge: "",
 
-        colors: [],
-        sizes: [],
+        colors,
+        sizes,
+
+        variants: product.variants.map((variant) => ({
+            id: variant.id,
+            sku: variant.sku,
+            size: variant.size,
+            color: variant.color,
+            price: variant.price !== null ? Number(variant.price) : undefined,
+            stock: variant.stock,
+        })),
     };
 };

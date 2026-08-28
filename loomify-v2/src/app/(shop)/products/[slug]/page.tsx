@@ -6,24 +6,55 @@ import ProductGallery from "@/components/product-details/ProductGallery";
 import ProductInfo from "@/components/product-details/ProductInfo";
 import RelatedProducts from "@/components/product-details/RelatedProducts";
 
-import { getProductById } from "@/services/productService";
+import { prisma } from "@/lib/prisma";
+import { mapProduct } from "@/lib/mappers/productMapper";
 
 interface ProductDetailsPageProps {
     params: Promise<{
-        id: string;
+        slug: string;
     }>;
 }
 
 export default async function ProductDetailsPage({
     params,
 }: ProductDetailsPageProps) {
-    const { id } = await params;
+    const { slug } = await params;
 
-    const product = getProductById(id);
+    const product = await prisma.product.findUnique({
+        where: {
+            slug,
+        },
+        include: {
+            category: true,
 
-    if (!product) {
+            images: {
+                orderBy: {
+                    sortOrder: "asc",
+                },
+            },
+
+            variants: {
+                orderBy: {
+                    createdAt: "asc",
+                },
+            },
+
+            reviews: {
+                where: {
+                    approved: true,
+                },
+                select: {
+                    rating: true,
+                },
+            },
+        },
+    });
+
+    if (!product || !product.published) {
         notFound();
     }
+
+    const mappedProduct = mapProduct(product);
 
     return (
         <>
@@ -40,19 +71,20 @@ export default async function ProductDetailsPage({
                                 path: "/products",
                             },
                             {
-                                label: product.name,
+                                label: mappedProduct.name,
                             },
                         ]}
                     />
 
                     <div className="grid gap-16 lg:grid-cols-2">
-                        <ProductGallery product={product} />
-                        <ProductInfo product={product} />
+                        <ProductGallery product={mappedProduct} />
+
+                        <ProductInfo product={mappedProduct} />
                     </div>
                 </Container>
             </section>
 
-            <RelatedProducts currentProduct={product} />
+            <RelatedProducts currentProduct={mappedProduct} />
         </>
     );
 }

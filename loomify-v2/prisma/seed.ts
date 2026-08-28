@@ -320,6 +320,32 @@ async function main() {
                 sortOrder: 0,
             },
         });
+
+        // Remove existing variants before reseeding
+        await prisma.productVariant.deleteMany({
+            where: {
+                productId: createdProduct.id,
+            },
+        });
+
+        // Create product variants
+        for (const color of product.colors) {
+            for (const size of product.sizes) {
+                const colorCode = color.replace(/\s+/g, "-").toUpperCase();
+
+                const variantSku = `${product.sku}-${colorCode}-${size}`;
+
+                await prisma.productVariant.create({
+                    data: {
+                        productId: createdProduct.id,
+                        sku: variantSku,
+                        size,
+                        color,
+                        stock: product.stock,
+                    },
+                });
+            }
+        }
     }
 
     console.log("✅ Database seed completed successfully.");

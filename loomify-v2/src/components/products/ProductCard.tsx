@@ -25,7 +25,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     );
 
     const {
-        id,
+        slug,
         name,
         category,
         image,
@@ -37,9 +37,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
     } = product;
 
     const handleAddToCart = () => {
+        const defaultVariant = product.variants.find(
+            (variant) => variant.stock > 0,
+        );
+
+        if (!defaultVariant) {
+            toast.error("Product is out of stock");
+            return;
+        }
+
         dispatch(
             addToCart({
                 product,
+                variantId: defaultVariant.id,
                 quantity: 1,
             }),
         );
@@ -95,7 +105,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 </button>
 
                 {/* Product Image */}
-                <Link href={`/products/${id}`}>
+                <Link href={`/products/${slug}`} aria-label={`View ${name}`}>
                     <Image
                         src={image}
                         alt={name}
@@ -111,7 +121,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 {/* Hover Actions */}
                 <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 translate-y-0 gap-3 opacity-100 transition-all duration-500 lg:translate-y-8 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
                     <Link
-                        href={`/products/${id}`}
+                        href={`/products/${slug}`}
                         aria-label={`View ${name}`}
                         className="flex h-11 w-11 items-center justify-center rounded-full bg-white transition hover:bg-accent hover:text-white"
                     >
@@ -136,7 +146,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
                         {category}
                     </p>
 
-                    <Link href={`/products/${id}`}>
+                    <Link
+                        href={`/products/${slug}`}
+                        aria-label={`View ${name}`}
+                    >
                         <h3 className="mt-2 text-lg font-semibold text-primary transition group-hover:text-accent sm:text-xl">
                             {name}
                         </h3>

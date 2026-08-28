@@ -24,8 +24,7 @@ const CartItem = ({ item }: CartItemProps) => {
         dispatch(
             decreaseQuantity({
                 id: item.id,
-                size: item.size,
-                color: item.color,
+                variantId: item.variantId,
             }),
         );
     };
@@ -34,8 +33,7 @@ const CartItem = ({ item }: CartItemProps) => {
         dispatch(
             increaseQuantity({
                 id: item.id,
-                size: item.size,
-                color: item.color,
+                variantId: item.variantId,
             }),
         );
     };
@@ -44,11 +42,14 @@ const CartItem = ({ item }: CartItemProps) => {
         dispatch(
             removeFromCart({
                 id: item.id,
-                size: item.size,
-                color: item.color,
+                variantId: item.variantId,
             }),
         );
     };
+
+    const variant = item.variants.find(
+        (variant) => variant.id === item.variantId,
+    );
 
     return (
         <div className="flex flex-col gap-5 rounded-card border border-border p-4 sm:gap-6 sm:p-5 md:flex-row md:items-center">
@@ -66,11 +67,11 @@ const CartItem = ({ item }: CartItemProps) => {
                 <h3 className="mt-1 text-xl font-semibold">{item.name}</h3>
 
                 <p className="mt-2 text-sm">
-                    Size: <strong>{item.size}</strong>
+                    Size: <strong>{variant?.size}</strong>
                 </p>
 
                 <p className="text-sm">
-                    Color: <strong>{item.color}</strong>
+                    Color: <strong>{variant?.color}</strong>
                 </p>
 
                 <p className="mt-4 text-xl font-bold">

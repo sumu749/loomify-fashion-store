@@ -3,11 +3,19 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { mapProduct } from "@/lib/mappers/productMapper";
 
-export async function GET() {
+interface ProductRouteParams {
+    params: Promise<{
+        slug: string;
+    }>;
+}
+
+export async function GET(_request: Request, { params }: ProductRouteParams) {
     try {
-        const products = await prisma.product.findMany({
+        const { slug } = await params;
+
+        const product = await prisma.product.findUnique({
             where: {
-                published: true,
+                slug,
             },
             include: {
                 category: true,
@@ -33,24 +41,31 @@ export async function GET() {
                     },
                 },
             },
-
-            orderBy: {
-                createdAt: "desc",
-            },
         });
-        const data = products.map(mapProduct);
+
+        if (!product || !product.published) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Product not found",
+                },
+                { status: 404 },
+            );
+        }
+
+        const data = mapProduct(product);
 
         return NextResponse.json({
             success: true,
             data,
         });
     } catch (error) {
-        console.error("Failed to fetch products:", error);
+        console.error("Failed to fetch product:", error);
 
         return NextResponse.json(
             {
                 success: false,
-                message: "Failed to fetch products",
+                message: "Failed to fetch product",
             },
             { status: 500 },
         );
