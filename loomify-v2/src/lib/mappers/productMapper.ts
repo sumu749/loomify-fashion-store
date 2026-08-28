@@ -13,6 +13,15 @@ interface PrismaCategory {
     slug: string;
 }
 
+interface PrismaProductVariant {
+    id: string;
+    sku: string;
+    size: string;
+    color: string;
+    price: unknown;
+    stock: number;
+}
+
 interface PrismaProduct {
     id: string;
     name: string;
@@ -24,19 +33,26 @@ interface PrismaProduct {
     stock: number;
     featured: boolean;
     published: boolean;
+
     category: PrismaCategory;
     images: PrismaProductImage[];
-    reviews: PrismaProductReview[];
-}
+    variants: PrismaProductVariant[];
 
-interface PrismaProductReview {
-    rating: number;
+    reviews: {
+        rating: number;
+    }[];
 }
 
 export const mapProduct = (product: PrismaProduct): Product => {
-    const images = product.images
+    const images = [...product.images]
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map((image) => image.url);
+
+    const colors = [
+        ...new Set(product.variants.map((variant) => variant.color)),
+    ];
+
+    const sizes = [...new Set(product.variants.map((variant) => variant.size))];
 
     const totalReviews = product.reviews.length;
 
@@ -74,7 +90,16 @@ export const mapProduct = (product: PrismaProduct): Product => {
 
         badge: "",
 
-        colors: [],
-        sizes: [],
+        colors,
+        sizes,
+
+        variants: product.variants.map((variant) => ({
+            id: variant.id,
+            sku: variant.sku,
+            size: variant.size,
+            color: variant.color,
+            price: variant.price !== null ? Number(variant.price) : undefined,
+            stock: variant.stock,
+        })),
     };
 };

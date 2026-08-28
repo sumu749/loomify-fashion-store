@@ -26,11 +26,19 @@ export default async function ProductDetailsPage({
         },
         include: {
             category: true,
+
             images: {
                 orderBy: {
                     sortOrder: "asc",
                 },
             },
+
+            variants: {
+                orderBy: {
+                    createdAt: "asc",
+                },
+            },
+
             reviews: {
                 where: {
                     approved: true,

@@ -46,11 +46,19 @@ export async function GET(
             },
             include: {
                 category: true,
+
                 images: {
                     orderBy: {
                         sortOrder: "asc",
                     },
                 },
+
+                variants: {
+                    orderBy: {
+                        createdAt: "asc",
+                    },
+                },
+
                 reviews: {
                     where: {
                         approved: true,
