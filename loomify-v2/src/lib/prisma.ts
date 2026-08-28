@@ -5,8 +5,19 @@ const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
 };
 
+const connectionString =
+    process.env.DATABASE_URL ??
+    process.env.POSTGRES_PRISMA_URL ??
+    process.env.POSTGRES_URL;
+
+if (!connectionString) {
+    throw new Error(
+        "Missing database connection string. Set DATABASE_URL in the deployment environment.",
+    );
+}
+
 const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL!,
+    connectionString,
 });
 
 export const prisma =
