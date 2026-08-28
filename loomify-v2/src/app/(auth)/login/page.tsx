@@ -128,9 +128,7 @@ const LoginPage = () => {
 
                 <p className="mt-6 text-center text-sm text-gray-500">
                     Don&apos;t have an account?{" "}
-                    <Button asChild className="text-accent">
-                        <Link href="/register">Create Account</Link>
-                    </Button>
+                    <Link href="/register">Create Account</Link>
                 </p>
             </div>
         </section>
