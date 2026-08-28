@@ -7,10 +7,15 @@ import formatCurrency from "@/utils/formatCurrency";
 const CartSummary = () => {
     const cartItems = useAppSelector((state) => state.cart.items);
 
-    const subtotal = cartItems.reduce(
-        (total, item) => total + item.price * item.quantity,
-        0,
-    );
+    const subtotal = cartItems.reduce((total, item) => {
+        const variant = item.variants.find(
+            (itemVariant) => itemVariant.id === item.variantId,
+        );
+
+        const price = variant?.price ?? item.price;
+
+        return total + price * item.quantity;
+    }, 0);
 
     const shipping = subtotal > 100 ? 0 : 15;
     const total = subtotal + shipping;

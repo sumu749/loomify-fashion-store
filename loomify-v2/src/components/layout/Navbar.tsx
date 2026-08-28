@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Search, ShoppingBag, Heart } from "lucide-react";
+import {
+    Menu,
+    X,
+    Search,
+    ShoppingBag,
+    Heart,
+    LogIn,
+    LogOut,
+    UserRound,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -10,11 +19,29 @@ import Container from "../common/Container";
 import { navItems } from "@/constants/navigation";
 import { useAppSelector } from "@/store/hooks";
 
+import { authClient } from "@/lib/auth-client";
+
+import toast from "react-hot-toast";
+import Button from "../common/Button";
+
 const Navbar = () => {
     const pathname = usePathname();
 
+    const { data: session, isPending } = authClient.useSession();
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+
+    const handleLogout = async () => {
+        const { error } = await authClient.signOut();
+
+        if (error) {
+            toast.error("Failed to logout.");
+            return;
+        }
+
+        toast.success("Logged out successfully.");
+    };
 
     const cartCount = useAppSelector((state) =>
         state.cart.items.reduce((total, item) => total + item.quantity, 0),
@@ -146,6 +173,46 @@ const Navbar = () => {
                             </AnimatePresence>
                         </Link>
 
+                        {/* Auth Actions */}
+                        <div className="hidden items-center gap-3 md:flex">
+                            {isPending ? (
+                                <div className="h-9 w-20 animate-pulse rounded-full bg-gray-100" />
+                            ) : session ? (
+                                <>
+                                    <div className="flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary">
+                                        <UserRound size={17} />
+
+                                        <span className="max-w-24 truncate">
+                                            {session.user.name}
+                                        </span>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleLogout}
+                                        className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:border-red-300 hover:text-red-500"
+                                    >
+                                        <LogOut size={17} />
+                                        Logout
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link
+                                        href="/login"
+                                        className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
+                                    >
+                                        <LogIn size={17} />
+                                        Login
+                                    </Link>
+
+                                    <Button asChild size="sm">
+                                        <Link href="/register">Register</Link>
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+
                         {/* Mobile Menu */}
                         <button
                             type="button"
@@ -179,6 +246,52 @@ const Navbar = () => {
                                 </Link>
                             </li>
                         ))}
+
+                        {/* Mobile Auth */}
+                        <li className="border-t border-border pt-4">
+                            {isPending ? (
+                                <div className="h-10 w-24 animate-pulse rounded-full bg-gray-100" />
+                            ) : session ? (
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                                        <UserRound size={17} />
+                                        <span>{session.user.name}</span>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            await handleLogout();
+                                            handleNavigation();
+                                        }}
+                                        className="flex items-center gap-2 text-left text-sm font-medium text-red-500"
+                                    >
+                                        <LogOut size={17} />
+                                        Logout
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-3">
+                                    <Link
+                                        href="/login"
+                                        onClick={handleNavigation}
+                                        className="flex items-center gap-2 text-sm font-medium text-primary transition hover:text-accent"
+                                    >
+                                        <LogIn size={17} />
+                                        Login
+                                    </Link>
+
+                                    <Link
+                                        href="/register"
+                                        onClick={handleNavigation}
+                                        className="flex items-center gap-2 text-sm font-medium text-primary transition hover:text-accent"
+                                    >
+                                        <UserRound size={17} />
+                                        Register
+                                    </Link>
+                                </div>
+                            )}
+                        </li>
                     </ul>
                 </div>
             </Container>
