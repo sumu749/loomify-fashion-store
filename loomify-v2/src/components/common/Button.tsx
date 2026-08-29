@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactElement, ReactNode } from "react";
 import { cloneElement } from "react";
 
-type ButtonVariant = "primary" | "secondary" | "outline";
+type ButtonVariant = "primary" | "secondary" | "outline" | "ghost";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface BaseButtonProps {
@@ -48,6 +48,8 @@ const Button = ({
 
         outline:
             "!border !border-gray-900 !bg-transparent !text-gray-900 hover:!bg-gray-900 hover:!text-white",
+
+        ghost: "bg-transparent text-gray-600 hover:bg-stone-100 hover:text-primary",
     };
 
     const classes = [

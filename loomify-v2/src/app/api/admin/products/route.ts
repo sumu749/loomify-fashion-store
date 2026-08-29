@@ -4,8 +4,15 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+interface ProductVariantInput {
+    size: string;
+    color: string;
+    stock: number;
+}
+
 export async function POST(request: Request) {
     try {
+        // Check authentication
         const session = await auth.api.getSession({
             headers: await headers(),
         });
@@ -20,6 +27,7 @@ export async function POST(request: Request) {
             );
         }
 
+        // Check admin role
         if (session.user.role !== "ADMIN") {
             return NextResponse.json(
                 {
@@ -30,6 +38,7 @@ export async function POST(request: Request) {
             );
         }
 
+        // Read request body
         const body = await request.json();
 
         const {
@@ -38,16 +47,32 @@ export async function POST(request: Request) {
             description,
             price,
             compareAtPrice,
-            variants,
             categoryId,
             image,
-            sizes,
-            colors,
+            variants,
             featured,
             published,
-        } = body;
+        } = body as {
+            name: string;
+            sku: string;
+            description: string;
+            price: number;
+            compareAtPrice: number | null;
+            categoryId: string;
+            image: string;
+            variants: ProductVariantInput[];
+            featured: boolean;
+            published: boolean;
+        };
 
-        if (!name || !sku || !description || !categoryId || !price) {
+        // Basic validation
+        if (
+            !name?.trim() ||
+            !sku?.trim() ||
+            !description?.trim() ||
+            !categoryId ||
+            !price
+        ) {
             return NextResponse.json(
                 {
                     success: false,
@@ -57,6 +82,36 @@ export async function POST(request: Request) {
             );
         }
 
+        if (!Array.isArray(variants) || variants.length === 0) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "At least one product variant is required",
+                },
+                { status: 400 },
+            );
+        }
+
+        // Validate variants
+        const hasInvalidVariant = variants.some(
+            (variant) =>
+                !variant.size?.trim() ||
+                !variant.color?.trim() ||
+                Number.isNaN(Number(variant.stock)) ||
+                Number(variant.stock) < 0,
+        );
+
+        if (hasInvalidVariant) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid product variant data",
+                },
+                { status: 400 },
+            );
+        }
+
+        // Check category
         const category = await prisma.category.findUnique({
             where: {
                 id: categoryId,
@@ -73,12 +128,14 @@ export async function POST(request: Request) {
             );
         }
 
+        // Generate slug
         const slug = `${name
             .toLowerCase()
             .trim()
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "")}-${crypto.randomUUID().slice(0, 8)}`;
 
+        // Create product + images + variants atomically
         const product = await prisma.$transaction(async (tx) => {
             const createdProduct = await tx.product.create({
                 data: {
@@ -88,13 +145,13 @@ export async function POST(request: Request) {
                     description: description.trim(),
                     price,
                     compareAtPrice: compareAtPrice ?? null,
-
                     featured: Boolean(featured),
                     published: Boolean(published),
                     categoryId,
                 },
             });
 
+            // Product image
             if (image?.trim()) {
                 await tx.productImage.create({
                     data: {
@@ -106,37 +163,22 @@ export async function POST(request: Request) {
                 });
             }
 
-            for (const color of colors) {
-                for (const size of sizes) {
-                    const colorCode = color.replace(/\s+/g, "-").toUpperCase();
-
-                    const variantSku = `${sku.trim()}-${colorCode}-${size}`;
-
-                    await tx.productVariant.create({
-                        data: {
-                            productId: createdProduct.id,
-                            sku: variantSku,
-                            size,
-                            color,
-                        },
-                    });
-                }
-            }
-
+            // Product variants
             for (const variant of variants) {
                 const colorCode = variant.color
+                    .trim()
                     .replace(/\s+/g, "-")
                     .toUpperCase();
 
-                const variantSku = `${sku.trim()}-${colorCode}-${variant.size}`;
+                const variantSku = `${sku.trim()}-${colorCode}-${variant.size.trim()}`;
 
                 await tx.productVariant.create({
                     data: {
                         productId: createdProduct.id,
                         sku: variantSku,
-                        size: variant.size,
-                        color: variant.color,
-                        stock: Number(variant.stock) || 0,
+                        size: variant.size.trim(),
+                        color: variant.color.trim(),
+                        stock: Number(variant.stock),
                     },
                 });
             }
