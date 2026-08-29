@@ -1,14 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import formatCurrency from "@/utils/formatCurrency";
+import Link from "next/dist/client/link";
 
-const statusStyles = {
-    PENDING: "bg-amber-50 text-amber-700",
-    CONFIRMED: "bg-blue-50 text-blue-700",
-    PROCESSING: "bg-purple-50 text-purple-700",
-    SHIPPED: "bg-indigo-50 text-indigo-700",
-    DELIVERED: "bg-green-50 text-green-700",
-    CANCELLED: "bg-red-50 text-red-700",
-};
+import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
 
 const AdminOrdersPage = async () => {
     const orders = await prisma.order.findMany({
@@ -130,13 +124,12 @@ const AdminOrdersPage = async () => {
                                     {/* Status */}
 
                                     <td className="px-6 py-4">
-                                        <span
-                                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                                                statusStyles[order.status]
-                                            }`}
-                                        >
-                                            {order.status}
-                                        </span>
+                                        <div className="flex justify-end">
+                                            <OrderStatusSelect
+                                                orderId={order.id}
+                                                status={order.status}
+                                            />
+                                        </div>
                                     </td>
 
                                     {/* Date */}
@@ -155,9 +148,12 @@ const AdminOrdersPage = async () => {
                                     {/* Actions */}
 
                                     <td className="px-6 py-4">
-                                        <span className="text-sm text-gray-400">
-                                            Coming soon
-                                        </span>
+                                        <Link
+                                            href={`/admin/orders/${order.id}`}
+                                            className="text-sm font-medium text-accent hover:underline"
+                                        >
+                                            View
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}
