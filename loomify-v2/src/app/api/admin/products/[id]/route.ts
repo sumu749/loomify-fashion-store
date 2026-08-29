@@ -260,3 +260,127 @@ export async function PATCH(request: Request, { params }: ProductRouteParams) {
         );
     }
 }
+
+// DELETE /api/admin/products/[id]
+
+export async function DELETE(
+    _request: Request,
+    { params }: ProductRouteParams,
+) {
+    try {
+        const session = await auth.api.getSession({
+            headers: await headers(),
+        });
+
+        if (!session) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                },
+                { status: 401 },
+            );
+        }
+
+        if (session.user.role !== "ADMIN") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Forbidden",
+                },
+                { status: 403 },
+            );
+        }
+
+        const { id } = await params;
+
+        const product = await prisma.product.findUnique({
+            where: {
+                id,
+            },
+            select: {
+                id: true,
+                name: true,
+                _count: {
+                    select: {
+                        orderItems: true,
+                    },
+                },
+            },
+        });
+
+        if (!product) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Product not found",
+                },
+                { status: 404 },
+            );
+        }
+
+        if (product._count.orderItems > 0) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "This product cannot be deleted because it exists in order history.",
+                },
+                { status: 409 },
+            );
+        }
+
+        await prisma.$transaction(async (tx) => {
+            await tx.cartItem.deleteMany({
+                where: {
+                    productId: id,
+                },
+            });
+
+            await tx.wishlistItem.deleteMany({
+                where: {
+                    productId: id,
+                },
+            });
+
+            await tx.review.deleteMany({
+                where: {
+                    productId: id,
+                },
+            });
+
+            await tx.productImage.deleteMany({
+                where: {
+                    productId: id,
+                },
+            });
+
+            await tx.productVariant.deleteMany({
+                where: {
+                    productId: id,
+                },
+            });
+
+            await tx.product.delete({
+                where: {
+                    id,
+                },
+            });
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: "Product deleted successfully",
+        });
+    } catch (error) {
+        console.error("Failed to delete product:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to delete product",
+            },
+            { status: 500 },
+        );
+    }
+}

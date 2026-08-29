@@ -6,6 +6,7 @@ import Button from "@/components/common/Button";
 import formatCurrency from "@/utils/formatCurrency";
 
 import ProductStatusToggle from "@/components/admin/ProductStatusToggle";
+import ProductDeleteButton from "@/components/admin/ProductDeleteButton";
 
 const AdminProductsPage = async () => {
     const products = await prisma.product.findMany({
@@ -124,12 +125,19 @@ const AdminProductsPage = async () => {
                                         </td>
 
                                         <td className="px-6 py-4">
-                                            <Link
-                                                href={`/admin/products/${product.id}`}
-                                                className="text-sm font-medium text-accent hover:underline"
-                                            >
-                                                Manage
-                                            </Link>
+                                            <div className="flex items-center gap-4">
+                                                <Link
+                                                    href={`/admin/products/${product.id}`}
+                                                    className="text-sm font-medium text-accent hover:underline"
+                                                >
+                                                    Manage
+                                                </Link>
+
+                                                <ProductDeleteButton
+                                                    productId={product.id}
+                                                    productName={product.name}
+                                                />
+                                            </div>
                                         </td>
                                     </tr>
                                 );
