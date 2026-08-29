@@ -10,6 +10,8 @@ interface ProductRouteParams {
     }>;
 }
 
+// PUT /api/admin/products/[id]
+
 export async function PUT(request: Request, { params }: ProductRouteParams) {
     try {
         const session = await auth.api.getSession({
@@ -178,6 +180,81 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
             {
                 success: false,
                 message: "Failed to update product",
+            },
+            { status: 500 },
+        );
+    }
+}
+
+// PATCH /api/admin/products/[id]
+
+export async function PATCH(request: Request, { params }: ProductRouteParams) {
+    try {
+        const session = await auth.api.getSession({
+            headers: await headers(),
+        });
+
+        if (!session) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                },
+                { status: 401 },
+            );
+        }
+
+        if (session.user.role !== "ADMIN") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Forbidden",
+                },
+                { status: 403 },
+            );
+        }
+
+        const { id } = await params;
+
+        const body = await request.json();
+
+        if (typeof body.published !== "boolean") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Published must be a boolean",
+                },
+                { status: 400 },
+            );
+        }
+
+        const product = await prisma.product.update({
+            where: {
+                id,
+            },
+            data: {
+                published: body.published,
+            },
+            select: {
+                id: true,
+                published: true,
+            },
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: product.published
+                ? "Product published successfully"
+                : "Product unpublished successfully",
+            data: product,
+        });
+    } catch (error) {
+        console.error("Failed to update product status:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to update product status",
             },
             { status: 500 },
         );

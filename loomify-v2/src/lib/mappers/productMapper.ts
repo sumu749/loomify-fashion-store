@@ -42,6 +42,9 @@ interface PrismaProduct {
 }
 
 export const mapProduct = (product: PrismaProduct): Product => {
+    const productImage =
+        product.images[0]?.url || "/images/placeholder-product.jpg";
+
     const images = [...product.images]
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map((image) => image.url);
@@ -76,7 +79,7 @@ export const mapProduct = (product: PrismaProduct): Product => {
 
         category: product.category.name,
 
-        image: images[0] ?? "",
+        image: productImage,
         images,
 
         featured: product.featured,

@@ -106,13 +106,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
                 {/* Product Image */}
                 <Link href={`/products/${slug}`} aria-label={`View ${name}`}>
-                    <Image
-                        src={image}
-                        alt={name}
-                        width={600}
-                        height={750}
-                        className="aspect-4/5 w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
+                    {image ? (
+                        <Image
+                            src={image}
+                            alt={name}
+                            width={600}
+                            height={750}
+                            className="aspect-4/5 w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                    ) : (
+                        <div className="flex h-full min-h-75 items-center justify-center bg-stone-100 text-sm text-gray-400">
+                            No image
+                        </div>
+                    )}
                 </Link>
 
                 {/* Overlay */}

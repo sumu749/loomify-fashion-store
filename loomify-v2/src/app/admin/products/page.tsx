@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import Button from "@/components/common/Button";
 import formatCurrency from "@/utils/formatCurrency";
 
+import ProductStatusToggle from "@/components/admin/ProductStatusToggle";
+
 const AdminProductsPage = async () => {
     const products = await prisma.product.findMany({
         include: {
@@ -45,7 +47,7 @@ const AdminProductsPage = async () => {
             {/* Products Table */}
             <div className="mt-8 overflow-hidden rounded-card border border-border bg-white">
                 <div className="overflow-x-auto">
-                    <table className="w-full min-w-[900px]">
+                    <table className="w-full min-w-225">
                         <thead className="border-b border-border bg-stone-50">
                             <tr>
                                 <th className="px-6 py-4 text-left text-sm font-semibold">
@@ -115,17 +117,10 @@ const AdminProductsPage = async () => {
                                         </td>
 
                                         <td className="px-6 py-4">
-                                            <span
-                                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                                                    product.published
-                                                        ? "bg-green-50 text-green-700"
-                                                        : "bg-gray-100 text-gray-600"
-                                                }`}
-                                            >
-                                                {product.published
-                                                    ? "Published"
-                                                    : "Draft"}
-                                            </span>
+                                            <ProductStatusToggle
+                                                productId={product.id}
+                                                published={product.published}
+                                            />
                                         </td>
 
                                         <td className="px-6 py-4">
