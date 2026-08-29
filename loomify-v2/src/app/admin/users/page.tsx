@@ -1,6 +1,18 @@
+import { headers } from "next/headers";
+
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import UserRoleToggle from "@/components/admin/UserRoleToggle";
 
 const AdminUsersPage = async () => {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+
+    if (!session) {
+        return null;
+    }
+
     const users = await prisma.user.findMany({
         orderBy: {
             createdAt: "desc",
@@ -63,6 +75,7 @@ const AdminUsersPage = async () => {
                                     key={user.id}
                                     className="transition hover:bg-stone-50"
                                 >
+                                    {/* User Information */}
                                     <td className="px-6 py-4">
                                         <div>
                                             <p className="font-semibold text-primary">
@@ -74,6 +87,8 @@ const AdminUsersPage = async () => {
                                             </p>
                                         </div>
                                     </td>
+
+                                    {/* Email */}
 
                                     <td className="px-6 py-4 text-sm text-gray-600">
                                         {user.email}
@@ -91,6 +106,8 @@ const AdminUsersPage = async () => {
                                         </span>
                                     </td>
 
+                                    {/* Created At */}
+
                                     <td className="px-6 py-4 text-sm text-gray-600">
                                         {user.createdAt.toLocaleDateString(
                                             "en-US",
@@ -102,10 +119,14 @@ const AdminUsersPage = async () => {
                                         )}
                                     </td>
 
+                                    {/* Role Toggle */}
+
                                     <td className="px-6 py-4">
-                                        <span className="text-sm text-gray-400">
-                                            Coming soon
-                                        </span>
+                                        <UserRoleToggle
+                                            userId={user.id}
+                                            role={user.role}
+                                            currentUserId={session.user.id}
+                                        />
                                     </td>
                                 </tr>
                             ))}
