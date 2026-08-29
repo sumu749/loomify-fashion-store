@@ -47,7 +47,6 @@ const products = [
             "A timeless wool jacket crafted with premium fabric for everyday comfort and effortless style.",
         price: 120,
         compareAtPrice: 160,
-        stock: 20,
         featured: true,
         published: true,
         categorySlug: "men",
@@ -64,7 +63,6 @@ const products = [
             "Stylish denim jacket with a slim fit and premium cotton fabric for everyday wear.",
         price: 95,
         compareAtPrice: 120,
-        stock: 25,
         featured: true,
         published: true,
         categorySlug: "men",
@@ -81,7 +79,6 @@ const products = [
             "Soft fleece hoodie with adjustable hood and kangaroo pocket for maximum comfort.",
         price: 75,
         compareAtPrice: 90,
-        stock: 30,
         featured: true,
         published: true,
         categorySlug: "men",
@@ -98,7 +95,6 @@ const products = [
             "Breathable cotton t-shirt designed with a slim fit for a modern casual look.",
         price: 30,
         compareAtPrice: 40,
-        stock: 50,
         featured: false,
         published: true,
         categorySlug: "men",
@@ -115,7 +111,6 @@ const products = [
             "Premium leather sneakers with cushioned sole and lightweight construction.",
         price: 110,
         compareAtPrice: 145,
-        stock: 18,
         featured: true,
         published: true,
         categorySlug: "footwear",
@@ -132,7 +127,6 @@ const products = [
             "Lightweight floral summer dress with soft fabric and elegant silhouette.",
         price: 85,
         compareAtPrice: 110,
-        stock: 22,
         featured: true,
         published: true,
         categorySlug: "women",
@@ -149,7 +143,6 @@ const products = [
             "Wrinkle-resistant formal shirt made with premium cotton fabric.",
         price: 55,
         compareAtPrice: 70,
-        stock: 35,
         featured: false,
         published: true,
         categorySlug: "men",
@@ -166,7 +159,6 @@ const products = [
             "Elegant handbag crafted with premium faux leather and spacious compartments.",
         price: 95,
         compareAtPrice: 130,
-        stock: 0,
         featured: true,
         published: true,
         categorySlug: "accessories",
@@ -183,7 +175,6 @@ const products = [
             "Lightweight running shoes with breathable mesh and shock-absorbing sole.",
         price: 130,
         compareAtPrice: 160,
-        stock: 26,
         featured: true,
         published: true,
         categorySlug: "footwear",
@@ -200,7 +191,6 @@ const products = [
             "Cozy oversized sweater perfect for chilly days with soft knitted fabric.",
         price: 78,
         compareAtPrice: 100,
-        stock: 28,
         featured: false,
         published: true,
         categorySlug: "women",
@@ -217,7 +207,6 @@ const products = [
             "Elegant stainless steel analog watch with water-resistant design.",
         price: 220,
         compareAtPrice: 280,
-        stock: 15,
         featured: true,
         published: true,
         categorySlug: "accessories",
@@ -234,7 +223,6 @@ const products = [
             "Durable travel backpack with multiple compartments and waterproof material.",
         price: 90,
         compareAtPrice: 120,
-        stock: 32,
         featured: false,
         published: true,
         categorySlug: "accessories",
@@ -243,6 +231,17 @@ const products = [
         sizes: ["One Size"],
     },
 ];
+
+const createVariants = (sku: string, colors: string[], sizes: string[]) => {
+    return colors.flatMap((color) =>
+        sizes.map((size) => ({
+            sku: `${sku}-${color.replace(/\s+/g, "-").toUpperCase()}-${size}`,
+            color,
+            size,
+            stock: 10,
+        })),
+    );
+};
 
 async function main() {
     console.log("🌱 Starting database seed...");
@@ -273,6 +272,12 @@ async function main() {
             },
         });
 
+        const variants = createVariants(
+            product.sku,
+            product.colors,
+            product.sizes,
+        );
+
         if (!category) {
             throw new Error(`Category not found: ${product.categorySlug}`);
         }
@@ -287,7 +292,6 @@ async function main() {
                 description: product.description,
                 price: product.price,
                 compareAtPrice: product.compareAtPrice,
-                stock: product.stock,
                 featured: product.featured,
                 published: product.published,
                 categoryId: category.id,
@@ -299,7 +303,6 @@ async function main() {
                 description: product.description,
                 price: product.price,
                 compareAtPrice: product.compareAtPrice,
-                stock: product.stock,
                 featured: product.featured,
                 published: product.published,
                 categoryId: category.id,
@@ -328,23 +331,17 @@ async function main() {
             },
         });
 
-        // Create product variants
-        for (const color of product.colors) {
-            for (const size of product.sizes) {
-                const colorCode = color.replace(/\s+/g, "-").toUpperCase();
-
-                const variantSku = `${product.sku}-${colorCode}-${size}`;
-
-                await prisma.productVariant.create({
-                    data: {
-                        productId: createdProduct.id,
-                        sku: variantSku,
-                        size,
-                        color,
-                        stock: product.stock,
-                    },
-                });
-            }
+        // Create product variants with stock values
+        for (const variant of variants) {
+            await prisma.productVariant.create({
+                data: {
+                    productId: createdProduct.id,
+                    sku: variant.sku,
+                    size: variant.size,
+                    color: variant.color,
+                    stock: variant.stock,
+                },
+            });
         }
     }
 

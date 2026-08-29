@@ -30,10 +30,8 @@ interface PrismaProduct {
     description: string;
     price: unknown;
     compareAtPrice: unknown;
-    stock: number;
     featured: boolean;
     published: boolean;
-
     category: PrismaCategory;
     images: PrismaProductImage[];
     variants: PrismaProductVariant[];
@@ -81,7 +79,6 @@ export const mapProduct = (product: PrismaProduct): Product => {
         image: images[0] ?? "",
         images,
 
-        stock: product.stock,
         featured: product.featured,
         published: product.published,
 
@@ -98,7 +95,7 @@ export const mapProduct = (product: PrismaProduct): Product => {
             sku: variant.sku,
             size: variant.size,
             color: variant.color,
-            price: variant.price !== null ? Number(variant.price) : undefined,
+            price: variant.price !== null ? Number(variant.price) : null,
             stock: variant.stock,
         })),
     };

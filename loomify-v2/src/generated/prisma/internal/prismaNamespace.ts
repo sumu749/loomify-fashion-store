@@ -1978,7 +1978,6 @@ export const ProductScalarFieldEnum = {
   description: 'description',
   price: 'price',
   compareAtPrice: 'compareAtPrice',
-  stock: 'stock',
   featured: 'featured',
   published: 'published',
   categoryId: 'categoryId',
