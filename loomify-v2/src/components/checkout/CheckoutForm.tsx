@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 "use client";
 
 import type { FormEvent } from "react";
@@ -6,10 +5,16 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import Button from "@/components/common/Button";
-import { useAppSelector } from "@/store/hooks";
+import { clearCart } from "@/features/cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import formatCurrency from "@/utils/formatCurrency";
 
+import { useRouter } from "next/navigation";
+
 const CheckoutForm = () => {
+    const router = useRouter();
+    const dispatch = useAppDispatch();
+
     const cartItems = useAppSelector((state) => state.cart.items);
 
     const [fullName, setFullName] = useState("");
@@ -106,9 +111,13 @@ const CheckoutForm = () => {
                 return;
             }
 
-            console.log("Validated order:", result.data);
+            const orderId = result.data.orderId;
 
-            toast.success("Checkout information validated!");
+            dispatch(clearCart());
+
+            toast.success("Order placed successfully!");
+
+            router.push(`/order-success?orderId=${orderId}`);
         } catch (error) {
             console.error("Checkout request failed:", error);
 
@@ -278,9 +287,7 @@ const CheckoutForm = () => {
                         className="w-full sm:w-auto"
                         disabled={loading}
                     >
-                        {loading
-                            ? "Validating Order..."
-                            : "Continue to Payment"}
+                        {loading ? "Placing Order..." : "Place Order"}
                     </Button>
                 </div>
             </section>
