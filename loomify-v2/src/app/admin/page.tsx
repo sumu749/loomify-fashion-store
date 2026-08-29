@@ -17,20 +17,18 @@ export default async function AdminPage() {
     }
 
     return (
-        <section className="min-h-screen bg-stone-50 px-4 py-20 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-7xl">
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-accent">
-                    Loomify Admin
-                </p>
+        <div className="mx-auto max-w-7xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-accent">
+                Loomify Admin
+            </p>
 
-                <h1 className="mt-3 text-4xl font-bold text-primary">
-                    Admin Dashboard
-                </h1>
+            <h1 className="mt-3 text-3xl font-bold text-primary sm:text-4xl">
+                Admin Dashboard
+            </h1>
 
-                <p className="mt-3 text-gray-600">
-                    Welcome back, {session.user.name}.
-                </p>
-            </div>
-        </section>
+            <p className="mt-3 text-gray-600">
+                Welcome back, {session.user.name}.
+            </p>
+        </div>
     );
 }
