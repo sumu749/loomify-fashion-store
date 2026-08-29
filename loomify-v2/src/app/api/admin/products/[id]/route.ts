@@ -46,11 +46,11 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
             description,
             price,
             compareAtPrice,
-            stock,
             categoryId,
             image,
             sizes,
             colors,
+            variants,
             featured,
             published,
         } = body;
@@ -120,7 +120,6 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
                     description: description.trim(),
                     price,
                     compareAtPrice: compareAtPrice ?? null,
-                    stock: Number(stock) || 0,
                     categoryId,
                     featured: Boolean(featured),
                     published: Boolean(published),
@@ -158,6 +157,24 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
                 },
             });
 
+            for (const variant of variants) {
+                const colorCode = variant.color
+                    .replace(/\s+/g, "-")
+                    .toUpperCase();
+
+                const variantSku = `${sku.trim()}-${colorCode}-${variant.size}`;
+
+                await tx.productVariant.create({
+                    data: {
+                        productId: id,
+                        sku: variantSku,
+                        size: variant.size,
+                        color: variant.color,
+                        stock: Number(variant.stock) || 0,
+                    },
+                });
+            }
+
             for (const color of cleanColors) {
                 for (const size of cleanSizes) {
                     const colorCode = color.replace(/\s+/g, "-").toUpperCase();
@@ -170,7 +187,6 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
                             sku: variantSku,
                             size,
                             color,
-                            stock: Number(stock) || 0,
                         },
                     });
                 }

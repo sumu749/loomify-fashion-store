@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 "use client";
 
 import { FormEvent, useState } from "react";
@@ -9,6 +10,12 @@ import Button from "@/components/common/Button";
 interface Category {
     id: string;
     name: string;
+}
+
+interface VariantInput {
+    size: string;
+    color: string;
+    stock: number;
 }
 
 interface ProductFormProps {
@@ -23,20 +30,50 @@ const ProductForm = ({ categories }: ProductFormProps) => {
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
     const [compareAtPrice, setCompareAtPrice] = useState("");
-    const [stock, setStock] = useState("");
+
+    const [sizes, setSizes] = useState("S, M, L, XL");
+    const [colors, setColors] = useState("Black, White");
+
+    const [variants, setVariants] = useState<VariantInput[]>([]);
+
     const [categoryId, setCategoryId] = useState("");
 
     const [image, setImage] = useState("");
-
-    const [sizes, setSizes] = useState("S, M, L, XL");
-
-    const [colors, setColors] = useState("Black, White");
 
     const [featured, setFeatured] = useState(false);
 
     const [published, setPublished] = useState(true);
 
     const [loading, setLoading] = useState(false);
+
+    const generateVariants = () => {
+        const parsedSizes = sizes
+            .split(",")
+            .map((size) => size.trim())
+            .filter(Boolean);
+
+        const parsedColors = colors
+            .split(",")
+            .map((color) => color.trim())
+            .filter(Boolean);
+
+        setVariants((currentVariants) => {
+            const existingMap = new Map(
+                currentVariants.map((variant) => [
+                    `${variant.color}__${variant.size}`,
+                    variant.stock,
+                ]),
+            );
+
+            return parsedColors.flatMap((color) =>
+                parsedSizes.map((size) => ({
+                    color,
+                    size,
+                    stock: existingMap.get(`${color}__${size}`) ?? 0,
+                })),
+            );
+        });
+    };
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -81,6 +118,11 @@ const ProductForm = ({ categories }: ProductFormProps) => {
             return;
         }
 
+        if (variants.length === 0) {
+            toast.error("Generate at least one product variant.");
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -97,15 +139,24 @@ const ProductForm = ({ categories }: ProductFormProps) => {
                     compareAtPrice: compareAtPrice
                         ? Number(compareAtPrice)
                         : null,
-                    stock: Number(stock) || 0,
                     categoryId,
                     image: image.trim(),
                     sizes: parsedSizes,
                     colors: parsedColors,
+                    variants,
                     featured,
                     published,
                 }),
             });
+
+            const hasInvalidStock = variants.some(
+                (variant) => variant.stock < 0,
+            );
+
+            if (hasInvalidStock) {
+                toast.error("Stock cannot be negative.");
+                return;
+            }
 
             const result = await response.json();
 
@@ -224,7 +275,7 @@ const ProductForm = ({ categories }: ProductFormProps) => {
                     Pricing & Inventory
                 </h2>
 
-                <div className="mt-6 grid gap-5 sm:grid-cols-3">
+                <div className="mt-6 grid gap-5 sm:grid-cols-2">
                     <div>
                         <label
                             htmlFor="price"
@@ -264,25 +315,6 @@ const ProductForm = ({ categories }: ProductFormProps) => {
                             }
                             className="h-12 w-full rounded-xl border border-border px-4 outline-none focus:border-accent"
                             placeholder="160"
-                        />
-                    </div>
-
-                    <div>
-                        <label
-                            htmlFor="stock"
-                            className="mb-2 block text-sm font-medium"
-                        >
-                            Initial Stock
-                        </label>
-
-                        <input
-                            id="stock"
-                            type="number"
-                            min="0"
-                            value={stock}
-                            onChange={(event) => setStock(event.target.value)}
-                            className="h-12 w-full rounded-xl border border-border px-4 outline-none focus:border-accent"
-                            placeholder="20"
                         />
                     </div>
                 </div>
@@ -337,6 +369,103 @@ const ProductForm = ({ categories }: ProductFormProps) => {
                             Separate colors with commas.
                         </p>
                     </div>
+                </div>
+
+                <div className="mt-8">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 className="font-semibold text-primary">
+                                Variants & Inventory
+                            </h3>
+
+                            <p className="mt-1 text-sm text-gray-500">
+                                Set stock for each size and color combination.
+                            </p>
+                        </div>
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={generateVariants}
+                        >
+                            Generate Variants
+                        </Button>
+                    </div>
+
+                    {variants.length > 0 && (
+                        <div className="mt-5 overflow-x-auto rounded-xl border border-border">
+                            <table className="w-full min-w-125">
+                                <thead className="bg-stone-50">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-sm font-semibold">
+                                            Color
+                                        </th>
+
+                                        <th className="px-4 py-3 text-left text-sm font-semibold">
+                                            Size
+                                        </th>
+
+                                        <th className="px-4 py-3 text-left text-sm font-semibold">
+                                            Stock
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody className="divide-y divide-border">
+                                    {variants.map((variant, index) => (
+                                        <tr
+                                            key={`${variant.color}-${variant.size}`}
+                                        >
+                                            <td className="px-4 py-3 text-sm font-medium">
+                                                {variant.color}
+                                            </td>
+
+                                            <td className="px-4 py-3 text-sm">
+                                                {variant.size}
+                                            </td>
+
+                                            <td className="px-4 py-3">
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    value={variant.stock}
+                                                    onChange={(event) => {
+                                                        const value = Number(
+                                                            event.target.value,
+                                                        );
+
+                                                        setVariants((current) =>
+                                                            current.map(
+                                                                (
+                                                                    item,
+                                                                    itemIndex,
+                                                                ) =>
+                                                                    itemIndex ===
+                                                                    index
+                                                                        ? {
+                                                                              ...item,
+                                                                              stock: value,
+                                                                          }
+                                                                        : item,
+                                                            ),
+                                                        );
+                                                    }}
+                                                    className="h-10 w-28 rounded-lg border border-border px-3 outline-none focus:border-accent"
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {variants.length === 0 && (
+                        <div className="mt-5 rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-gray-500">
+                            Add sizes and colors, then click{" "}
+                            <strong>Generate Variants</strong>.
+                        </div>
+                    )}
                 </div>
 
                 <div className="mt-5">

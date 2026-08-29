@@ -153,7 +153,6 @@ model Product {
   description    String
   price          Decimal  @db.Decimal(10, 2)
   compareAtPrice Decimal? @db.Decimal(10, 2)
-  stock          Int      @default(0)
   featured       Boolean  @default(false)
   published      Boolean  @default(true)
   categoryId     String

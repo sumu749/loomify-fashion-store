@@ -3,7 +3,7 @@ export interface ProductVariant {
     sku: string;
     size: string;
     color: string;
-    price?: number;
+    price?: number | null;
     stock: number;
 }
 
@@ -22,7 +22,6 @@ export interface Product {
     image: string;
     images: string[];
 
-    stock: number;
     featured: boolean;
     published: boolean;
 

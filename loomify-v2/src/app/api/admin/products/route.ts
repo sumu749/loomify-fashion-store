@@ -38,7 +38,7 @@ export async function POST(request: Request) {
             description,
             price,
             compareAtPrice,
-            stock,
+            variants,
             categoryId,
             image,
             sizes,
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
                     description: description.trim(),
                     price,
                     compareAtPrice: compareAtPrice ?? null,
-                    stock: Number(stock) || 0,
+
                     featured: Boolean(featured),
                     published: Boolean(published),
                     categoryId,
@@ -118,10 +118,27 @@ export async function POST(request: Request) {
                             sku: variantSku,
                             size,
                             color,
-                            stock: Number(stock) || 0,
                         },
                     });
                 }
+            }
+
+            for (const variant of variants) {
+                const colorCode = variant.color
+                    .replace(/\s+/g, "-")
+                    .toUpperCase();
+
+                const variantSku = `${sku.trim()}-${colorCode}-${variant.size}`;
+
+                await tx.productVariant.create({
+                    data: {
+                        productId: createdProduct.id,
+                        sku: variantSku,
+                        size: variant.size,
+                        color: variant.color,
+                        stock: Number(variant.stock) || 0,
+                    },
+                });
             }
 
             return createdProduct;

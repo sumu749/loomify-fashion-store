@@ -60,7 +60,6 @@ const EditProductPage = async ({ params }: EditProductPageProps) => {
                 ? Number(product.compareAtPrice)
                 : null,
 
-        stock: product.stock,
         featured: product.featured,
         published: product.published,
         categoryId: product.categoryId,
@@ -77,9 +76,7 @@ const EditProductPage = async ({ params }: EditProductPageProps) => {
             sku: variant.sku,
             size: variant.size,
             color: variant.color,
-
             price: variant.price !== null ? Number(variant.price) : null,
-
             stock: variant.stock,
         })),
     };

@@ -24,7 +24,6 @@ interface ProductVariant {
     size: string;
     color: string;
     price: number | null;
-    stock: number;
 }
 
 interface ProductData {
@@ -35,7 +34,6 @@ interface ProductData {
     description: string;
     price: number;
     compareAtPrice: number | null;
-    stock: number;
     featured: boolean;
     published: boolean;
     categoryId: string;
@@ -62,8 +60,6 @@ const ProductEditForm = ({ product, categories }: ProductEditFormProps) => {
     const [compareAtPrice, setCompareAtPrice] = useState(
         product.compareAtPrice !== null ? String(product.compareAtPrice) : "",
     );
-
-    const [stock, setStock] = useState(String(product.stock));
 
     const [categoryId, setCategoryId] = useState(product.categoryId);
 
@@ -150,7 +146,6 @@ const ProductEditForm = ({ product, categories }: ProductEditFormProps) => {
                     compareAtPrice: compareAtPrice
                         ? Number(compareAtPrice)
                         : null,
-                    stock: Number(stock) || 0,
                     categoryId,
                     image: image.trim(),
                     sizes: parsedSizes,
@@ -270,7 +265,7 @@ const ProductEditForm = ({ product, categories }: ProductEditFormProps) => {
                     Pricing & Inventory
                 </h2>
 
-                <div className="mt-6 grid gap-5 sm:grid-cols-3">
+                <div className="mt-6 grid gap-5 sm:grid-cols-2">
                     <div>
                         <label
                             htmlFor="price"
@@ -307,24 +302,6 @@ const ProductEditForm = ({ product, categories }: ProductEditFormProps) => {
                             onChange={(event) =>
                                 setCompareAtPrice(event.target.value)
                             }
-                            className="h-12 w-full rounded-xl border border-border px-4 outline-none focus:border-accent"
-                        />
-                    </div>
-
-                    <div>
-                        <label
-                            htmlFor="stock"
-                            className="mb-2 block text-sm font-medium"
-                        >
-                            Stock
-                        </label>
-
-                        <input
-                            id="stock"
-                            type="number"
-                            min="0"
-                            value={stock}
-                            onChange={(event) => setStock(event.target.value)}
                             className="h-12 w-full rounded-xl border border-border px-4 outline-none focus:border-accent"
                         />
                     </div>
