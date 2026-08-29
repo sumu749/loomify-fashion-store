@@ -1,11 +1,17 @@
+/* eslint-disable indent */
 "use client";
 
-import { FormEvent, useState } from "react";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 import Button from "@/components/common/Button";
+import { useAppSelector } from "@/store/hooks";
+import formatCurrency from "@/utils/formatCurrency";
 
 const CheckoutForm = () => {
+    const cartItems = useAppSelector((state) => state.cart.items);
+
     const [fullName, setFullName] = useState("");
     const [phone, setPhone] = useState("");
     const [address, setAddress] = useState("");
@@ -15,8 +21,27 @@ const CheckoutForm = () => {
 
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const subtotal = cartItems.reduce((total, item) => {
+        const variant = item.variants.find(
+            (itemVariant) => itemVariant.id === item.variantId,
+        );
+
+        const price = variant?.price ?? item.price;
+
+        return total + price * item.quantity;
+    }, 0);
+
+    const shipping = subtotal > 100 ? 0 : 15;
+
+    const total = subtotal + shipping;
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        if (cartItems.length === 0) {
+            toast.error("Your cart is empty.");
+            return;
+        }
 
         if (!fullName.trim()) {
             toast.error("Please enter your full name.");
@@ -43,19 +68,51 @@ const CheckoutForm = () => {
             return;
         }
 
+        if (!country.trim()) {
+            toast.error("Please enter your country.");
+            return;
+        }
+
         setLoading(true);
 
         try {
-            console.log({
-                fullName,
-                phone,
-                address,
-                city,
-                postalCode,
-                country,
+            const response = await fetch("/api/orders", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    items: cartItems.map((item) => ({
+                        productId: item.id,
+                        variantId: item.variantId,
+                        quantity: item.quantity,
+                    })),
+
+                    shippingAddress: {
+                        fullName: fullName.trim(),
+                        phone: phone.trim(),
+                        address: address.trim(),
+                        city: city.trim(),
+                        postalCode: postalCode.trim(),
+                        country: country.trim(),
+                    },
+                }),
             });
 
-            toast.success("Shipping information saved.");
+            const result = await response.json();
+
+            if (!response.ok) {
+                toast.error(result.message || "Unable to process checkout.");
+                return;
+            }
+
+            console.log("Validated order:", result.data);
+
+            toast.success("Checkout information validated!");
+        } catch (error) {
+            console.error("Checkout request failed:", error);
+
+            toast.error("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -66,14 +123,26 @@ const CheckoutForm = () => {
             onSubmit={handleSubmit}
             className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]"
         >
-            {/* Shipping Information */}
+            {/* ================= Shipping Information ================= */}
 
             <section className="rounded-card border border-border bg-white p-6 sm:p-8">
-                <h2 className="text-xl font-semibold text-primary">
-                    Shipping Information
-                </h2>
+                <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
+                        Delivery
+                    </p>
 
-                <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                    <h2 className="mt-2 text-xl font-semibold text-primary sm:text-2xl">
+                        Shipping Information
+                    </h2>
+
+                    <p className="mt-2 text-sm text-gray-500">
+                        Enter the address where you want your order delivered.
+                    </p>
+                </div>
+
+                <div className="mt-8 grid gap-5 sm:grid-cols-2">
+                    {/* Full Name */}
+
                     <div className="sm:col-span-2">
                         <label
                             htmlFor="fullName"
@@ -89,10 +158,13 @@ const CheckoutForm = () => {
                             onChange={(event) =>
                                 setFullName(event.target.value)
                             }
+                            placeholder="Enter your full name"
                             autoComplete="name"
-                            className="h-12 w-full rounded-xl border border-border px-4 outline-none transition focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border px-4 text-sm outline-none transition focus:border-accent"
                         />
                     </div>
+
+                    {/* Phone */}
 
                     <div className="sm:col-span-2">
                         <label
@@ -107,10 +179,13 @@ const CheckoutForm = () => {
                             type="tel"
                             value={phone}
                             onChange={(event) => setPhone(event.target.value)}
+                            placeholder="01XXXXXXXXX"
                             autoComplete="tel"
-                            className="h-12 w-full rounded-xl border border-border px-4 outline-none transition focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border px-4 text-sm outline-none transition focus:border-accent"
                         />
                     </div>
+
+                    {/* Address */}
 
                     <div className="sm:col-span-2">
                         <label
@@ -125,10 +200,13 @@ const CheckoutForm = () => {
                             value={address}
                             onChange={(event) => setAddress(event.target.value)}
                             rows={4}
+                            placeholder="House, road, area, etc."
                             autoComplete="street-address"
-                            className="w-full rounded-xl border border-border px-4 py-3 outline-none transition focus:border-accent"
+                            className="w-full rounded-xl border border-border px-4 py-3 text-sm outline-none transition focus:border-accent"
                         />
                     </div>
+
+                    {/* City */}
 
                     <div>
                         <label
@@ -143,10 +221,13 @@ const CheckoutForm = () => {
                             type="text"
                             value={city}
                             onChange={(event) => setCity(event.target.value)}
+                            placeholder="Dhaka"
                             autoComplete="address-level2"
-                            className="h-12 w-full rounded-xl border border-border px-4 outline-none transition focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border px-4 text-sm outline-none transition focus:border-accent"
                         />
                     </div>
+
+                    {/* Postal Code */}
 
                     <div>
                         <label
@@ -163,10 +244,13 @@ const CheckoutForm = () => {
                             onChange={(event) =>
                                 setPostalCode(event.target.value)
                             }
+                            placeholder="1207"
                             autoComplete="postal-code"
-                            className="h-12 w-full rounded-xl border border-border px-4 outline-none transition focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border px-4 text-sm outline-none transition focus:border-accent"
                         />
                     </div>
+
+                    {/* Country */}
 
                     <div className="sm:col-span-2">
                         <label
@@ -182,27 +266,112 @@ const CheckoutForm = () => {
                             value={country}
                             onChange={(event) => setCountry(event.target.value)}
                             autoComplete="country-name"
-                            className="h-12 w-full rounded-xl border border-border px-4 outline-none transition focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border px-4 text-sm outline-none transition focus:border-accent"
                         />
                     </div>
                 </div>
 
                 <div className="mt-8">
-                    <Button type="submit" disabled={loading}>
-                        {loading ? "Saving..." : "Continue"}
+                    <Button
+                        type="submit"
+                        size="lg"
+                        className="w-full sm:w-auto"
+                        disabled={loading}
+                    >
+                        {loading
+                            ? "Validating Order..."
+                            : "Continue to Payment"}
                     </Button>
                 </div>
             </section>
 
-            {/* Order Summary placeholder */}
+            {/* ================= Order Summary ================= */}
 
             <aside className="h-fit rounded-card border border-border bg-white p-6 sm:p-8">
-                <h2 className="text-xl font-semibold text-primary">
-                    Order Summary
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
+                    Summary
+                </p>
+
+                <h2 className="mt-2 text-xl font-semibold text-primary sm:text-2xl">
+                    Your Order
                 </h2>
 
-                <p className="mt-4 text-sm text-gray-500">
-                    Your cart summary will be connected here next.
+                <div className="mt-6 space-y-4">
+                    {cartItems.map((item) => {
+                        const variant = item.variants.find(
+                            (itemVariant) => itemVariant.id === item.variantId,
+                        );
+
+                        const price = variant?.price ?? item.price;
+
+                        return (
+                            <div
+                                key={`${item.id}-${item.variantId}`}
+                                className="flex items-start justify-between gap-4"
+                            >
+                                <div className="min-w-0">
+                                    <p className="font-medium text-primary">
+                                        {item.name}
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        {variant?.size
+                                            ? `Size: ${variant.size}`
+                                            : ""}
+
+                                        {variant?.color
+                                            ? ` • Color: ${variant.color}`
+                                            : ""}
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        Qty: {item.quantity}
+                                    </p>
+                                </div>
+
+                                <span className="shrink-0 text-sm font-semibold text-primary">
+                                    {formatCurrency(price * item.quantity)}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div className="mt-6 border-t border-border pt-6">
+                    <div className="space-y-3 text-sm">
+                        <div className="flex justify-between">
+                            <span className="text-gray-500">Subtotal</span>
+
+                            <span className="font-medium text-primary">
+                                {formatCurrency(subtotal)}
+                            </span>
+                        </div>
+
+                        <div className="flex justify-between">
+                            <span className="text-gray-500">Shipping</span>
+
+                            <span className="font-medium text-primary">
+                                {shipping === 0
+                                    ? "Free"
+                                    : formatCurrency(shipping)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+                        <span className="text-lg font-bold text-primary">
+                            Total
+                        </span>
+
+                        <span className="text-xl font-bold text-primary">
+                            {formatCurrency(total)}
+                        </span>
+                    </div>
+                </div>
+
+                <p className="mt-5 text-xs leading-5 text-gray-500">
+                    Final pricing, stock availability, and order totals are
+                    verified securely on the server.
                 </p>
             </aside>
         </form>
