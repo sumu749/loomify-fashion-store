@@ -48,8 +48,6 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
             compareAtPrice,
             categoryId,
             image,
-            sizes,
-            colors,
             variants,
             featured,
             published,
@@ -101,14 +99,6 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
             );
         }
 
-        const cleanSizes = Array.isArray(sizes)
-            ? sizes.map((size: string) => size.trim()).filter(Boolean)
-            : [];
-
-        const cleanColors = Array.isArray(colors)
-            ? colors.map((color: string) => color.trim()).filter(Boolean)
-            : [];
-
         await prisma.$transaction(async (tx) => {
             await tx.product.update({
                 where: {
@@ -159,37 +149,21 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
 
             for (const variant of variants) {
                 const colorCode = variant.color
+                    .trim()
                     .replace(/\s+/g, "-")
                     .toUpperCase();
 
-                const variantSku = `${sku.trim()}-${colorCode}-${variant.size}`;
+                const variantSku = `${sku.trim()}-${colorCode}-${variant.size.trim()}`;
 
                 await tx.productVariant.create({
                     data: {
                         productId: id,
                         sku: variantSku,
-                        size: variant.size,
-                        color: variant.color,
+                        size: variant.size.trim(),
+                        color: variant.color.trim(),
                         stock: Number(variant.stock) || 0,
                     },
                 });
-            }
-
-            for (const color of cleanColors) {
-                for (const size of cleanSizes) {
-                    const colorCode = color.replace(/\s+/g, "-").toUpperCase();
-
-                    const variantSku = `${sku.trim()}-${colorCode}-${size}`;
-
-                    await tx.productVariant.create({
-                        data: {
-                            productId: id,
-                            sku: variantSku,
-                            size,
-                            color,
-                        },
-                    });
-                }
             }
         });
 

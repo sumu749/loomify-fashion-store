@@ -126,6 +126,8 @@ const ProductForm = ({ categories }: ProductFormProps) => {
         setLoading(true);
 
         try {
+            console.log("Submitting variants:", variants);
+
             const response = await fetch("/api/admin/products", {
                 method: "POST",
                 headers: {
