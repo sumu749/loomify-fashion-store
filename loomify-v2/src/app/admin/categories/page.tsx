@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import Button from "@/components/common/Button";
+import CategoryDeleteButton from "@/components/admin/CategoryDeleteButton";
 
 const AdminCategoriesPage = async () => {
     const categories = await prisma.category.findMany({
@@ -95,12 +96,19 @@ const AdminCategoriesPage = async () => {
                                     </td>
 
                                     <td className="px-6 py-4">
-                                        <Link
-                                            href={`/admin/categories/${category.id}`}
-                                            className="text-sm font-medium text-accent hover:underline"
-                                        >
-                                            Manage
-                                        </Link>
+                                        <div className="flex items-center gap-4">
+                                            <Link
+                                                href={`/admin/categories/${category.id}`}
+                                                className="text-sm font-medium text-accent hover:underline"
+                                            >
+                                                Manage
+                                            </Link>
+
+                                            <CategoryDeleteButton
+                                                categoryId={category.id}
+                                                categoryName={category.name}
+                                            />
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
