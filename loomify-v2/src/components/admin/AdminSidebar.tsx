@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-    BarChart3,
     Boxes,
     ClipboardList,
     FolderKanban,
@@ -12,6 +11,7 @@ import {
     TicketPercent,
     Users,
 } from "lucide-react";
+import Button from "../common/Button";
 
 const adminNavItems = [
     {
@@ -83,18 +83,18 @@ const AdminSidebar = () => {
                                 : pathname.startsWith(item.href);
 
                         return (
-                            <Link
+                            <Button
                                 key={item.href}
-                                href={item.href}
-                                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
-                                    isActive
-                                        ? "bg-primary text-white"
-                                        : "text-gray-600 hover:bg-stone-100 hover:text-primary"
-                                }`}
+                                asChild
+                                variant={isActive ? "primary" : "ghost"}
+                                size="sm"
+                                className="w-full justify-start"
                             >
-                                <Icon size={19} />
-                                <span>{item.name}</span>
-                            </Link>
+                                <Link href={item.href}>
+                                    <Icon size={19} />
+                                    <span>{item.name}</span>
+                                </Link>
+                            </Button>
                         );
                     })}
                 </nav>

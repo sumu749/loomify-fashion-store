@@ -47,7 +47,7 @@ const AdminCategoriesPage = async () => {
             {/* Category Table */}
             <div className="mt-8 overflow-hidden rounded-card border border-border bg-white">
                 <div className="overflow-x-auto">
-                    <table className="w-full min-w-[700px]">
+                    <table className="w-full min-w-175">
                         <thead className="border-b border-border bg-stone-50">
                             <tr>
                                 <th className="px-6 py-4 text-left text-sm font-semibold">
