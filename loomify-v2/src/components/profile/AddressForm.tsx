@@ -21,9 +21,10 @@ interface AddressData {
 
 interface AddressFormProps {
     address?: AddressData;
+    returnTo?: string;
 }
 
-const AddressForm = ({ address }: AddressFormProps) => {
+const AddressForm = ({ address, returnTo = "/profile" }: AddressFormProps) => {
     const router = useRouter();
 
     const [fullName, setFullName] = useState(address?.fullName ?? "");
@@ -35,6 +36,16 @@ const AddressForm = ({ address }: AddressFormProps) => {
     const [country, setCountry] = useState(address?.country ?? "Bangladesh");
 
     const [loading, setLoading] = useState(false);
+
+    const handleSuccessRedirect = (addressId: string) => {
+        if (returnTo === "/checkout") {
+            router.push(`/checkout?addressId=${encodeURIComponent(addressId)}`);
+
+            return;
+        }
+
+        router.push("/profile");
+    };
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -109,8 +120,7 @@ const AddressForm = ({ address }: AddressFormProps) => {
                     : "Address saved successfully!",
             );
 
-            router.push("/profile");
-            router.refresh();
+            handleSuccessRedirect(result.data.id);
         } catch (error) {
             console.error("Address creation failed:", error);
 

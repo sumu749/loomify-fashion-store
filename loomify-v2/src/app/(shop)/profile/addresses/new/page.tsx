@@ -1,6 +1,16 @@
 import AddressForm from "@/components/profile/AddressForm";
 
-const NewAddressPage = () => {
+interface NewAddressPageProps {
+    searchParams: Promise<{
+        returnTo?: string;
+    }>;
+}
+
+const NewAddressPage = async ({ searchParams }: NewAddressPageProps) => {
+    const { returnTo } = await searchParams;
+    console.log("returnTo:", returnTo);
+    const safeReturnTo = returnTo === "/checkout" ? "/checkout" : "/profile";
+
     return (
         <section className="bg-stone-50 px-4 py-16 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
@@ -18,7 +28,7 @@ const NewAddressPage = () => {
                     </p>
                 </div>
 
-                <AddressForm />
+                <AddressForm returnTo={safeReturnTo} />
             </div>
         </section>
     );

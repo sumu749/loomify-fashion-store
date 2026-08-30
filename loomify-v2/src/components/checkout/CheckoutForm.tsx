@@ -3,7 +3,7 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-
+import Link from "next/link";
 import Button from "@/components/common/Button";
 import { clearCart } from "@/features/cart/cartSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -11,11 +11,29 @@ import formatCurrency from "@/utils/formatCurrency";
 
 import { useRouter } from "next/navigation";
 
-const CheckoutForm = () => {
+interface SavedAddress {
+    id: string;
+    fullName: string;
+    phone: string;
+    addressLine: string;
+    city: string;
+    district: string;
+    postalCode: string;
+    country: string;
+}
+
+interface CheckoutFormProps {
+    addresses: SavedAddress[];
+}
+
+const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const router = useRouter();
     const dispatch = useAppDispatch();
 
     const cartItems = useAppSelector((state) => state.cart.items);
+
+    const [selectedAddressId, setSelectedAddressId] = useState("");
+    const [district, setDistrict] = useState("");
 
     const [fullName, setFullName] = useState("");
     const [phone, setPhone] = useState("");
@@ -70,6 +88,11 @@ const CheckoutForm = () => {
             return;
         }
 
+        if (!district.trim()) {
+            toast.error("Please enter your district.");
+            return;
+        }
+
         if (!postalCode.trim()) {
             toast.error("Please enter your postal code.");
             return;
@@ -100,6 +123,7 @@ const CheckoutForm = () => {
                         phone: phone.trim(),
                         address: address.trim(),
                         city: city.trim(),
+                        district: district.trim(),
                         postalCode: postalCode.trim(),
                         country: country.trim(),
                     },
@@ -136,6 +160,114 @@ const CheckoutForm = () => {
             onSubmit={handleSubmit}
             className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]"
         >
+            {/* ================= Saved Addresses ================= */}
+
+            {addresses.length === 0 && (
+                <div className="mb-8 rounded-xl border border-dashed border-border bg-white p-5">
+                    <p className="font-medium text-primary">
+                        No saved addresses yet.
+                    </p>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                        Save an address to make future checkout faster.
+                    </p>
+
+                    <div className="mt-4">
+                        <Button asChild variant="outline" size="sm">
+                            <Link href="/profile/addresses/new?returnTo=/checkout">
+                                Add a Saved Address
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            {addresses.length > 0 && (
+                <div className="mt-8 border-b border-border pb-8">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
+                                Saved
+                            </p>
+
+                            <h3 className="mt-1 text-xl font-semibold text-primary">
+                                Saved Address
+                            </h3>
+
+                            <p className="mt-1 text-sm text-gray-500">
+                                Choose a saved address or enter a new one.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSelectedAddressId("");
+                                setFullName("");
+                                setPhone("");
+                                setAddress("");
+                                setCity("");
+                                setDistrict("");
+                                setPostalCode("");
+                                setCountry("Bangladesh");
+                            }}
+                            className="text-sm font-medium text-accent hover:underline"
+                        >
+                            Enter manually
+                        </button>
+                    </div>
+
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                        {addresses.map((savedAddress) => (
+                            <button
+                                key={savedAddress.id}
+                                type="button"
+                                onClick={() => {
+                                    setSelectedAddressId(savedAddress.id);
+
+                                    setFullName(savedAddress.fullName);
+
+                                    setPhone(savedAddress.phone);
+
+                                    setAddress(savedAddress.addressLine);
+
+                                    setCity(savedAddress.city);
+
+                                    setDistrict(savedAddress.district);
+
+                                    setPostalCode(savedAddress.postalCode);
+
+                                    setCountry(savedAddress.country);
+                                }}
+                                className={`rounded-xl border p-4 text-left transition ${
+                                    selectedAddressId === savedAddress.id
+                                        ? "border-primary bg-stone-50"
+                                        : "border-border bg-white hover:border-primary"
+                                }`}
+                            >
+                                <p className="font-semibold text-primary">
+                                    {savedAddress.fullName}
+                                </p>
+
+                                <p className="mt-1 text-sm text-gray-600">
+                                    {savedAddress.phone}
+                                </p>
+
+                                <p className="mt-2 text-sm leading-6 text-gray-500">
+                                    {savedAddress.addressLine}
+                                    <br />
+                                    {savedAddress.city}, {savedAddress.district}
+                                    <br />
+                                    {savedAddress.postalCode}
+                                    <br />
+                                    {savedAddress.country}
+                                </p>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* ================= Shipping Information ================= */}
 
             <section className="rounded-card border border-border bg-white p-6 sm:p-8">
@@ -236,6 +368,28 @@ const CheckoutForm = () => {
                             onChange={(event) => setCity(event.target.value)}
                             placeholder="Dhaka"
                             autoComplete="address-level2"
+                            className="h-12 w-full rounded-xl border border-border px-4 text-sm outline-none transition focus:border-accent"
+                        />
+                    </div>
+
+                    {/* District */}
+
+                    <div>
+                        <label
+                            htmlFor="district"
+                            className="mb-2 block text-sm font-medium text-primary"
+                        >
+                            District
+                        </label>
+
+                        <input
+                            id="district"
+                            type="text"
+                            value={district}
+                            onChange={(event) =>
+                                setDistrict(event.target.value)
+                            }
+                            placeholder="Dhaka"
                             className="h-12 w-full rounded-xl border border-border px-4 text-sm outline-none transition focus:border-accent"
                         />
                     </div>

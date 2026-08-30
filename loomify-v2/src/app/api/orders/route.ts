@@ -16,6 +16,7 @@ interface ShippingAddress {
     phone: string;
     address: string;
     city: string;
+    district: string;
     postalCode: string;
     country: string;
 }
