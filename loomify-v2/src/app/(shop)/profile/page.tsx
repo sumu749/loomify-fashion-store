@@ -5,6 +5,9 @@ import { MapPin, UserRound } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+import Button from "@/components/common/Button";
+import Link from "next/link";
+
 const ProfilePage = async () => {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -105,6 +108,12 @@ const ProfilePage = async () => {
                                     </div>
                                 </div>
                             </div>
+
+                            <Button asChild size="sm">
+                                <Link href="/profile/addresses/new">
+                                    Add Address
+                                </Link>
+                            </Button>
                         </div>
 
                         <div className="mt-8">
