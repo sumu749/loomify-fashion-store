@@ -172,12 +172,13 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                         Save an address to make future checkout faster.
                     </p>
 
-                    <Link
-                        href="/profile/addresses/new"
-                        className="mt-3 inline-block text-sm font-medium text-accent hover:underline"
-                    >
-                        Add a saved address
-                    </Link>
+                    <div className="mt-4">
+                        <Button asChild variant="outline" size="sm">
+                            <Link href="/profile/addresses/new?returnTo=/checkout">
+                                Add a Saved Address
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
             )}
 
