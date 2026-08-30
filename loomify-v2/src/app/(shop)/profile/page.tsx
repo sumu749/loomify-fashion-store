@@ -5,8 +5,9 @@ import { MapPin, UserRound } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-import Button from "@/components/common/Button";
 import Link from "next/link";
+import Button from "@/components/common/Button";
+import AddressDeleteButton from "@/components/profile/AddressDeleteButton";
 
 const ProfilePage = async () => {
     const session = await auth.api.getSession({
@@ -157,6 +158,24 @@ const ProfilePage = async () => {
                                                 <br />
                                                 {address.country}
                                             </p>
+
+                                            <div className="mt-5 flex items-center gap-3">
+                                                <Button
+                                                    asChild
+                                                    variant="outline"
+                                                    size="sm"
+                                                >
+                                                    <Link
+                                                        href={`/profile/addresses/${address.id}`}
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                </Button>
+
+                                                <AddressDeleteButton
+                                                    addressId={address.id}
+                                                />
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

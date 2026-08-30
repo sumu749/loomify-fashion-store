@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 "use client";
 
 import type { FormEvent } from "react";
@@ -7,16 +8,31 @@ import toast from "react-hot-toast";
 
 import Button from "@/components/common/Button";
 
-const AddressForm = () => {
+interface AddressData {
+    id: string;
+    fullName: string;
+    phone: string;
+    addressLine: string;
+    city: string;
+    district: string;
+    postalCode: string;
+    country: string;
+}
+
+interface AddressFormProps {
+    address?: AddressData;
+}
+
+const AddressForm = ({ address }: AddressFormProps) => {
     const router = useRouter();
 
-    const [fullName, setFullName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [addressLine, setAddressLine] = useState("");
-    const [city, setCity] = useState("");
-    const [district, setDistrict] = useState("");
-    const [postalCode, setPostalCode] = useState("");
-    const [country, setCountry] = useState("Bangladesh");
+    const [fullName, setFullName] = useState(address?.fullName ?? "");
+    const [phone, setPhone] = useState(address?.phone ?? "");
+    const [addressLine, setAddressLine] = useState(address?.addressLine ?? "");
+    const [city, setCity] = useState(address?.city ?? "");
+    const [district, setDistrict] = useState(address?.district ?? "");
+    const [postalCode, setPostalCode] = useState(address?.postalCode ?? "");
+    const [country, setCountry] = useState(address?.country ?? "Bangladesh");
 
     const [loading, setLoading] = useState(false);
 
@@ -61,21 +77,24 @@ const AddressForm = () => {
         setLoading(true);
 
         try {
-            const response = await fetch("/api/addresses", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
+            const response = await fetch(
+                address ? `/api/addresses/${address.id}` : "/api/addresses",
+                {
+                    method: address ? "PUT" : "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        fullName: fullName.trim(),
+                        phone: phone.trim(),
+                        addressLine: addressLine.trim(),
+                        city: city.trim(),
+                        district: district.trim(),
+                        postalCode: postalCode.trim(),
+                        country: country.trim(),
+                    }),
                 },
-                body: JSON.stringify({
-                    fullName: fullName.trim(),
-                    phone: phone.trim(),
-                    addressLine: addressLine.trim(),
-                    city: city.trim(),
-                    district: district.trim(),
-                    postalCode: postalCode.trim(),
-                    country: country.trim(),
-                }),
-            });
+            );
 
             const result = await response.json();
 
@@ -84,7 +103,11 @@ const AddressForm = () => {
                 return;
             }
 
-            toast.success("Address saved successfully!");
+            toast.success(
+                address
+                    ? "Address updated successfully!"
+                    : "Address saved successfully!",
+            );
 
             router.push("/profile");
             router.refresh();
@@ -240,7 +263,13 @@ const AddressForm = () => {
                 </Button>
 
                 <Button type="submit" disabled={loading}>
-                    {loading ? "Saving Address..." : "Save Address"}
+                    {loading
+                        ? address
+                            ? "Saving Changes..."
+                            : "Saving Address..."
+                        : address
+                          ? "Save Changes"
+                          : "Save Address"}
                 </Button>
             </div>
         </form>
