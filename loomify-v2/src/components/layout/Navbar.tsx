@@ -179,13 +179,15 @@ const Navbar = () => {
                                 <div className="h-9 w-20 animate-pulse rounded-full bg-gray-100" />
                             ) : session ? (
                                 <>
-                                    <div className="flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary">
+                                    <Link
+                                        href="/profile"
+                                        className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
+                                    >
                                         <UserRound size={17} />
-
                                         <span className="max-w-24 truncate">
                                             {session.user.name}
                                         </span>
-                                    </div>
+                                    </Link>
 
                                     <button
                                         type="button"
