@@ -40,6 +40,8 @@ const CheckoutForm = () => {
 
     const total = subtotal + shipping;
 
+    const [paymentMethod, setPaymentMethod] = useState<"COD">("COD");
+
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -101,6 +103,8 @@ const CheckoutForm = () => {
                         postalCode: postalCode.trim(),
                         country: country.trim(),
                     },
+
+                    paymentMethod,
                 }),
             });
 
@@ -279,6 +283,49 @@ const CheckoutForm = () => {
                         />
                     </div>
                 </div>
+
+                {/* ================= Payment Method ================= */}
+
+                <div className="mt-10 border-t border-border pt-8">
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
+                        Payment
+                    </p>
+
+                    <h3 className="mt-2 text-xl font-semibold text-primary">
+                        Payment Method
+                    </h3>
+
+                    <div className="mt-5">
+                        <label
+                            className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition ${
+                                paymentMethod === "COD"
+                                    ? "border-primary bg-stone-50"
+                                    : "border-border hover:border-primary"
+                            }`}
+                        >
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="COD"
+                                checked={paymentMethod === "COD"}
+                                onChange={() => setPaymentMethod("COD")}
+                                className="mt-1 h-4 w-4 accent-black"
+                            />
+
+                            <div>
+                                <p className="font-semibold text-primary">
+                                    Cash on Delivery
+                                </p>
+
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Pay in cash when your order is delivered.
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {/* Button  */}
 
                 <div className="mt-8">
                     <Button

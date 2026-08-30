@@ -11,6 +11,7 @@ interface CartItemInput {
 }
 
 interface ShippingAddress {
+    [key: string]: string;
     fullName: string;
     phone: string;
     address: string;
@@ -40,9 +41,11 @@ export async function POST(request: Request) {
         const {
             items,
             shippingAddress,
+            paymentMethod,
         }: {
             items: CartItemInput[];
             shippingAddress: ShippingAddress;
+            paymentMethod: "COD";
         } = body;
 
         if (!Array.isArray(items) || items.length === 0) {
@@ -50,6 +53,16 @@ export async function POST(request: Request) {
                 {
                     success: false,
                     message: "Your cart is empty.",
+                },
+                { status: 400 },
+            );
+        }
+
+        if (paymentMethod !== "COD") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid payment method.",
                 },
                 { status: 400 },
             );
@@ -221,9 +234,19 @@ export async function POST(request: Request) {
                     discount,
                     total,
                     couponCode: null,
-                    shippingAddress: JSON.parse(
-                        JSON.stringify(shippingAddress),
-                    ),
+                    shippingAddress,
+                },
+            });
+
+            // Create a payment record for the order with the selected payment method.
+
+            await tx.payment.create({
+                data: {
+                    orderId: createdOrder.id,
+                    provider: "COD",
+                    amount: total,
+                    currency: "USD",
+                    status: "PENDING",
                 },
             });
 
@@ -252,6 +275,28 @@ export async function POST(request: Request) {
                     color: variant.color,
                 })),
             });
+
+            for (const { item, variant } of orderItems) {
+                const updatedVariant = await tx.productVariant.updateMany({
+                    where: {
+                        id: variant.id,
+                        stock: {
+                            gte: item.quantity,
+                        },
+                    },
+                    data: {
+                        stock: {
+                            decrement: item.quantity,
+                        },
+                    },
+                });
+
+                if (updatedVariant.count !== 1) {
+                    throw new Error(
+                        `${variant.product.name} (${variant.size}, ${variant.color}) is out of stock.`,
+                    );
+                }
+            }
 
             return createdOrder;
         });
