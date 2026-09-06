@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import formatCurrency from "@/utils/formatCurrency";
+import CancelOrderButton from "@/components/orders/CancelOrderButton";
 
 interface OrderDetailsPageProps {
     params: Promise<{
@@ -76,13 +77,19 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                         </p>
                     </div>
 
-                    <span
-                        className={`w-fit rounded-full px-4 py-2 text-sm font-semibold ${
-                            statusStyles[order.status]
-                        }`}
-                    >
-                        {order.status}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <span
+                            className={`w-fit rounded-full px-4 py-2 text-sm font-semibold ${
+                                statusStyles[order.status]
+                            }`}
+                        >
+                            {order.status}
+                        </span>
+
+                        {order.status === "PENDING" && (
+                            <CancelOrderButton orderId={order.id} />
+                        )}
+                    </div>
                 </div>
 
                 {/* Items */}
