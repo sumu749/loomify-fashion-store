@@ -74,6 +74,7 @@ export async function POST(request: Request) {
             !shippingAddress?.phone?.trim() ||
             !shippingAddress?.address?.trim() ||
             !shippingAddress?.city?.trim() ||
+            !shippingAddress?.district?.trim() ||
             !shippingAddress?.postalCode?.trim() ||
             !shippingAddress?.country?.trim()
         ) {
@@ -276,28 +277,6 @@ export async function POST(request: Request) {
                     color: variant.color,
                 })),
             });
-
-            for (const { item, variant } of orderItems) {
-                const updatedVariant = await tx.productVariant.updateMany({
-                    where: {
-                        id: variant.id,
-                        stock: {
-                            gte: item.quantity,
-                        },
-                    },
-                    data: {
-                        stock: {
-                            decrement: item.quantity,
-                        },
-                    },
-                });
-
-                if (updatedVariant.count !== 1) {
-                    throw new Error(
-                        `${variant.product.name} (${variant.size}, ${variant.color}) is out of stock.`,
-                    );
-                }
-            }
 
             return createdOrder;
         });

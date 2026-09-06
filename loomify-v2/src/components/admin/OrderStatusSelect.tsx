@@ -74,13 +74,6 @@ const OrderStatusSelect = ({ orderId, status }: OrderStatusSelectProps) => {
 
     return (
         <div className="flex items-center gap-3">
-            <label
-                htmlFor="order-status"
-                className="text-sm font-medium text-gray-600"
-            >
-                Status
-            </label>
-
             <select
                 id="order-status"
                 value={currentStatus}
