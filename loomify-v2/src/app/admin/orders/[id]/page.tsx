@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import formatCurrency from "@/utils/formatCurrency";
+import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
 
 interface AdminOrderDetailsPageProps {
     params: Promise<{
@@ -93,13 +94,20 @@ const AdminOrderDetailsPage = async ({
                     </p>
                 </div>
 
-                <span
-                    className={`inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold ${
-                        statusStyles[order.status]
-                    }`}
-                >
-                    {order.status}
-                </span>
+                <div className="flex flex-wrap items-center gap-3">
+                    <OrderStatusSelect
+                        orderId={order.id}
+                        status={order.status}
+                    />
+
+                    <span
+                        className={`inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold ${
+                            statusStyles[order.status]
+                        }`}
+                    >
+                        {order.status}
+                    </span>
+                </div>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-3">
