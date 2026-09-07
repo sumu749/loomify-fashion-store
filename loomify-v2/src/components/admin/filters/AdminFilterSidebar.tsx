@@ -1,13 +1,15 @@
-import Button from "@/components/common/Button";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 interface AdminFilterSidebarProps {
     title?: string;
+    clearHref?: string;
     children: ReactNode;
 }
 
 const AdminFilterSidebar = ({
     title = "Filters",
+    clearHref,
     children,
 }: AdminFilterSidebarProps) => {
     return (
@@ -17,12 +19,14 @@ const AdminFilterSidebar = ({
                     {title}
                 </h2>
 
-                <Button
-                    type="button"
-                    className="text-xs font-medium text-accent transition hover:underline"
-                >
-                    Clear all
-                </Button>
+                {clearHref && (
+                    <Link
+                        href={clearHref}
+                        className="text-xs font-medium text-accent transition hover:underline"
+                    >
+                        Clear all
+                    </Link>
+                )}
             </div>
 
             <div className="space-y-6">{children}</div>
