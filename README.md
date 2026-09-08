@@ -1,181 +1,130 @@
-<div align="center">
+# Loomify
 
-# 🛍️ Loomify
+Loomify is a full-stack fashion e-commerce application built with Next.js. It provides a responsive storefront for browsing clothing, footwear, and accessories, together with authenticated customer accounts and an admin workspace for managing the catalog and orders.
 
-### A Modern & Premium Fashion E-Commerce Frontend
+## Features
 
-Built with **React**, **Tailwind CSS v4**, **Context API**, and **Framer Motion**.
+### Storefront
 
-[🌐 Live Demo](https://loomify-fashion-store.vercel.app/) • [💻 Source Code](https://github.com/sumu749/loomify-fashion-store)
+- Browse published products and categories
+- Product detail pages with images, variants, sizes, colors, and stock
+- Product search, filtering, sorting, and pagination
+- Cart and wishlist management
+- Checkout with saved delivery addresses
+- Cash on delivery order creation and order tracking
+- Customer profiles, addresses, order history, and reviews
+- Help, FAQ, contact, shipping, returns, privacy, and terms pages
 
-</div>
+### Administration
 
----
+- Dashboard for store activity
+- Product and product variant management
+- Category management
+- Order management and status updates
+- Coupon management
+- User management
 
-## 📖 Overview
+## Technology
 
-Loomify is a modern fashion e-commerce frontend that delivers a premium shopping experience through a clean UI, responsive design, smooth animations, and interactive shopping features.
-
-The project focuses on building a production-quality frontend architecture using reusable components, modern React practices, and scalable state management with Context API.
-
----
-
-## ✨ Features
-
-### 🛒 Shopping Experience
-
-- Browse fashion products
-- Product Details Page
-- Quick View Modal
-- Add to Cart
-- Update Product Quantity
-- Remove Products from Cart
-- Persistent Cart using Local Storage
-
-### ❤️ Wishlist
-
-- Add/Remove Wishlist
-- Wishlist Page
-- Persistent Wishlist
-- Move Wishlist Items to Cart
-
-### 🎨 User Interface
-
-- Premium Modern Design
-- Fully Responsive
-- Smooth Framer Motion Animations
-- Interactive Hover Effects
-- Skeleton Loading UI
-- Toast Notifications
-- Custom 404 Page
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-
-- React 19
-- Vite
-- React Router DOM
+- [Next.js 16](https://nextjs.org/) with the App Router
+- React 19 and TypeScript
+- PostgreSQL with [Prisma ORM](https://www.prisma.io/)
+- [Better Auth](https://www.better-auth.com/) for authentication
+- TanStack React Query for server state
+- Redux Toolkit and React Redux for client state
 - Tailwind CSS v4
-- Framer Motion
-- Context API
-- React Hot Toast
-- Lucide React
+- Framer Motion for animations
+- Lucide React and React Icons
+- Zod for validation
 
-### Styling
+## Requirements
 
-- Tailwind CSS
-- CSS Variables
-- Responsive Design
-- Glassmorphism Inspired UI
+- Node.js 20 or newer
+- npm
+- A PostgreSQL database
 
----
+## Getting Started
 
-## 📂 Folder Structure
-
-```text
-src/
-│
-├── assets/
-├── components/
-│   ├── common/
-│   ├── home/
-│   ├── products/
-│   ├── cart/
-│   └── skeleton/
-│
-├── constants/
-├── context/
-├── data/
-├── hooks/
-├── layouts/
-├── pages/
-├── routes/
-├── styles/
-└── utils/
-```
-
----
-
-## 🚀 Getting Started
-
-### Clone Repository
-
-```bash
-git clone YOUR_GITHUB_URL
-```
-
-### Install Dependencies
+From the `loomify-v2` directory, install dependencies:
 
 ```bash
 npm install
 ```
 
-### Run Development Server
+Create a `.env` file in this directory:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+Apply the Prisma migrations and generate the client:
+
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+Seed the database with sample categories, products, variants, and images:
+
+```bash
+npx prisma db seed
+```
+
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-### Build Production
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-```bash
-npm run build
+## Available Scripts
+
+| Command                      | Description                             |
+| ---------------------------- | --------------------------------------- |
+| `npm run dev`                | Start the Next.js development server    |
+| `npm run build`              | Create a production build               |
+| `npm run start`              | Start the production server             |
+| `npm run lint`               | Run ESLint                              |
+| `npx prisma migrate dev`     | Apply and create development migrations |
+| `npx prisma db seed`         | Populate the database with sample data  |
+| `npm run add-product-images` | Import product image assets             |
+
+## Project Structure
+
+```text
+loomify-v2/
+├── prisma/                 # Prisma schema, migrations, and seed data
+├── public/                 # Static assets
+├── src/
+│   ├── app/                # App Router pages, API routes, and admin pages
+│   ├── components/         # Reusable UI components
+│   ├── features/           # Cart and wishlist feature logic
+│   ├── hooks/              # React Query and product hooks
+│   ├── lib/                # Auth, Prisma, and mapping utilities
+│   ├── services/           # Product and admin service functions
+│   ├── store/              # Redux store and typed hooks
+│   └── types/              # Shared TypeScript types
+└── scripts/                # Maintenance and data-import scripts
 ```
 
----
+## Database and Authentication
 
-## 📱 Responsive Design
+The application uses PostgreSQL through Prisma. The schema includes users, Better Auth sessions and accounts, categories, products, variants, carts, wishlists, orders, reviews, coupons, and addresses.
 
-Loomify is optimized for:
+Authentication routes are available at `/login` and `/register`. Administrative pages are under `/admin` and require an authenticated user with the `ADMIN` role. The seed data creates the initial catalog; configure administrator access through the application's user data before using the admin workspace.
 
-- Mobile Devices
-- Tablets
-- Laptops
-- Desktop Screens
+## Production Build
 
----
+Set production environment variables, apply migrations, and build the application:
 
-## 🎯 Project Highlights
+```bash
+npm ci
+npx prisma migrate deploy
+npx prisma generate
+npm run build
+npm run start
+```
 
-- Modern Component-Based Architecture
-- Reusable UI Components
-- Context API State Management
-- Local Storage Persistence
-- Clean Folder Structure
-- Responsive Layout
-- Smooth User Experience
-- Production Ready Code
-
----
-
-## 🔮 Future Improvements
-
-- Authentication
-- User Profile
-- Product Search
-- Product Filtering
-- Product Sorting
-- Checkout Flow
-- Payment Integration
-- Backend API Integration
-- Order History
-- Dark Mode
-
----
-
-## 👩‍💻 Author
-
-**Sumaiya Alam**
-
-- GitHub: https://github.com/sumu749
-- Portfolio: https://nexusfolio-pi.vercel.app/
-- LinkedIn: https://www.linkedin.com/in/sumaiya-alam749/
-
----
-
-## ⭐ Support
-
-If you like this project, consider giving it a ⭐ on GitHub.
+The Next.js image configuration currently allows images hosted on `images.unsplash.com`.
