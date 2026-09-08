@@ -1,9 +1,12 @@
 /* eslint-disable indent */
+
 import { useMemo, useState } from "react";
 
 import type { Product } from "@/types/product";
 
 export type ProductSort = "newest" | "low-high" | "high-low" | "rating";
+
+export type ProductAvailability = "all" | "in-stock" | "out-of-stock";
 
 interface ProductFiltersResult {
     search: string;
@@ -14,6 +17,15 @@ interface ProductFiltersResult {
 
     categories: string[];
 
+    minPrice: string;
+    setMinPrice: React.Dispatch<React.SetStateAction<string>>;
+
+    maxPrice: string;
+    setMaxPrice: React.Dispatch<React.SetStateAction<string>>;
+
+    availability: ProductAvailability;
+    setAvailability: React.Dispatch<React.SetStateAction<ProductAvailability>>;
+
     sort: ProductSort;
     setSort: React.Dispatch<React.SetStateAction<ProductSort>>;
 
@@ -23,6 +35,13 @@ interface ProductFiltersResult {
 const useProductFilters = (products: Product[]): ProductFiltersResult => {
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("all");
+
+    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
+
+    const [availability, setAvailability] =
+        useState<ProductAvailability>("all");
+
     const [sort, setSort] = useState<ProductSort>("newest");
 
     const categories = useMemo(() => {
@@ -48,6 +67,43 @@ const useProductFilters = (products: Product[]): ProductFiltersResult => {
             );
         }
 
+        // Minimum price
+        if (minPrice.trim()) {
+            const minimum = Number(minPrice);
+
+            if (!Number.isNaN(minimum)) {
+                filtered = filtered.filter(
+                    (product) => product.price >= minimum,
+                );
+            }
+        }
+
+        // Maximum price
+        if (maxPrice.trim()) {
+            const maximum = Number(maxPrice);
+
+            if (!Number.isNaN(maximum)) {
+                filtered = filtered.filter(
+                    (product) => product.price <= maximum,
+                );
+            }
+        }
+
+        // Availability
+        if (availability === "in-stock") {
+            filtered = filtered.filter((product) =>
+                product.variants.some((variant) => variant.stock > 0),
+            );
+        }
+
+        if (availability === "out-of-stock") {
+            filtered = filtered.filter(
+                (product) =>
+                    product.variants.length === 0 ||
+                    product.variants.every((variant) => variant.stock <= 0),
+            );
+        }
+
         // Sort
         switch (sort) {
             case "low-high":
@@ -68,7 +124,7 @@ const useProductFilters = (products: Product[]): ProductFiltersResult => {
         }
 
         return filtered;
-    }, [products, search, category, sort]);
+    }, [products, search, category, minPrice, maxPrice, availability, sort]);
 
     return {
         search,
@@ -77,10 +133,19 @@ const useProductFilters = (products: Product[]): ProductFiltersResult => {
         category,
         setCategory,
 
+        categories,
+
+        minPrice,
+        setMinPrice,
+
+        maxPrice,
+        setMaxPrice,
+
+        availability,
+        setAvailability,
+
         sort,
         setSort,
-
-        categories,
 
         filteredProducts,
     };

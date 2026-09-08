@@ -1,10 +1,13 @@
+/* eslint-disable indent */
 "use client";
 
+import { SlidersHorizontal, X } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import Container from "@/components/common/Container";
-import ProductFilters from "@/components/products/ProductFilters";
+import ProductFilterSidebar from "@/components/products/ProductFilterSidebar";
 import ProductGrid from "@/components/products/ProductGrid";
-import ProductSearch from "@/components/products/ProductSearch";
-import ProductSort from "@/components/products/ProductSort";
+import ProductPagination from "@/components/products/ProductPagination";
 import ProductGridSkeleton from "@/components/skeleton/ProductGridSkeleton";
 
 import useProductFilters from "@/hooks/useProductFilters";
@@ -22,12 +25,48 @@ export default function ProductsPage() {
 
         categories,
 
+        minPrice,
+        setMinPrice,
+
+        maxPrice,
+        setMaxPrice,
+
+        availability,
+        setAvailability,
+
         sort,
         setSort,
 
         filteredProducts,
     } = useProductFilters(products);
 
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const PRODUCTS_PER_PAGE = 9;
+
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const clearFilters = () => {
+        setSearch("");
+        setCategory("all");
+        setMinPrice("");
+        setMaxPrice("");
+        setAvailability("all");
+        setSort("newest");
+        setCurrentPage(1);
+    };
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCurrentPage(1);
+    }, [search, category, minPrice, maxPrice, availability, sort]);
+    const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+
+    const paginatedProducts = filteredProducts.slice(
+        startIndex,
+        startIndex + PRODUCTS_PER_PAGE,
+    );
     if (isLoading) {
         return (
             <section className="py-20">
@@ -59,32 +98,213 @@ export default function ProductsPage() {
     return (
         <section className="py-16 sm:py-24">
             <Container>
-                <h1 className="text-3xl font-bold text-primary sm:text-4xl lg:text-5xl">
-                    All Products
-                </h1>
+                {/* ================= Header ================= */}
 
-                <p className="mt-3 max-w-xl text-sm text-gray-600 sm:mt-4 sm:text-base">
-                    Discover our curated collection of premium fashion
-                    essentials.
-                </p>
+                <div className="mb-8">
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
+                        Loomify Collection
+                    </p>
 
-                <div className="mt-8 flex flex-col gap-4 sm:mt-10 lg:flex-row lg:items-center lg:justify-between">
-                    <ProductSearch value={search} onChange={setSearch} />
+                    <h1 className="mt-2 text-3xl font-bold tracking-tight text-primary sm:text-4xl lg:text-5xl">
+                        All Products
+                    </h1>
 
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                        <ProductFilters
+                    <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base">
+                        Discover our curated collection of premium fashion
+                        essentials, designed for everyday style.
+                    </p>
+                </div>
+
+                {/* ================= Mobile Search ================= */}
+
+                <div className="mb-6 lg:hidden">
+                    <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
+                        <ProductFilterSidebar
+                            search={search}
+                            setSearch={setSearch}
+                            category={category}
+                            setCategory={setCategory}
                             categories={categories}
-                            value={category}
-                            onChange={setCategory}
+                            minPrice={minPrice}
+                            setMinPrice={setMinPrice}
+                            maxPrice={maxPrice}
+                            setMaxPrice={setMaxPrice}
+                            availability={availability}
+                            setAvailability={setAvailability}
+                            sort={sort}
+                            setSort={setSort}
+                            onClear={clearFilters}
                         />
-
-                        <ProductSort value={sort} onChange={setSort} />
                     </div>
                 </div>
 
-                <div className="mt-14">
-                    <ProductGrid products={filteredProducts} />
+                {/* ================= Mobile Filter Button ================= */}
+
+                <div className="mb-8 flex gap-3 lg:hidden">
+                    <button
+                        type="button"
+                        onClick={() => setIsFilterOpen(true)}
+                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-medium text-primary shadow-sm transition hover:border-accent hover:text-accent"
+                    >
+                        <SlidersHorizontal size={17} />
+                        Filters
+                    </button>
+
+                    <div className="flex h-11 items-center rounded-xl border border-border bg-stone-50 px-4 text-sm text-gray-500">
+                        {filteredProducts.length}{" "}
+                        {filteredProducts.length === 1 ? "product" : "products"}
+                    </div>
                 </div>
+
+                {/* ================= Desktop + Mobile Content ================= */}
+
+                <div className="grid gap-8 lg:grid-cols-[250px_minmax(0,1fr)] xl:gap-10">
+                    {/* ================= Desktop Sidebar ================= */}
+
+                    <aside className="hidden h-fit rounded-2xl border border-border bg-white p-6 shadow-sm lg:sticky lg:top-24 lg:block">
+                        <div className="mb-6 border-b border-border pb-5">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+                                Refine
+                            </p>
+
+                            <h2 className="mt-2 text-xl font-semibold text-primary">
+                                Shop Filters
+                            </h2>
+
+                            <p className="mt-1 text-xs leading-5 text-gray-500">
+                                Narrow down the collection to find what you
+                                need.
+                            </p>
+                        </div>
+
+                        <ProductFilterSidebar
+                            search={search}
+                            setSearch={setSearch}
+                            category={category}
+                            setCategory={setCategory}
+                            categories={categories}
+                            minPrice={minPrice}
+                            setMinPrice={setMinPrice}
+                            maxPrice={maxPrice}
+                            setMaxPrice={setMaxPrice}
+                            availability={availability}
+                            setAvailability={setAvailability}
+                            sort={sort}
+                            setSort={setSort}
+                            onClear={clearFilters}
+                        />
+                    </aside>
+
+                    {/* ================= Products ================= */}
+
+                    <div className="min-w-0">
+                        {/* Results Header */}
+
+                        <div className="mb-6 flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-primary">
+                                    {filteredProducts.length === 0
+                                        ? "No products found"
+                                        : `Showing ${startIndex + 1}-${Math.min(
+                                              startIndex + PRODUCTS_PER_PAGE,
+                                              filteredProducts.length,
+                                          )} of ${filteredProducts.length} products`}
+                                </p>
+
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Showing matching items from the collection
+                                </p>
+                            </div>
+
+                            {(search ||
+                                category !== "all" ||
+                                sort !== "newest") && (
+                                <button
+                                    type="button"
+                                    onClick={clearFilters}
+                                    className="self-start text-xs font-medium text-gray-500 transition hover:text-accent sm:self-auto"
+                                >
+                                    Clear filters
+                                </button>
+                            )}
+                        </div>
+
+                        <ProductGrid products={paginatedProducts} />
+                        <ProductPagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                        />
+                    </div>
+                </div>
+
+                {/* ================= Mobile Filter Drawer ================= */}
+
+                {isFilterOpen && (
+                    <div className="fixed inset-0 z-60 lg:hidden">
+                        {/* Backdrop */}
+
+                        <button
+                            type="button"
+                            aria-label="Close filters"
+                            onClick={() => setIsFilterOpen(false)}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+                        />
+
+                        {/* Drawer */}
+
+                        <aside className="absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white px-5 pb-8 pt-5 shadow-2xl sm:left-auto sm:w-95 sm:rounded-none sm:rounded-l-3xl sm:pb-8 sm:pt-6">
+                            <div className="mb-6 flex items-center justify-between border-b border-border pb-4">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+                                        Refine
+                                    </p>
+
+                                    <h2 className="mt-1 text-xl font-semibold text-primary">
+                                        Shop Filters
+                                    </h2>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setIsFilterOpen(false)}
+                                    className="rounded-full p-2 transition hover:bg-stone-100"
+                                    aria-label="Close filters"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <ProductFilterSidebar
+                                search={search}
+                                setSearch={setSearch}
+                                category={category}
+                                setCategory={setCategory}
+                                categories={categories}
+                                minPrice={minPrice}
+                                setMinPrice={setMinPrice}
+                                maxPrice={maxPrice}
+                                setMaxPrice={setMaxPrice}
+                                availability={availability}
+                                setAvailability={setAvailability}
+                                sort={sort}
+                                setSort={setSort}
+                                onClear={clearFilters}
+                            />
+
+                            <button
+                                type="button"
+                                onClick={() => setIsFilterOpen(false)}
+                                className="mt-7 h-12 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-white transition hover:bg-accent"
+                            >
+                                View {paginatedProducts.length}{" "}
+                                {paginatedProducts.length === 1
+                                    ? "Product"
+                                    : "Products"}
+                            </button>
+                        </aside>
+                    </div>
+                )}
             </Container>
         </section>
     );

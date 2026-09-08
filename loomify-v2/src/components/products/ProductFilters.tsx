@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 interface ProductFiltersProps {
     categories: string[];
     value: string;
@@ -13,11 +14,15 @@ const ProductFilters = ({
         <select
             value={value}
             onChange={(event) => onChange(event.target.value)}
-            className="h-12 w-full rounded-full border border-border bg-white px-5 text-sm outline-none transition focus:border-accent sm:w-auto"
+            className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-primary outline-none transition focus:border-accent"
         >
             {categories.map((category) => (
                 <option key={category} value={category}>
-                    {category}
+                    {category === "all"
+                        ? "All categories"
+                        : category.replace(/\b\w/g, (char) =>
+                              char.toUpperCase(),
+                          )}
                 </option>
             ))}
         </select>
