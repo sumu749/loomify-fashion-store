@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
     Menu,
     X,
-    Search,
+    // Search,
     ShoppingBag,
     Heart,
     LogIn,

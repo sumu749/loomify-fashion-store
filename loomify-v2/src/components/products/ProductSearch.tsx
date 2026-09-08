@@ -19,7 +19,7 @@ const ProductSearch = ({ value, onChange }: ProductSearchProps) => {
                 onChange={(event) => onChange(event.target.value)}
                 placeholder="Search products..."
                 aria-label="Search products"
-                className="h-12 w-full rounded-full border border-border bg-white pl-11 pr-4 text-sm outline-none transition focus:border-accent"
+                className="h-11 w-full rounded-xl border border-border bg-white pl-11 pr-4 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent"
             />
         </div>
     );
