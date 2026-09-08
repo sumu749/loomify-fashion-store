@@ -1,11 +1,16 @@
-/* eslint-disable indent */
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: Request) {
+interface RouteContext {
+    params: Promise<{
+        id: string;
+    }>;
+}
+
+export async function GET(_request: Request, { params }: RouteContext) {
     try {
         // Check authentication
         const session = await auth.api.getSession({
@@ -33,95 +38,56 @@ export async function GET(request: Request) {
             );
         }
 
-        // Read query parameters
-        const { searchParams } = new URL(request.url);
+        const { id } = await params;
 
-        const search = searchParams.get("search")?.trim() || "";
-        const status = searchParams.get("status") || "all";
-        const type = searchParams.get("type") || "all";
-        const sort = searchParams.get("sort") || "newest";
-
-        // Build filters
-        const where = {
-            ...(search
-                ? {
-                      code: {
-                          contains: search,
-                          mode: "insensitive" as const,
-                      },
-                  }
-                : {}),
-
-            ...(status === "active"
-                ? { active: true }
-                : status === "inactive"
-                  ? { active: false }
-                  : {}),
-
-            ...(type === "PERCENTAGE"
-                ? { type: "PERCENTAGE" as const }
-                : type === "FIXED"
-                  ? { type: "FIXED" as const }
-                  : {}),
-        };
-
-        // Build sorting
-        let orderBy;
-
-        switch (sort) {
-            case "oldest":
-                orderBy = {
-                    createdAt: "asc" as const,
-                };
-                break;
-
-            case "highest":
-                orderBy = {
-                    value: "desc" as const,
-                };
-                break;
-
-            case "lowest":
-                orderBy = {
-                    value: "asc" as const,
-                };
-                break;
-
-            case "newest":
-            default:
-                orderBy = {
-                    createdAt: "desc" as const,
-                };
-                break;
+        if (!id) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Coupon ID is required",
+                },
+                { status: 400 },
+            );
         }
 
-        const coupons = await prisma.coupon.findMany({
-            where,
-            orderBy,
+        const coupon = await prisma.coupon.findUnique({
+            where: {
+                id,
+            },
         });
+
+        if (!coupon) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Coupon not found",
+                },
+                { status: 404 },
+            );
+        }
 
         return NextResponse.json(
             {
                 success: true,
-                message: "Coupons fetched successfully",
-                data: coupons,
+                message: "Coupon fetched successfully",
+                data: coupon,
             },
             { status: 200 },
         );
     } catch (error) {
-        console.error("Failed to fetch coupons:", error);
+        console.error("Failed to fetch coupon:", error);
 
         return NextResponse.json(
             {
                 success: false,
-                message: "Failed to fetch coupons",
+                message: "Failed to fetch coupon",
             },
             { status: 500 },
         );
     }
 }
 
-export async function POST(request: Request) {
+export async function PUT(request: Request, { params }: RouteContext) {
     try {
         // Check authentication
         const session = await auth.api.getSession({
@@ -146,6 +112,40 @@ export async function POST(request: Request) {
                     message: "Forbidden",
                 },
                 { status: 403 },
+            );
+        }
+
+        const { id } = await params;
+
+        if (!id) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Coupon ID is required",
+                },
+                { status: 400 },
+            );
+        }
+
+        // Check existing coupon
+        const existingCoupon = await prisma.coupon.findUnique({
+            where: {
+                id,
+            },
+            select: {
+                id: true,
+                code: true,
+                usedCount: true,
+            },
+        });
+
+        if (!existingCoupon) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Coupon not found",
+                },
+                { status: 404 },
             );
         }
 
@@ -208,7 +208,6 @@ export async function POST(request: Request) {
             );
         }
 
-        // Percentage validation
         if (type === "PERCENTAGE" && Number(value) > 100) {
             return NextResponse.json(
                 {
@@ -219,7 +218,6 @@ export async function POST(request: Request) {
             );
         }
 
-        // Validate optional numeric fields
         if (
             minOrderAmount !== undefined &&
             minOrderAmount !== null &&
@@ -262,6 +260,21 @@ export async function POST(request: Request) {
             );
         }
 
+        // Prevent lowering usage limit below current usage.
+        if (
+            usageLimit !== undefined &&
+            usageLimit !== null &&
+            Number(usageLimit) < existingCoupon.usedCount
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: `Usage limit cannot be less than current usage (${existingCoupon.usedCount})`,
+                },
+                { status: 400 },
+            );
+        }
+
         // Validate expiry date
         let parsedExpiresAt: Date | null = null;
 
@@ -283,16 +296,19 @@ export async function POST(request: Request) {
         const normalizedCode = code.trim().toUpperCase();
 
         // Check duplicate coupon code
-        const existingCoupon = await prisma.coupon.findUnique({
+        const duplicateCoupon = await prisma.coupon.findFirst({
             where: {
                 code: normalizedCode,
+                NOT: {
+                    id,
+                },
             },
             select: {
                 id: true,
             },
         });
 
-        if (existingCoupon) {
+        if (duplicateCoupon) {
             return NextResponse.json(
                 {
                     success: false,
@@ -302,8 +318,11 @@ export async function POST(request: Request) {
             );
         }
 
-        // Create coupon
-        const coupon = await prisma.coupon.create({
+        // Update coupon
+        const coupon = await prisma.coupon.update({
+            where: {
+                id,
+            },
             data: {
                 code: normalizedCode,
                 type,
@@ -328,18 +347,122 @@ export async function POST(request: Request) {
         return NextResponse.json(
             {
                 success: true,
-                message: "Coupon created successfully",
+                message: "Coupon updated successfully",
                 data: coupon,
             },
-            { status: 201 },
+            { status: 200 },
         );
     } catch (error) {
-        console.error("Failed to create coupon:", error);
+        console.error("Failed to update coupon:", error);
 
         return NextResponse.json(
             {
                 success: false,
-                message: "Failed to create coupon",
+                message: "Failed to update coupon",
+            },
+            { status: 500 },
+        );
+    }
+}
+
+export async function DELETE(_request: Request, { params }: RouteContext) {
+    try {
+        // Check authentication
+        const session = await auth.api.getSession({
+            headers: await headers(),
+        });
+
+        if (!session) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                },
+                { status: 401 },
+            );
+        }
+
+        // Check admin role
+        if (session.user.role !== "ADMIN") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Forbidden",
+                },
+                { status: 403 },
+            );
+        }
+
+        const { id } = await params;
+
+        if (!id) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Coupon ID is required",
+                },
+                { status: 400 },
+            );
+        }
+
+        // Check existing coupon
+        const coupon = await prisma.coupon.findUnique({
+            where: {
+                id,
+            },
+            select: {
+                id: true,
+                code: true,
+                usedCount: true,
+            },
+        });
+
+        if (!coupon) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Coupon not found",
+                },
+                { status: 404 },
+            );
+        }
+
+        // Prevent deleting a coupon that has already been used.
+        if (coupon.usedCount > 0) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "Used coupons cannot be deleted. Deactivate the coupon instead.",
+                },
+                { status: 409 },
+            );
+        }
+
+        await prisma.coupon.delete({
+            where: {
+                id,
+            },
+        });
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Coupon deleted successfully",
+                data: {
+                    id: coupon.id,
+                    code: coupon.code,
+                },
+            },
+            { status: 200 },
+        );
+    } catch (error) {
+        console.error("Failed to delete coupon:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to delete coupon",
             },
             { status: 500 },
         );
