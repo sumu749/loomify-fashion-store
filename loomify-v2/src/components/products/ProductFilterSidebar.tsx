@@ -160,50 +160,46 @@ const ProductFilterSidebar = ({
                         ["all", "All products"],
                         ["in-stock", "In stock"],
                         ["out-of-stock", "Out of stock"],
-                    ].map(([value, label]) => (
-                        <label
-                            key={value}
-                            className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-stone-50"
-                        >
-                            <input
-                                type="radio"
-                                name="product-availability"
-                                checked={availability === value}
-                                onChange={() =>
+                    ].map(([value, label]) => {
+                        const isSelected = availability === value;
+
+                        return (
+                            <button
+                                key={value}
+                                type="button"
+                                onClick={() =>
                                     setAvailability(
                                         value as ProductAvailability,
                                     )
                                 }
-                                className="peer sr-only"
-                            />
+                                className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition hover:bg-stone-50"
+                            >
+                                {/* Custom radio */}
 
-                            <span
-                                className="
-                        relative h-4 w-4 shrink-0 rounded-full
-                        border border-gray-300
-                        bg-white
-                        transition-all
-                        peer-checked:border-primary
-                        after:absolute
-                        after:left-1/2
-                        after:top-1/2
-                        after:h-2
-                        after:w-2
-                        after:-translate-x-1/2
-                        after:-translate-y-1/2
-                        after:scale-0
-                        after:rounded-full
-                        after:bg-primary
-                        after:transition-transform
-                        peer-checked:after:scale-100
-                    "
-                            />
+                                <span
+                                    className={`relative flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-all ${
+                                        isSelected
+                                            ? "border-primary"
+                                            : "border-gray-300 bg-white"
+                                    }`}
+                                >
+                                    {isSelected && (
+                                        <span className="h-2 w-2 rounded-full bg-primary" />
+                                    )}
+                                </span>
 
-                            <span className="text-sm text-gray-700">
-                                {label}
-                            </span>
-                        </label>
-                    ))}
+                                <span
+                                    className={`text-sm ${
+                                        isSelected
+                                            ? "font-medium text-primary"
+                                            : "text-gray-700"
+                                    }`}
+                                >
+                                    {label}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
