@@ -1,11 +1,13 @@
+/* eslint-disable indent */
 "use client";
 
 import { SlidersHorizontal, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Container from "@/components/common/Container";
 import ProductFilterSidebar from "@/components/products/ProductFilterSidebar";
 import ProductGrid from "@/components/products/ProductGrid";
+import ProductPagination from "@/components/products/ProductPagination";
 import ProductGridSkeleton from "@/components/skeleton/ProductGridSkeleton";
 
 import useProductFilters from "@/hooks/useProductFilters";
@@ -39,6 +41,9 @@ export default function ProductsPage() {
     } = useProductFilters(products);
 
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const PRODUCTS_PER_PAGE = 9;
+
+    const [currentPage, setCurrentPage] = useState(1);
 
     const clearFilters = () => {
         setSearch("");
@@ -47,8 +52,21 @@ export default function ProductsPage() {
         setMaxPrice("");
         setAvailability("all");
         setSort("newest");
+        setCurrentPage(1);
     };
 
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCurrentPage(1);
+    }, [search, category, minPrice, maxPrice, availability, sort]);
+    const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+
+    const paginatedProducts = filteredProducts.slice(
+        startIndex,
+        startIndex + PRODUCTS_PER_PAGE,
+    );
     if (isLoading) {
         return (
             <section className="py-20">
@@ -185,10 +203,12 @@ export default function ProductsPage() {
                         <div className="mb-6 flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <p className="text-sm font-medium text-primary">
-                                    {filteredProducts.length}{" "}
-                                    {filteredProducts.length === 1
-                                        ? "product"
-                                        : "products"}
+                                    {filteredProducts.length === 0
+                                        ? "No products found"
+                                        : `Showing ${startIndex + 1}-${Math.min(
+                                              startIndex + PRODUCTS_PER_PAGE,
+                                              filteredProducts.length,
+                                          )} of ${filteredProducts.length} products`}
                                 </p>
 
                                 <p className="mt-1 text-xs text-gray-500">
@@ -209,7 +229,12 @@ export default function ProductsPage() {
                             )}
                         </div>
 
-                        <ProductGrid products={filteredProducts} />
+                        <ProductGrid products={paginatedProducts} />
+                        <ProductPagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                        />
                     </div>
                 </div>
 
@@ -272,8 +297,8 @@ export default function ProductsPage() {
                                 onClick={() => setIsFilterOpen(false)}
                                 className="mt-7 h-12 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-white transition hover:bg-accent"
                             >
-                                View {filteredProducts.length}{" "}
-                                {filteredProducts.length === 1
+                                View {paginatedProducts.length}{" "}
+                                {paginatedProducts.length === 1
                                     ? "Product"
                                     : "Products"}
                             </button>
