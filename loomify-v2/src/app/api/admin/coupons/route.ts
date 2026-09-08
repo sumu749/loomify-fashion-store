@@ -1,8 +1,125 @@
+/* eslint-disable indent */
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+export async function GET(request: Request) {
+    try {
+        // Check authentication
+        const session = await auth.api.getSession({
+            headers: await headers(),
+        });
+
+        if (!session) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                },
+                { status: 401 },
+            );
+        }
+
+        // Check admin role
+        if (session.user.role !== "ADMIN") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Forbidden",
+                },
+                { status: 403 },
+            );
+        }
+
+        // Read query parameters
+        const { searchParams } = new URL(request.url);
+
+        const search = searchParams.get("search")?.trim() || "";
+        const status = searchParams.get("status") || "all";
+        const type = searchParams.get("type") || "all";
+        const sort = searchParams.get("sort") || "newest";
+
+        // Build filters
+        const where = {
+            ...(search
+                ? {
+                      code: {
+                          contains: search,
+                          mode: "insensitive" as const,
+                      },
+                  }
+                : {}),
+
+            ...(status === "active"
+                ? { active: true }
+                : status === "inactive"
+                  ? { active: false }
+                  : {}),
+
+            ...(type === "PERCENTAGE"
+                ? { type: "PERCENTAGE" as const }
+                : type === "FIXED"
+                  ? { type: "FIXED" as const }
+                  : {}),
+        };
+
+        // Build sorting
+        let orderBy;
+
+        switch (sort) {
+            case "oldest":
+                orderBy = {
+                    createdAt: "asc" as const,
+                };
+                break;
+
+            case "highest":
+                orderBy = {
+                    value: "desc" as const,
+                };
+                break;
+
+            case "lowest":
+                orderBy = {
+                    value: "asc" as const,
+                };
+                break;
+
+            case "newest":
+            default:
+                orderBy = {
+                    createdAt: "desc" as const,
+                };
+                break;
+        }
+
+        const coupons = await prisma.coupon.findMany({
+            where,
+            orderBy,
+        });
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Coupons fetched successfully",
+                data: coupons,
+            },
+            { status: 200 },
+        );
+    } catch (error) {
+        console.error("Failed to fetch coupons:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to fetch coupons",
+            },
+            { status: 500 },
+        );
+    }
+}
 
 export async function POST(request: Request) {
     try {
