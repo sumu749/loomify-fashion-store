@@ -364,3 +364,107 @@ export async function PUT(request: Request, { params }: RouteContext) {
         );
     }
 }
+
+export async function DELETE(_request: Request, { params }: RouteContext) {
+    try {
+        // Check authentication
+        const session = await auth.api.getSession({
+            headers: await headers(),
+        });
+
+        if (!session) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                },
+                { status: 401 },
+            );
+        }
+
+        // Check admin role
+        if (session.user.role !== "ADMIN") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Forbidden",
+                },
+                { status: 403 },
+            );
+        }
+
+        const { id } = await params;
+
+        if (!id) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Coupon ID is required",
+                },
+                { status: 400 },
+            );
+        }
+
+        // Check existing coupon
+        const coupon = await prisma.coupon.findUnique({
+            where: {
+                id,
+            },
+            select: {
+                id: true,
+                code: true,
+                usedCount: true,
+            },
+        });
+
+        if (!coupon) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Coupon not found",
+                },
+                { status: 404 },
+            );
+        }
+
+        // Prevent deleting a coupon that has already been used.
+        if (coupon.usedCount > 0) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "Used coupons cannot be deleted. Deactivate the coupon instead.",
+                },
+                { status: 409 },
+            );
+        }
+
+        await prisma.coupon.delete({
+            where: {
+                id,
+            },
+        });
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Coupon deleted successfully",
+                data: {
+                    id: coupon.id,
+                    code: coupon.code,
+                },
+            },
+            { status: 200 },
+        );
+    } catch (error) {
+        console.error("Failed to delete coupon:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to delete coupon",
+            },
+            { status: 500 },
+        );
+    }
+}
