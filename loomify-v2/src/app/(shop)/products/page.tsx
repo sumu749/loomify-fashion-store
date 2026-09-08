@@ -23,6 +23,15 @@ export default function ProductsPage() {
 
         categories,
 
+        minPrice,
+        setMinPrice,
+
+        maxPrice,
+        setMaxPrice,
+
+        availability,
+        setAvailability,
+
         sort,
         setSort,
 
@@ -34,6 +43,9 @@ export default function ProductsPage() {
     const clearFilters = () => {
         setSearch("");
         setCategory("all");
+        setMinPrice("");
+        setMaxPrice("");
+        setAvailability("all");
         setSort("newest");
     };
 
@@ -95,6 +107,12 @@ export default function ProductsPage() {
                             category={category}
                             setCategory={setCategory}
                             categories={categories}
+                            minPrice={minPrice}
+                            setMinPrice={setMinPrice}
+                            maxPrice={maxPrice}
+                            setMaxPrice={setMaxPrice}
+                            availability={availability}
+                            setAvailability={setAvailability}
                             sort={sort}
                             setSort={setSort}
                             onClear={clearFilters}
@@ -147,6 +165,12 @@ export default function ProductsPage() {
                             category={category}
                             setCategory={setCategory}
                             categories={categories}
+                            minPrice={minPrice}
+                            setMinPrice={setMinPrice}
+                            maxPrice={maxPrice}
+                            setMaxPrice={setMaxPrice}
+                            availability={availability}
+                            setAvailability={setAvailability}
                             sort={sort}
                             setSort={setSort}
                             onClear={clearFilters}
@@ -232,6 +256,12 @@ export default function ProductsPage() {
                                 category={category}
                                 setCategory={setCategory}
                                 categories={categories}
+                                minPrice={minPrice}
+                                setMinPrice={setMinPrice}
+                                maxPrice={maxPrice}
+                                setMaxPrice={setMaxPrice}
+                                availability={availability}
+                                setAvailability={setAvailability}
                                 sort={sort}
                                 setSort={setSort}
                                 onClear={clearFilters}

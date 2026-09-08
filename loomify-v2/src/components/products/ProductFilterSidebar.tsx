@@ -4,7 +4,10 @@ import ProductFilters from "@/components/products/ProductFilters";
 import ProductSearch from "@/components/products/ProductSearch";
 import ProductSort from "@/components/products/ProductSort";
 
-import type { ProductSort as ProductSortType } from "@/hooks/useProductFilters";
+import type {
+    ProductAvailability,
+    ProductSort as ProductSortType,
+} from "@/hooks/useProductFilters";
 
 interface ProductFilterSidebarProps {
     search: string;
@@ -15,6 +18,15 @@ interface ProductFilterSidebarProps {
 
     categories: string[];
 
+    minPrice: string;
+    setMinPrice: (value: string) => void;
+
+    maxPrice: string;
+    setMaxPrice: (value: string) => void;
+
+    availability: ProductAvailability;
+    setAvailability: (value: ProductAvailability) => void;
+
     sort: ProductSortType;
     setSort: (value: ProductSortType) => void;
 
@@ -24,15 +36,33 @@ interface ProductFilterSidebarProps {
 const ProductFilterSidebar = ({
     search,
     setSearch,
+
     category,
     setCategory,
+
     categories,
+
+    minPrice,
+    setMinPrice,
+
+    maxPrice,
+    setMaxPrice,
+
+    availability,
+    setAvailability,
+
     sort,
     setSort,
+
     onClear,
 }: ProductFilterSidebarProps) => {
     const hasActiveFilters =
-        Boolean(search.trim()) || category !== "all" || sort !== "newest";
+        Boolean(search.trim()) ||
+        category !== "all" ||
+        Boolean(minPrice.trim()) ||
+        Boolean(maxPrice.trim()) ||
+        availability !== "all" ||
+        sort !== "newest";
 
     return (
         <div className="space-y-7">
@@ -60,6 +90,123 @@ const ProductFilterSidebar = ({
                 />
             </div>
 
+            {/* Price */}
+
+            <div>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                    Price Range
+                </p>
+
+                <div className="grid grid-cols-2 gap-2">
+                    <div>
+                        <label
+                            htmlFor="product-min-price"
+                            className="mb-1.5 block text-[11px] text-gray-400"
+                        >
+                            Min
+                        </label>
+
+                        <input
+                            id="product-min-price"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={minPrice}
+                            onChange={(event) =>
+                                setMinPrice(event.target.value)
+                            }
+                            placeholder="0"
+                            className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="product-max-price"
+                            className="mb-1.5 block text-[11px] text-gray-400"
+                        >
+                            Max
+                        </label>
+
+                        <input
+                            id="product-max-price"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={maxPrice}
+                            onChange={(event) =>
+                                setMaxPrice(event.target.value)
+                            }
+                            placeholder="Any"
+                            className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent"
+                        />
+                    </div>
+                </div>
+
+                <p className="mt-2 text-[11px] leading-4 text-gray-400">
+                    Enter a minimum and maximum price.
+                </p>
+            </div>
+
+            {/* Availability */}
+
+            <div>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                    Availability
+                </p>
+
+                <div className="space-y-2">
+                    {[
+                        ["all", "All products"],
+                        ["in-stock", "In stock"],
+                        ["out-of-stock", "Out of stock"],
+                    ].map(([value, label]) => (
+                        <label
+                            key={value}
+                            className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-stone-50"
+                        >
+                            <input
+                                type="radio"
+                                name="product-availability"
+                                checked={availability === value}
+                                onChange={() =>
+                                    setAvailability(
+                                        value as ProductAvailability,
+                                    )
+                                }
+                                className="peer sr-only"
+                            />
+
+                            <span
+                                className="
+                        relative h-4 w-4 shrink-0 rounded-full
+                        border border-gray-300
+                        bg-white
+                        transition-all
+                        peer-checked:border-primary
+                        after:absolute
+                        after:left-1/2
+                        after:top-1/2
+                        after:h-2
+                        after:w-2
+                        after:-translate-x-1/2
+                        after:-translate-y-1/2
+                        after:scale-0
+                        after:rounded-full
+                        after:bg-primary
+                        after:transition-transform
+                        peer-checked:after:scale-100
+                    "
+                            />
+
+                            <span className="text-sm text-gray-700">
+                                {label}
+                            </span>
+                        </label>
+                    ))}
+                </div>
+            </div>
+
             {/* Sort */}
 
             <div>
@@ -69,16 +216,6 @@ const ProductFilterSidebar = ({
 
                 <ProductSort value={sort} onChange={setSort} />
             </div>
-
-            {/* Active Filter Summary */}
-
-            {hasActiveFilters && (
-                <div className="rounded-xl bg-stone-50 px-4 py-3">
-                    <p className="text-xs leading-5 text-gray-500">
-                        Filters are currently applied to this collection.
-                    </p>
-                </div>
-            )}
 
             {/* Clear */}
 
