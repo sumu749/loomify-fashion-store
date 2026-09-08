@@ -6,7 +6,7 @@ export const navItems: NavItem[] = [
         path: "/",
     },
     {
-        name: "Products",
+        name: "Shop",
         path: "/products",
     },
 ];

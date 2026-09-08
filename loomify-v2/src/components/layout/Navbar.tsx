@@ -11,6 +11,8 @@ import {
     LogIn,
     LogOut,
     UserRound,
+    LayoutDashboard,
+    ClipboardList,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -18,9 +20,7 @@ import { useEffect, useState } from "react";
 import Container from "../common/Container";
 import { navItems } from "@/constants/navigation";
 import { useAppSelector } from "@/store/hooks";
-
 import { authClient } from "@/lib/auth-client";
-
 import toast from "react-hot-toast";
 import Button from "../common/Button";
 
@@ -41,11 +41,13 @@ const Navbar = () => {
         }
 
         toast.success("Logged out successfully.");
+        setIsMenuOpen(false);
     };
 
     const cartCount = useAppSelector((state) =>
         state.cart.items.reduce((total, item) => total + item.quantity, 0),
     );
+
     const wishlistCount = useAppSelector(
         (state) => state.wishlist.items.length,
     );
@@ -92,6 +94,7 @@ const Navbar = () => {
                     }`}
                 >
                     {/* Logo */}
+
                     <Link
                         href="/"
                         onClick={handleNavigation}
@@ -102,7 +105,8 @@ const Navbar = () => {
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <ul className="hidden items-center gap-8 md:flex lg:gap-12">
+
+                    <ul className="hidden items-center gap-8 md:flex lg:gap-10">
                         {navItems.map((item) => (
                             <li key={item.path}>
                                 <Link
@@ -114,20 +118,36 @@ const Navbar = () => {
                                 </Link>
                             </li>
                         ))}
+
+                        {/* Customer Orders */}
+
+                        {session && (
+                            <li>
+                                <Link
+                                    href="/orders"
+                                    className={getNavLinkClass("/orders")}
+                                >
+                                    Orders
+                                </Link>
+                            </li>
+                        )}
                     </ul>
 
-                    {/* Right Side Icons */}
+                    {/* Right Side */}
+
                     <div className="flex items-center gap-2 sm:gap-4">
-                        {/* Search */}
+                        {/* Search
+
                         <button
                             type="button"
                             className="rounded-full p-2 transition-all duration-300 hover:scale-110 hover:bg-accent hover:text-white"
                             aria-label="Search"
                         >
                             <Search size={20} />
-                        </button>
+                        </button> */}
 
                         {/* Wishlist */}
+
                         <Link
                             href="/wishlist"
                             aria-label="Wishlist"
@@ -143,6 +163,7 @@ const Navbar = () => {
                         </Link>
 
                         {/* Cart */}
+
                         <Link
                             href="/cart"
                             aria-label="Shopping cart"
@@ -173,21 +194,39 @@ const Navbar = () => {
                             </AnimatePresence>
                         </Link>
 
-                        {/* Auth Actions */}
+                        {/* Desktop Auth */}
+
                         <div className="hidden items-center gap-3 md:flex">
                             {isPending ? (
                                 <div className="h-9 w-20 animate-pulse rounded-full bg-gray-100" />
                             ) : session ? (
                                 <>
+                                    {/* Admin Dashboard */}
+
+                                    {session.user.role === "ADMIN" && (
+                                        <Link
+                                            href="/admin"
+                                            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
+                                        >
+                                            <LayoutDashboard size={17} />
+                                            Admin
+                                        </Link>
+                                    )}
+
+                                    {/* Profile */}
+
                                     <Link
                                         href="/profile"
-                                        className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
+                                        className="inline-flex max-w-36 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
                                     >
                                         <UserRound size={17} />
-                                        <span className="max-w-24 truncate">
+
+                                        <span className="truncate">
                                             {session.user.name}
                                         </span>
                                     </Link>
+
+                                    {/* Logout */}
 
                                     <button
                                         type="button"
@@ -215,7 +254,8 @@ const Navbar = () => {
                             )}
                         </div>
 
-                        {/* Mobile Menu */}
+                        {/* Mobile Menu Button */}
+
                         <button
                             type="button"
                             onClick={() => setIsMenuOpen((prev) => !prev)}
@@ -229,72 +269,152 @@ const Navbar = () => {
                 </nav>
 
                 {/* Mobile Navigation */}
+
                 <div
                     className={`overflow-hidden transition-all duration-300 md:hidden ${
                         isMenuOpen
-                            ? "max-h-96 opacity-100"
+                            ? "max-h-175 opacity-100"
                             : "max-h-0 opacity-0"
                     }`}
                 >
-                    <ul className="flex flex-col gap-4 py-6">
-                        {navItems.map((item) => (
-                            <li key={item.path}>
+                    <div className="border-t border-border py-5">
+                        <ul className="flex flex-col gap-2">
+                            {navItems.map((item) => (
+                                <li key={item.path}>
+                                    <Link
+                                        href={item.path}
+                                        className="flex items-center rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
+                                        onClick={handleNavigation}
+                                    >
+                                        {item.name}
+                                    </Link>
+                                </li>
+                            ))}
+
+                            {/* Orders */}
+
+                            {session && (
+                                <li>
+                                    <Link
+                                        href="/orders"
+                                        className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
+                                        onClick={handleNavigation}
+                                    >
+                                        <ClipboardList size={18} />
+                                        Orders
+                                    </Link>
+                                </li>
+                            )}
+
+                            {/* Wishlist */}
+
+                            <li>
                                 <Link
-                                    href={item.path}
-                                    className={getNavLinkClass(item.path)}
+                                    href="/wishlist"
+                                    className="flex items-center justify-between rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
                                     onClick={handleNavigation}
                                 >
-                                    {item.name}
+                                    <span className="flex items-center gap-3">
+                                        <Heart size={18} />
+                                        Wishlist
+                                    </span>
+
+                                    {wishlistCount > 0 && (
+                                        <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold text-white">
+                                            {wishlistCount}
+                                        </span>
+                                    )}
                                 </Link>
                             </li>
-                        ))}
 
-                        {/* Mobile Auth */}
-                        <li className="border-t border-border pt-4">
-                            {isPending ? (
-                                <div className="h-10 w-24 animate-pulse rounded-full bg-gray-100" />
-                            ) : session ? (
-                                <div className="flex flex-col gap-3">
-                                    <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                                        <UserRound size={17} />
-                                        <span>{session.user.name}</span>
-                                    </div>
+                            {/* Cart */}
 
-                                    <button
-                                        type="button"
-                                        onClick={async () => {
-                                            await handleLogout();
-                                            handleNavigation();
-                                        }}
-                                        className="flex items-center gap-2 text-left text-sm font-medium text-red-500"
-                                    >
-                                        <LogOut size={17} />
-                                        Logout
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col gap-3">
+                            <li>
+                                <Link
+                                    href="/cart"
+                                    className="flex items-center justify-between rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
+                                    onClick={handleNavigation}
+                                >
+                                    <span className="flex items-center gap-3">
+                                        <ShoppingBag size={18} />
+                                        Cart
+                                    </span>
+
+                                    {cartCount > 0 && (
+                                        <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold text-white">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            </li>
+
+                            {/* Admin */}
+
+                            {session?.user.role === "ADMIN" && (
+                                <li>
                                     <Link
-                                        href="/login"
+                                        href="/admin"
+                                        className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
                                         onClick={handleNavigation}
-                                        className="flex items-center gap-2 text-sm font-medium text-primary transition hover:text-accent"
                                     >
-                                        <LogIn size={17} />
-                                        Login
+                                        <LayoutDashboard size={18} />
+                                        Admin Dashboard
                                     </Link>
-
-                                    <Link
-                                        href="/register"
-                                        onClick={handleNavigation}
-                                        className="flex items-center gap-2 text-sm font-medium text-primary transition hover:text-accent"
-                                    >
-                                        <UserRound size={17} />
-                                        Register
-                                    </Link>
-                                </div>
+                                </li>
                             )}
-                        </li>
-                    </ul>
+
+                            {/* Auth */}
+
+                            <li className="mt-2 border-t border-border pt-4">
+                                {isPending ? (
+                                    <div className="h-10 w-24 animate-pulse rounded-full bg-gray-100" />
+                                ) : session ? (
+                                    <div className="flex flex-col gap-3">
+                                        <Link
+                                            href="/profile"
+                                            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
+                                            onClick={handleNavigation}
+                                        >
+                                            <UserRound size={18} />
+
+                                            <span className="truncate">
+                                                {session.user.name}
+                                            </span>
+                                        </Link>
+
+                                        <button
+                                            type="button"
+                                            onClick={handleLogout}
+                                            className="flex items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-red-500 transition hover:bg-red-50"
+                                        >
+                                            <LogOut size={18} />
+                                            Logout
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col gap-2">
+                                        <Link
+                                            href="/login"
+                                            onClick={handleNavigation}
+                                            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
+                                        >
+                                            <LogIn size={18} />
+                                            Login
+                                        </Link>
+
+                                        <Link
+                                            href="/register"
+                                            onClick={handleNavigation}
+                                            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
+                                        >
+                                            <UserRound size={18} />
+                                            Register
+                                        </Link>
+                                    </div>
+                                )}
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </Container>
         </header>
