@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -58,19 +59,36 @@ const CategoryForm = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8">
-            <section className="rounded-card border border-border bg-white p-6 sm:p-8">
-                <h2 className="text-xl font-semibold text-primary">
-                    Category Information
-                </h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+                {/* Section Header */}
 
-                <div className="mt-6 space-y-5">
+                <div className="border-b border-border bg-stone-50/60 px-6 py-5 sm:px-8">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                        Category Setup
+                    </p>
+
+                    <h2 className="mt-2 text-xl font-semibold text-primary">
+                        Category Information
+                    </h2>
+
+                    <p className="mt-1 text-sm leading-6 text-gray-500">
+                        Add the basic information for your new product category.
+                    </p>
+                </div>
+
+                {/* Form Fields */}
+
+                <div className="space-y-6 p-6 sm:p-8">
+                    {/* Category Name */}
+
                     <div>
                         <label
                             htmlFor="name"
-                            className="mb-2 block text-sm font-medium"
+                            className="mb-2 block text-sm font-semibold text-primary"
                         >
                             Category Name
+                            <span className="ml-1 text-red-500">*</span>
                         </label>
 
                         <input
@@ -78,15 +96,23 @@ const CategoryForm = () => {
                             type="text"
                             value={name}
                             onChange={(event) => setName(event.target.value)}
-                            placeholder="Men"
-                            className="h-12 w-full rounded-xl border border-border px-4 outline-none transition focus:border-accent"
+                            placeholder="e.g. Men"
+                            autoComplete="off"
+                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-stone-100"
                         />
+
+                        <p className="mt-2 text-xs leading-5 text-gray-500">
+                            Use a clear and recognizable name that customers
+                            will understand.
+                        </p>
                     </div>
+
+                    {/* Description */}
 
                     <div>
                         <label
                             htmlFor="description"
-                            className="mb-2 block text-sm font-medium"
+                            className="mb-2 block text-sm font-semibold text-primary"
                         >
                             Description
                         </label>
@@ -99,16 +125,23 @@ const CategoryForm = () => {
                             }
                             rows={5}
                             placeholder="Premium fashion for modern men."
-                            className="w-full rounded-xl border border-border px-4 py-3 outline-none transition focus:border-accent"
+                            className="w-full resize-y rounded-xl border border-border bg-white px-4 py-3 text-sm leading-6 text-primary outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-stone-100"
                         />
+
+                        <p className="mt-2 text-xs leading-5 text-gray-500">
+                            A short description helps organize and identify the
+                            category internally.
+                        </p>
                     </div>
+
+                    {/* Image URL */}
 
                     <div>
                         <label
                             htmlFor="imageUrl"
-                            className="mb-2 block text-sm font-medium"
+                            className="mb-2 block text-sm font-semibold text-primary"
                         >
-                            Image URL
+                            Category Image URL
                         </label>
 
                         <input
@@ -118,19 +151,30 @@ const CategoryForm = () => {
                             onChange={(event) =>
                                 setImageUrl(event.target.value)
                             }
-                            placeholder="https://..."
-                            className="h-12 w-full rounded-xl border border-border px-4 outline-none transition focus:border-accent"
+                            placeholder="https://example.com/category-image.jpg"
+                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-stone-100"
                         />
 
-                        <p className="mt-2 text-xs text-gray-500">
-                            Leave empty if this category does not have an image
-                            yet.
+                        <p className="mt-2 text-xs leading-5 text-gray-500">
+                            Add a public image URL for this category. You can
+                            leave this field empty and add it later.
                         </p>
                     </div>
                 </div>
             </section>
 
-            <div className="flex justify-end">
+            {/* Actions */}
+
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={loading}
+                    onClick={() => router.push("/admin/categories")}
+                >
+                    Cancel
+                </Button>
+
                 <Button type="submit" disabled={loading}>
                     {loading ? "Creating Category..." : "Create Category"}
                 </Button>
