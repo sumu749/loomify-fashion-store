@@ -1,7 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable indent */
 "use client";
 
 import { Heart, Minus, Plus, ShieldCheck, Truck } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import Button from "@/components/common/Button";
@@ -21,12 +23,12 @@ const ProductActions = ({ product }: ProductActionsProps) => {
     const dispatch = useAppDispatch();
 
     /*
-     * --------------------------------------------------
-     * Selected options
-     * --------------------------------------------------
+     * Find the first available variant.
      */
-
-    const defaultVariant = variants.find((variant) => variant.stock > 0);
+    const defaultVariant = useMemo(
+        () => variants.find((variant) => variant.stock > 0),
+        [variants],
+    );
 
     const [selectedSize, setSelectedSize] = useState(
         defaultVariant?.size ?? sizes[0] ?? "",
@@ -39,9 +41,7 @@ const ProductActions = ({ product }: ProductActionsProps) => {
     const [quantity, setQuantity] = useState(1);
 
     /*
-     * --------------------------------------------------
-     * Wishlist state from Redux
-     * --------------------------------------------------
+     * Wishlist
      */
 
     const isInWishlist = useAppSelector((state) =>
@@ -49,37 +49,82 @@ const ProductActions = ({ product }: ProductActionsProps) => {
     );
 
     /*
-     * --------------------------------------------------
-     * Find selected variant
-     * --------------------------------------------------
-     *
-     * Example:
-     *
-     * selectedSize  = "M"
-     * selectedColor = "Black"
-     *
-     * ↓
-     *
-     * variants.find(...)
-     *
-     * ↓
-     *
-     * Black + M variant
+     * Find the currently selected variant.
      */
 
-    const selectedVariant = variants.find(
-        (variant) =>
-            variant.size === selectedSize && variant.color === selectedColor,
+    const selectedVariant = useMemo(
+        () =>
+            variants.find(
+                (variant) =>
+                    variant.size === selectedSize &&
+                    variant.color === selectedColor,
+            ),
+        [variants, selectedSize, selectedColor],
     );
 
     /*
-     * --------------------------------------------------
-     * Quantity handlers
-     * --------------------------------------------------
+     * Reset quantity when selected variant changes.
+     */
+
+    useEffect(() => {
+        setQuantity(1);
+    }, [selectedSize, selectedColor]);
+
+    /*
+     * Check whether a size has any available variant
+     * with the currently selected color.
+     */
+
+    const isSizeAvailable = (size: string) => {
+        return variants.some(
+            (variant) =>
+                variant.size === size &&
+                variant.color === selectedColor &&
+                variant.stock > 0,
+        );
+    };
+
+    /*
+     * Check whether a color has any available variant
+     * with the currently selected size.
+     */
+
+    const isColorAvailable = (color: string) => {
+        return variants.some(
+            (variant) =>
+                variant.color === color &&
+                variant.size === selectedSize &&
+                variant.stock > 0,
+        );
+    };
+
+    /*
+     * Find another available color for a selected size.
+     */
+
+    const getAvailableColorForSize = (size: string) => {
+        return variants.find(
+            (variant) => variant.size === size && variant.stock > 0,
+        )?.color;
+    };
+
+    /*
+     * Find another available size for a selected color.
+     */
+
+    const getAvailableSizeForColor = (color: string) => {
+        return variants.find(
+            (variant) => variant.color === color && variant.stock > 0,
+        )?.size;
+    };
+
+    /*
+     * Quantity
      */
 
     const increaseQuantity = () => {
         if (!selectedVariant) {
+            toast.error("Please select an available size and color.");
             return;
         }
 
@@ -96,14 +141,12 @@ const ProductActions = ({ product }: ProductActionsProps) => {
     };
 
     /*
-     * --------------------------------------------------
-     * Add to Cart
-     * --------------------------------------------------
+     * Add to cart
      */
 
     const handleAddToCart = () => {
         if (!selectedVariant) {
-            toast.error("Please select a valid size and color.");
+            toast.error("Please select an available size and color.");
             return;
         }
 
@@ -129,9 +172,7 @@ const ProductActions = ({ product }: ProductActionsProps) => {
     };
 
     /*
-     * --------------------------------------------------
      * Wishlist
-     * --------------------------------------------------
      */
 
     const handleToggleWishlist = () => {
@@ -149,63 +190,174 @@ const ProductActions = ({ product }: ProductActionsProps) => {
             {/* ================= Size ================= */}
 
             <div>
-                <h3 className="mb-3 font-semibold text-primary">Select Size</h3>
+                <div className="mb-3 flex items-center justify-between">
+                    <h3 className="font-semibold text-primary">Select Size</h3>
+
+                    {selectedSize && (
+                        <span className="text-xs text-gray-400">
+                            Selected: {selectedSize}
+                        </span>
+                    )}
+                </div>
 
                 <div className="flex flex-wrap gap-3">
-                    {sizes.map((size) => (
-                        <button
-                            key={size}
-                            type="button"
-                            onClick={() => {
-                                setSelectedSize(size);
-                                setQuantity(1);
-                            }}
-                            className={`h-10 w-10 rounded-lg border transition sm:h-11 sm:w-11 ${
-                                selectedSize === size
-                                    ? "border-primary bg-primary text-white"
-                                    : "border-border hover:border-primary"
-                            }`}
-                        >
-                            {size}
-                        </button>
-                    ))}
+                    {sizes.map((size) => {
+                        const available = isSizeAvailable(size);
+                        const selected = selectedSize === size;
+
+                        return (
+                            <button
+                                key={size}
+                                type="button"
+                                disabled={!available}
+                                onClick={() => {
+                                    if (!available) {
+                                        return;
+                                    }
+
+                                    setSelectedSize(size);
+
+                                    /*
+                                     * If the current color is not
+                                     * available for this size,
+                                     * automatically select the
+                                     * first available color.
+                                     */
+                                    if (
+                                        !variants.some(
+                                            (variant) =>
+                                                variant.size === size &&
+                                                variant.color ===
+                                                    selectedColor &&
+                                                variant.stock > 0,
+                                        )
+                                    ) {
+                                        const nextColor =
+                                            getAvailableColorForSize(size);
+
+                                        if (nextColor) {
+                                            setSelectedColor(nextColor);
+                                        }
+                                    }
+                                }}
+                                className={`relative flex h-11 min-w-11 items-center justify-center rounded-lg border px-3 text-sm font-medium transition ${
+                                    selected
+                                        ? "border-primary bg-primary text-white"
+                                        : available
+                                          ? "border-border bg-white text-primary hover:border-primary"
+                                          : "cursor-not-allowed border-border bg-gray-50 text-gray-300 line-through"
+                                }`}
+                            >
+                                {size}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
             {/* ================= Color ================= */}
 
             <div>
-                <h3 className="mb-3 font-semibold text-primary">
-                    Select Color
-                </h3>
+                <div className="mb-3 flex items-center justify-between">
+                    <h3 className="font-semibold text-primary">Select Color</h3>
 
-                <div className="flex flex-wrap gap-3">
-                    {colors.map((color) => (
-                        <button
-                            key={color}
-                            type="button"
-                            onClick={() => {
-                                setSelectedColor(color);
-                                setQuantity(1);
-                            }}
-                            className={`rounded-full border px-3 py-2 transition ${
-                                selectedColor === color
-                                    ? "border-primary bg-primary text-white"
-                                    : "border-border hover:border-primary"
-                            }`}
-                        >
-                            {color}
-                        </button>
-                    ))}
+                    {selectedColor && (
+                        <span className="text-xs text-gray-400">
+                            Selected: {selectedColor}
+                        </span>
+                    )}
                 </div>
 
-                {/* Selected Variant Status */}
+                <div className="flex flex-wrap gap-3">
+                    {colors.map((color) => {
+                        const available = isColorAvailable(color);
+                        const selected = selectedColor === color;
 
-                {selectedVariant && (
-                    <p className="mt-3 text-sm text-gray-500">
-                        {selectedVariant.stock > 0
-                            ? `${selectedVariant.stock} available`
-                            : "Out of stock"}
+                        return (
+                            <button
+                                key={color}
+                                type="button"
+                                disabled={!available}
+                                onClick={() => {
+                                    if (!available) {
+                                        return;
+                                    }
+
+                                    setSelectedColor(color);
+
+                                    /*
+                                     * If the current size is not
+                                     * available for this color,
+                                     * automatically select the
+                                     * first available size.
+                                     */
+                                    if (
+                                        !variants.some(
+                                            (variant) =>
+                                                variant.color === color &&
+                                                variant.size === selectedSize &&
+                                                variant.stock > 0,
+                                        )
+                                    ) {
+                                        const nextSize =
+                                            getAvailableSizeForColor(color);
+
+                                        if (nextSize) {
+                                            setSelectedSize(nextSize);
+                                        }
+                                    }
+                                }}
+                                className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                                    selected
+                                        ? "border-primary bg-primary text-white"
+                                        : available
+                                          ? "border-border bg-white text-primary hover:border-primary"
+                                          : "cursor-not-allowed border-border bg-gray-50 text-gray-300 line-through"
+                                }`}
+                            >
+                                {color}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* ================= Selected Variant ================= */}
+
+            <div
+                className={`rounded-2xl border p-4 transition ${
+                    selectedVariant && selectedVariant.stock > 0
+                        ? "border-green-100 bg-green-50/50"
+                        : "border-red-100 bg-red-50/50"
+                }`}
+            >
+                {selectedVariant ? (
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p className="text-sm font-semibold text-primary">
+                                {selectedVariant.size} / {selectedVariant.color}
+                            </p>
+
+                            <p className="mt-1 text-xs text-gray-500">
+                                SKU: {selectedVariant.sku}
+                            </p>
+                        </div>
+
+                        <div className="text-sm font-medium">
+                            {selectedVariant.stock > 0 ? (
+                                <span className="text-green-700">
+                                    {selectedVariant.stock} available
+                                </span>
+                            ) : (
+                                <span className="text-red-600">
+                                    Out of stock
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-sm font-medium text-red-600">
+                        This size and color combination is not available.
                     </p>
                 )}
             </div>
@@ -215,11 +367,12 @@ const ProductActions = ({ product }: ProductActionsProps) => {
             <div>
                 <h3 className="mb-3 font-semibold text-primary">Quantity</h3>
 
-                <div className="flex w-full items-center rounded-lg border border-border sm:w-fit">
+                <div className="flex w-fit items-center rounded-xl border border-border">
                     <button
                         type="button"
                         onClick={decreaseQuantity}
-                        className="p-3 transition hover:bg-gray-100"
+                        disabled={!selectedVariant}
+                        className="p-3 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                         aria-label="Decrease quantity"
                     >
                         <Minus size={18} />
@@ -232,7 +385,8 @@ const ProductActions = ({ product }: ProductActionsProps) => {
                     <button
                         type="button"
                         onClick={increaseQuantity}
-                        className="p-3 transition hover:bg-gray-100"
+                        disabled={!selectedVariant}
+                        className="p-3 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                         aria-label="Increase quantity"
                     >
                         <Plus size={18} />
@@ -276,21 +430,22 @@ const ProductActions = ({ product }: ProductActionsProps) => {
 
             {/* ================= Extra Info ================= */}
 
-            <div className="space-y-2 rounded-card bg-stone-50 p-4">
+            <div className="space-y-2 rounded-2xl bg-stone-50 p-4 text-sm text-gray-600">
                 <div className="flex items-center gap-3">
-                    <Truck size={18} />
+                    <Truck size={18} className="shrink-0 text-primary" />
+
                     <span>Free Shipping Worldwide</span>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <ShieldCheck size={18} />
+                    <ShieldCheck size={18} className="shrink-0 text-primary" />
 
                     <span>
                         {selectedVariant
                             ? selectedVariant.stock > 0
-                                ? "In Stock"
-                                : "Out of Stock"
-                            : "Select a size and color"}
+                                ? "This variant is in stock"
+                                : "This variant is out of stock"
+                            : "Select an available size and color"}
                     </span>
                 </div>
             </div>
