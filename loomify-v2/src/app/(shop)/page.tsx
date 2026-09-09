@@ -67,11 +67,11 @@ export default async function HomePage() {
         <>
             <Hero />
 
-            <TopProducts products={mappedTopProducts} />
+            <Categories />
 
             <LatestProducts products={mappedLatestProducts} />
 
-            <Categories />
+            <TopProducts products={mappedTopProducts} />
 
             <EditorialCampaigns />
 

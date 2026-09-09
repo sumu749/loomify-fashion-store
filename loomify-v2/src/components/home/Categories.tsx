@@ -1,10 +1,8 @@
 import Container from "@/components/common/Container";
 import SectionTitle from "@/components/common/SectionTitle";
-import CategoryCard from "@/components/categories/CategoryCard";
+import CategoryCarousel from "@/components/categories/CategoryCarousel";
 
 import { prisma } from "@/lib/prisma";
-
-const categoryPriority = ["Women", "Men", "Footwear", "Accessories"];
 
 const Categories = async () => {
     const categories = await prisma.category.findMany({
@@ -24,51 +22,26 @@ const Categories = async () => {
         },
     });
 
-    const sortedCategories = [...categories].sort((a, b) => {
-        const aIndex = categoryPriority.indexOf(a.name);
-        const bIndex = categoryPriority.indexOf(b.name);
-
-        if (aIndex !== -1 && bIndex !== -1) {
-            return aIndex - bIndex;
-        }
-
-        if (aIndex !== -1) {
-            return -1;
-        }
-
-        if (bIndex !== -1) {
-            return 1;
-        }
-
-        return a.name.localeCompare(b.name);
-    });
+    const mappedCategories = categories.map((category) => ({
+        id: category.id,
+        slug: category.slug,
+        title: category.name,
+        image: category.imageUrl ?? "",
+        products: category._count.products,
+    }));
 
     return (
-        <section className="py-20 sm:py-24 lg:py-28">
+        <section className="py-20 sm:py-24 lg:py-20">
             <Container>
                 <SectionTitle
-                    subtitle="Collections"
-                    title="Shop by Category"
-                    description="Explore our curated collections tailored to every lifestyle."
+                    subtitle="Top Categories"
+                    title="Shop By Category"
+                    description="Explore our curated collections and find the pieces that fit your style."
                 />
 
-                {sortedCategories.length > 0 ? (
-                    <div className="mt-10 grid gap-5 sm:mt-14 lg:grid-cols-2 lg:gap-6">
-                        {sortedCategories.map((category, index) => (
-                            <CategoryCard
-                                key={category.id}
-                                category={{
-                                    id: category.id,
-                                    slug: category.slug,
-                                    title: category.name,
-                                    image:
-                                        category.imageUrl ??
-                                        "/images/placeholder-product.jpg",
-                                    products: category._count.products,
-                                }}
-                                featured={index < 2}
-                            />
-                        ))}
+                {mappedCategories.length > 0 ? (
+                    <div className="mt-10 sm:mt-14">
+                        <CategoryCarousel categories={mappedCategories} />
                     </div>
                 ) : (
                     <div className="mt-10 rounded-2xl border border-border bg-stone-50 px-6 py-16 text-center sm:mt-14">
