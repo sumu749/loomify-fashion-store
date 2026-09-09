@@ -3,12 +3,12 @@ import TopProducts from "@/components/home/TopProducts";
 import Hero from "@/components/home/Hero";
 import LoomifyPromise from "@/components/home/LoomifyPromise";
 import Newsletter from "@/components/home/Newsletter";
-import StatsSection from "@/components/home/StatsSection";
 
 import { prisma } from "@/lib/prisma";
 import { mapProduct } from "@/lib/mappers/productMapper";
 import EditorialCampaigns from "@/components/home/EditorialCampaigns";
 import LatestProducts from "@/components/home/LatestProducts";
+import BenefitsSection from "@/components/home/BenefitsSection";
 
 export default async function HomePage() {
     const topProducts = await prisma.product.findMany({
@@ -76,7 +76,9 @@ export default async function HomePage() {
             <EditorialCampaigns />
 
             <LoomifyPromise />
-            <StatsSection />
+
+            <BenefitsSection />
+
             <Newsletter />
         </>
     );
