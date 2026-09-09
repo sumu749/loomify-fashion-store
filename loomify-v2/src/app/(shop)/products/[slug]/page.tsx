@@ -8,6 +8,7 @@ import RelatedProducts from "@/components/product-details/RelatedProducts";
 
 import { prisma } from "@/lib/prisma";
 import { mapProduct } from "@/lib/mappers/productMapper";
+import ProductReviews from "@/components/product-details/ProductReviews";
 
 interface ProductDetailsPageProps {
     params: Promise<{
@@ -44,7 +45,18 @@ export default async function ProductDetailsPage({
                     approved: true,
                 },
                 select: {
+                    id: true,
                     rating: true,
+                    comment: true,
+                    createdAt: true,
+                    user: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
+                orderBy: {
+                    createdAt: "desc",
                 },
             },
         },
@@ -83,6 +95,8 @@ export default async function ProductDetailsPage({
                     </div>
                 </Container>
             </section>
+
+            <ProductReviews reviews={product.reviews} />
 
             <RelatedProducts currentProduct={mappedProduct} />
         </>
