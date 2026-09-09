@@ -247,7 +247,7 @@ const Hero = () => {
                                     }}
                                     className="max-w-xl text-white"
                                 >
-                                    <p className="text-xs font-medium uppercase tracking-[0.35em] text-white/80 sm:text-sm">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent sm:text-sm">
                                         {slide.eyebrow} · 2026
                                     </p>
 
