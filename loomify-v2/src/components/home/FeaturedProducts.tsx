@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 import Container from "@/components/common/Container";
-import SectionTitle from "@/components/common/SectionTitle";
 import ProductCard from "@/components/products/ProductCard";
 
 import type { Product } from "@/types/product";
@@ -16,65 +15,80 @@ interface FeaturedProductsProps {
 
 const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
     return (
-        <section className="relative overflow-hidden py-24">
-            {/* Decoration */}
-
-            <div className="absolute -left-20 top-20 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
-
-            <div className="absolute -right-20 bottom-10 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
-
+        <section className="py-20 sm:py-24">
             <Container>
-                {/* Header */}
+                {/* ================= Tabs ================= */}
 
                 <motion.div
-                    initial={{
-                        opacity: 0,
-                        y: 40,
-                    }}
-                    whileInView={{
-                        opacity: 1,
-                        y: 0,
-                    }}
-                    viewport={{
-                        once: true,
-                    }}
-                    transition={{
-                        duration: 0.6,
-                    }}
-                    className="mb-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="mb-10 flex items-center justify-center sm:mb-12"
                 >
-                    <SectionTitle
-                        align="left"
-                        subtitle="Featured Collection"
-                        title="Our Best Picks"
-                        description="Handpicked fashion essentials crafted with premium quality to elevate your everyday wardrobe."
-                        descriptionClassName="max-w-xl"
-                    />
+                    <div className="flex items-center gap-8 sm:gap-12">
+                        <button
+                            type="button"
+                            className="relative pb-3 text-xs font-semibold uppercase tracking-[0.18em] text-accent sm:text-sm"
+                        >
+                            Featured
+                            <span className="absolute bottom-0 left-0 h-px w-full bg-accent" />
+                        </button>
 
-                    <Link
-                        href="/products"
-                        className="inline-flex items-center gap-2 font-medium text-primary transition hover:text-accent"
-                    >
-                        View All
-                        <ArrowRight size={18} />
-                    </Link>
+                        <Link
+                            href="/products?category=women"
+                            className="pb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 transition-colors hover:text-accent sm:text-sm"
+                        >
+                            Clothing
+                        </Link>
+
+                        <Link
+                            href="/products"
+                            className="pb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 transition-colors hover:text-accent sm:text-sm"
+                        >
+                            Collections
+                        </Link>
+                    </div>
                 </motion.div>
 
-                {/* Products */}
+                {/* ================= Products ================= */}
 
                 {products.length > 0 ? (
-                    <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {products.map((product, index) => (
-                            <div
-                                key={product.id}
-                                className={index % 2 !== 0 ? "xl:mt-10" : ""}
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{
+                                duration: 0.7,
+                                delay: 0.1,
+                            }}
+                            className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 sm:gap-y-12 lg:grid-cols-4 lg:gap-x-7"
+                        >
+                            {products.slice(0, 4).map((product) => (
+                                <ProductCard
+                                    key={product.id}
+                                    product={product}
+                                />
+                            ))}
+                        </motion.div>
+
+                        {/* View all */}
+                        <div className="mt-12 flex justify-center">
+                            <Link
+                                href="/products"
+                                className="group inline-flex items-center gap-2 border-b border-primary pb-1 text-sm font-medium text-primary transition-colors hover:border-accent hover:text-accent"
                             >
-                                <ProductCard product={product} />
-                            </div>
-                        ))}
-                    </div>
+                                View All Products
+                                <ArrowRight
+                                    size={16}
+                                    className="transition-transform duration-300 group-hover:translate-x-1"
+                                />
+                            </Link>
+                        </div>
+                    </>
                 ) : (
-                    <div className="mt-14 rounded-2xl border border-border bg-stone-50 px-6 py-16 text-center">
+                    <div className="rounded-2xl border border-border bg-stone-50 px-6 py-16 text-center">
                         <h3 className="text-xl font-semibold text-primary">
                             No featured products yet
                         </h3>
