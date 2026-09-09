@@ -7,24 +7,40 @@ import { ArrowRight } from "lucide-react";
 import Container from "@/components/common/Container";
 import SectionTitle from "@/components/common/SectionTitle";
 import ProductCard from "@/components/products/ProductCard";
-import products from "@/data/products";
 
-const featuredProducts = products.slice(0, 4);
+import type { Product } from "@/types/product";
 
-const FeaturedProducts = () => {
+interface FeaturedProductsProps {
+    products: Product[];
+}
+
+const FeaturedProducts = ({ products }: FeaturedProductsProps) => {
     return (
         <section className="relative overflow-hidden py-24">
             {/* Decoration */}
+
             <div className="absolute -left-20 top-20 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+
             <div className="absolute -right-20 bottom-10 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
 
             <Container>
                 {/* Header */}
+
                 <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
+                    initial={{
+                        opacity: 0,
+                        y: 40,
+                    }}
+                    whileInView={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    viewport={{
+                        once: true,
+                    }}
+                    transition={{
+                        duration: 0.6,
+                    }}
                     className="mb-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between"
                 >
                     <SectionTitle
@@ -45,16 +61,38 @@ const FeaturedProducts = () => {
                 </motion.div>
 
                 {/* Products */}
-                <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {featuredProducts.map((product, index) => (
-                        <div
-                            key={product.id}
-                            className={index % 2 !== 0 ? "xl:mt-10" : ""}
+
+                {products.length > 0 ? (
+                    <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {products.map((product, index) => (
+                            <div
+                                key={product.id}
+                                className={index % 2 !== 0 ? "xl:mt-10" : ""}
+                            >
+                                <ProductCard product={product} />
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="mt-14 rounded-2xl border border-border bg-stone-50 px-6 py-16 text-center">
+                        <h3 className="text-xl font-semibold text-primary">
+                            No featured products yet
+                        </h3>
+
+                        <p className="mt-2 text-sm text-gray-500">
+                            Featured products selected from the admin panel will
+                            appear here.
+                        </p>
+
+                        <Link
+                            href="/products"
+                            className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-accent"
                         >
-                            <ProductCard product={product} />
-                        </div>
-                    ))}
-                </div>
+                            Explore all products
+                            <ArrowRight size={16} />
+                        </Link>
+                    </div>
+                )}
             </Container>
         </section>
     );

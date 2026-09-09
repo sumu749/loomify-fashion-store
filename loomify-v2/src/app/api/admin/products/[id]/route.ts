@@ -50,7 +50,8 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
             compareAtPrice,
             categoryId,
             image,
-            variants,
+            sizes,
+            colors,
             featured,
             published,
         } = body;
@@ -60,6 +61,21 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
                 {
                     success: false,
                     message: "Missing required fields",
+                },
+                { status: 400 },
+            );
+        }
+
+        if (
+            !Array.isArray(sizes) ||
+            !Array.isArray(colors) ||
+            sizes.length === 0 ||
+            colors.length === 0
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "At least one size and one color are required",
                 },
                 { status: 400 },
             );
@@ -143,29 +159,45 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
                 }
             }
 
+            const existingVariantStock = new Map(
+                existingProduct.variants.map((variant) => [
+                    `${variant.color.trim().toLowerCase()}-${variant.size.trim().toLowerCase()}`,
+                    variant.stock,
+                ]),
+            );
+
             await tx.productVariant.deleteMany({
                 where: {
                     productId: id,
                 },
             });
 
-            for (const variant of variants) {
-                const colorCode = variant.color
-                    .trim()
-                    .replace(/\s+/g, "-")
-                    .toUpperCase();
+            for (const color of colors) {
+                for (const size of sizes) {
+                    const normalizedColor = String(color).trim();
+                    const normalizedSize = String(size).trim();
 
-                const variantSku = `${sku.trim()}-${colorCode}-${variant.size.trim()}`;
+                    const colorCode = normalizedColor
+                        .replace(/\s+/g, "-")
+                        .toUpperCase();
 
-                await tx.productVariant.create({
-                    data: {
-                        productId: id,
-                        sku: variantSku,
-                        size: variant.size.trim(),
-                        color: variant.color.trim(),
-                        stock: Number(variant.stock) || 0,
-                    },
-                });
+                    const variantSku = `${sku.trim()}-${colorCode}-${normalizedSize}`;
+
+                    const previousStock =
+                        existingVariantStock.get(
+                            `${normalizedColor.toLowerCase()}-${normalizedSize.toLowerCase()}`,
+                        ) ?? 0;
+
+                    await tx.productVariant.create({
+                        data: {
+                            productId: id,
+                            sku: variantSku,
+                            size: normalizedSize,
+                            color: normalizedColor,
+                            stock: previousStock,
+                        },
+                    });
+                }
             }
         });
 

@@ -10,7 +10,8 @@
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
-        "add-product-images": "tsx scripts/add-product-images.ts"
+        "add-product-images": "tsx scripts/add-product-images.ts",
+        "add-category-images": "tsx scripts/add-category-images.ts"
     },
     "dependencies": {
         "@fontsource/inter": "^5.3.0",
