@@ -1,193 +1,377 @@
+/* eslint-disable indent */
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
-
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 import Button from "@/components/common/Button";
 import Container from "@/components/common/Container";
-import heroImage from "@/assets/images/hero.jpg";
+
+const heroSlides = [
+    {
+        image: "https://images.unsplash.com/photo-1628102160424-5f4ab3404829?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        eyebrow: "New Season",
+        title: "The Art of Everyday Style",
+        description:
+            "Refined essentials designed to bring effortless elegance to your everyday wardrobe.",
+    },
+    {
+        image: "https://images.unsplash.com/photo-1632129460818-7e7fb9603a53?q=80&w=699&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        eyebrow: "Modern Essentials",
+        title: "Designed to Be Remembered",
+        description:
+            "Thoughtful silhouettes and timeless pieces made for modern living.",
+    },
+    {
+        image: "https://images.unsplash.com/photo-1545911825-6bfa5b0c34a9?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        eyebrow: "Effortless Elegance",
+        title: "Less, But Better",
+        description:
+            "A considered collection of premium pieces that move effortlessly with you.",
+    },
+    {
+        image: "https://images.unsplash.com/photo-1580651214613-f4692d6d138f?q=80&w=686&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        eyebrow: "Curated Collection",
+        title: "Style Without Compromise",
+        description:
+            "Discover elevated essentials where comfort, confidence, and character meet.",
+    },
+    {
+        image: "https://images.unsplash.com/photo-1599309329365-0a9ed45a1da3?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        eyebrow: "Loomify Collection",
+        title: "Made for Your Moment",
+        description:
+            "Find pieces that feel as good as they look, from everyday essentials to statement styles.",
+    },
+];
+
+type Direction = "left" | "right" | "top" | "bottom" | "diagonal";
+
+const directions: Direction[] = ["right", "left", "bottom", "top", "diagonal"];
+
+const imageVariants = {
+    enter: (direction: Direction) => {
+        switch (direction) {
+            case "left":
+                return {
+                    x: "-18%",
+                    clipPath: "inset(0 0 0 100%)",
+                    scale: 1.05,
+                };
+
+            case "right":
+                return {
+                    x: "18%",
+                    clipPath: "inset(0 100% 0 0)",
+                    scale: 1.05,
+                };
+
+            case "top":
+                return {
+                    y: "-14%",
+                    clipPath: "inset(100% 0 0 0)",
+                    scale: 1.05,
+                };
+
+            case "bottom":
+                return {
+                    y: "14%",
+                    clipPath: "inset(0 0 100% 0)",
+                    scale: 1.05,
+                };
+
+            case "diagonal":
+                return {
+                    x: "10%",
+                    y: "-8%",
+                    clipPath: "polygon(100% 0, 100% 0, 100% 100%, 100% 100%)",
+                    scale: 1.08,
+                };
+        }
+    },
+
+    center: {
+        x: 0,
+        y: 0,
+        clipPath: "inset(0% 0% 0% 0%)",
+        scale: 1,
+    },
+
+    exit: (direction: Direction) => {
+        switch (direction) {
+            case "left":
+                return {
+                    x: "-12%",
+                    clipPath: "inset(0 100% 0 0)",
+                    scale: 1.03,
+                };
+
+            case "right":
+                return {
+                    x: "12%",
+                    clipPath: "inset(0 0 0 100%)",
+                    scale: 1.03,
+                };
+
+            case "top":
+                return {
+                    y: "-10%",
+                    clipPath: "inset(0 0 100% 0)",
+                    scale: 1.03,
+                };
+
+            case "bottom":
+                return {
+                    y: "10%",
+                    clipPath: "inset(100% 0 0 0)",
+                    scale: 1.03,
+                };
+
+            case "diagonal":
+                return {
+                    x: "-8%",
+                    y: "8%",
+                    clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)",
+                    scale: 1.04,
+                };
+        }
+    },
+};
+
+const contentVariants = {
+    enter: {
+        opacity: 0,
+        y: 28,
+    },
+    center: {
+        opacity: 1,
+        y: 0,
+    },
+    exit: {
+        opacity: 0,
+        y: -20,
+    },
+};
 
 const Hero = () => {
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [direction, setDirection] = useState<Direction>("right");
+
+    const slide = heroSlides[currentSlide];
+
+    const goToNext = useCallback(() => {
+        setDirection(directions[currentSlide]);
+
+        setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, [currentSlide]);
+
+    const goToPrevious = () => {
+        const previousIndex =
+            (currentSlide - 1 + heroSlides.length) % heroSlides.length;
+
+        setDirection(directions[previousIndex]);
+
+        setCurrentSlide(previousIndex);
+    };
+
+    const goToSlide = (index: number) => {
+        if (index === currentSlide) return;
+
+        setDirection(directions[index]);
+        setCurrentSlide(index);
+    };
+
+    useEffect(() => {
+        const interval = setInterval(goToNext, 6000);
+
+        return () => clearInterval(interval);
+    }, [goToNext]);
+
     return (
-        <section className="relative overflow-hidden bg-stone-50">
-            {/* Background accents */}
-            <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
-            <div className="pointer-events-none absolute -right-24 bottom-10 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
-
+        <section className="bg-stone-50 pb-14 sm:pb-16">
             <Container>
-                <div className="relative py-6 sm:py-8 lg:py-10">
-                    {/* Main Hero */}
-                    <div className="relative min-h-155 overflow-hidden  bg-primary sm:min-h-170 lg:min-h-[calc(100vh-120px)]">
-                        {/* Hero Image */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 1.08 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{
-                                duration: 1.2,
-                                ease: "easeOut",
-                            }}
-                            className="absolute inset-0"
+                <div className="relative pt-4 sm:pt-6">
+                    {/* ================= Hero ================= */}
+
+                    <div className="relative overflow-hidden ">
+                        {/* Images */}
+                        <AnimatePresence
+                            initial={false}
+                            custom={direction}
+                            mode="sync"
                         >
-                            <Image
-                                src={heroImage}
-                                alt="Loomify Fashion Collection"
-                                fill
-                                priority
-                                className="object-cover object-center"
-                            />
-                        </motion.div>
+                            <motion.div
+                                key={currentSlide}
+                                custom={direction}
+                                variants={imageVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{
+                                    duration: 1.05,
+                                    ease: [0.76, 0, 0.24, 1],
+                                }}
+                                className="absolute inset-0"
+                            >
+                                <Image
+                                    src={slide.image}
+                                    alt={`Loomify — ${slide.title}`}
+                                    fill
+                                    priority={currentSlide === 0}
+                                    sizes="100vw"
+                                    className="object-cover"
+                                />
 
-                        {/* Dark Gradient Overlay */}
-                        <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/35 to-black/5" />
+                                <div className="absolute inset-0 bg-black/10" />
 
-                        {/* Bottom Gradient */}
-                        <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-black/35 to-transparent" />
+                                <div className="absolute inset-0 bg-linear-to-r from-black/65 via-black/25 to-transparent" />
+                            </motion.div>
+                        </AnimatePresence>
 
                         {/* Hero Content */}
-                        <div className="relative z-10 flex min-h-155 items-center px-6 py-16 sm:min-h-170 sm:px-10 md:px-14 lg:min-h-[calc(100vh-120px)] lg:px-16 xl:px-20">
-                            <motion.div
-                                initial={{ opacity: 0, y: 35 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{
-                                    duration: 0.8,
-                                    delay: 0.15,
-                                }}
-                                className="max-w-2xl text-white"
-                            >
-                                {/* Eyebrow */}
-                                <div className="flex items-center gap-3">
-                                    <span className="h-px w-10 bg-white/70" />
+                        <div className="relative z-10 flex min-h-140 items-center px-6 py-20 sm:min-h-155 sm:px-10 md:px-14 lg:min-h-162.5 lg:px-20">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={currentSlide}
+                                    variants={contentVariants}
+                                    initial="enter"
+                                    animate="center"
+                                    exit="exit"
+                                    transition={{
+                                        duration: 0.7,
+                                        delay: 0.18,
+                                        ease: "easeOut",
+                                    }}
+                                    className="max-w-xl text-white"
+                                >
+                                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent sm:text-sm">
+                                        {slide.eyebrow} · 2026
+                                    </p>
 
-                                    <span className="text-xs font-medium uppercase tracking-[0.3em] text-white/85 sm:text-sm">
-                                        New Season · 2026
-                                    </span>
-                                </div>
+                                    <h1 className="mt-6 max-w-2xl text-5xl font-semibold leading-[0.95] tracking-[-0.04em] sm:text-6xl md:text-7xl lg:text-8xl">
+                                        {slide.title}
+                                    </h1>
 
-                                {/* Heading */}
-                                <h1 className="mt-6 text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-                                    Effortlessly
-                                    <br />
-                                    <span className="font-light italic">
-                                        Elevated.
-                                    </span>
-                                </h1>
+                                    <p className="mt-7 max-w-md text-sm leading-7 text-white/80 sm:text-base sm:leading-8">
+                                        {slide.description}
+                                    </p>
 
-                                {/* Description */}
-                                <p className="mt-7 max-w-xl text-sm leading-7 text-white/80 sm:text-base sm:leading-8 lg:text-lg">
-                                    Discover refined essentials designed for
-                                    modern living. Timeless silhouettes, premium
-                                    details, and effortless everyday style.
-                                </p>
+                                    <div className="mt-9 flex flex-wrap items-center gap-5">
+                                        <Button asChild size="lg">
+                                            <Link href="/products">
+                                                Shop Collection
+                                                <ArrowRight size={18} />
+                                            </Link>
+                                        </Button>
 
-                                {/* CTA */}
-                                <div className="mt-8 flex flex-wrap items-center gap-3 sm:mt-10 sm:gap-4">
-                                    <Button asChild size="lg">
-                                        <Link href="/products">
-                                            Shop Collection
-                                            <ArrowRight size={18} />
+                                        <Link
+                                            href="/products?category=women"
+                                            className="group inline-flex items-center gap-2 border-b border-white/60 pb-1 text-sm font-medium text-white transition hover:border-white"
+                                        >
+                                            Explore Women
+                                            <ArrowRight
+                                                size={16}
+                                                className="transition-transform duration-300 group-hover:translate-x-1"
+                                            />
                                         </Link>
-                                    </Button>
-
-                                    <Link
-                                        href="/products?category=women"
-                                        className="inline-flex h-12 items-center justify-center rounded-full border border-white/40 bg-white/10 px-6 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white hover:bg-white hover:text-primary"
-                                    >
-                                        Shop Women
-                                    </Link>
-                                </div>
-
-                                {/* Supporting text */}
-                                <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-white/65 sm:text-sm">
-                                    <span>Free shipping over $100</span>
-
-                                    <span className="hidden h-1 w-1 rounded-full bg-white/40 sm:block" />
-
-                                    <span>Easy 7-day returns</span>
-                                </div>
-                            </motion.div>
+                                    </div>
+                                </motion.div>
+                            </AnimatePresence>
                         </div>
 
-                        {/* Campaign Badge */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 30, y: -20 }}
-                            animate={{ opacity: 1, x: 0, y: 0 }}
-                            transition={{
-                                duration: 0.7,
-                                delay: 0.6,
-                            }}
-                            className="absolute right-5 top-5 z-10 sm:right-8 sm:top-8 lg:right-10 lg:top-10"
-                        >
-                            <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full border border-white/30 bg-white/10 text-center text-white backdrop-blur-md sm:h-28 sm:w-28">
-                                <span className="text-[10px] uppercase tracking-[0.2em] text-white/70 sm:text-xs">
-                                    New
-                                </span>
+                        {/* Slide Controls */}
+                        <div className="absolute bottom-7 left-6 z-20 flex items-center gap-3 sm:left-10 lg:left-20">
+                            <button
+                                type="button"
+                                onClick={goToPrevious}
+                                aria-label="Previous slide"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-black/10 text-white backdrop-blur-sm transition hover:bg-white hover:text-primary"
+                            >
+                                <ChevronLeft size={18} />
+                            </button>
 
-                                <span className="mt-1 text-sm font-semibold sm:text-base">
-                                    Arrivals
-                                </span>
+                            <button
+                                type="button"
+                                onClick={goToNext}
+                                aria-label="Next slide"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-black/10 text-white backdrop-blur-sm transition hover:bg-white hover:text-primary"
+                            >
+                                <ChevronRight size={18} />
+                            </button>
+                        </div>
 
-                                <span className="mt-1 text-[10px] text-white/70 sm:text-xs">
-                                    Shop now
-                                </span>
+                        {/* Slide Indicator */}
+                        <div className="absolute bottom-8 right-6 z-20 flex items-center gap-4 text-white sm:right-10 lg:right-20">
+                            <span className="text-xs font-medium tracking-[0.2em] text-white/70">
+                                {String(currentSlide + 1).padStart(2, "0")}
+                            </span>
+
+                            <div className="flex items-center gap-1.5">
+                                {heroSlides.map((_, index) => (
+                                    <button
+                                        key={index}
+                                        type="button"
+                                        aria-label={`Go to slide ${index + 1}`}
+                                        onClick={() => goToSlide(index)}
+                                        className={`h-px transition-all duration-300 ${
+                                            index === currentSlide
+                                                ? "w-10 bg-white"
+                                                : "w-5 bg-white/40"
+                                        }`}
+                                    />
+                                ))}
                             </div>
-                        </motion.div>
 
-                        {/* Scroll indicator */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{
-                                duration: 0.8,
-                                delay: 1,
-                            }}
-                            className="absolute bottom-6 right-6 z-10 hidden items-center gap-3 text-[10px] uppercase tracking-[0.25em] text-white/60 sm:flex lg:bottom-8 lg:right-10"
-                        >
-                            <span>Explore</span>
-                            <span className="h-px w-10 bg-white/30" />
-                        </motion.div>
+                            <span className="text-xs font-medium tracking-[0.2em] text-white/50">
+                                {String(heroSlides.length).padStart(2, "0")}
+                            </span>
+                        </div>
                     </div>
 
-                    {/* Trust / Benefits Strip */}
+                    {/* ================= Trust / Benefits ================= */}
+
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{
                             duration: 0.7,
                             delay: 0.8,
                         }}
-                        className="relative z-20 -mt-5 mx-4 grid overflow-hidden rounded-2xl border border-border bg-white shadow-lg sm:mx-8 sm:grid-cols-3"
+                        className="relative z-20 mx-4 -mt-5 overflow-hidden rounded-2xl border border-border bg-white shadow-lg sm:mx-8"
                     >
-                        <div className="px-5 py-5 text-center sm:border-r sm:border-border">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                                Free Shipping
-                            </p>
+                        <div className="grid sm:grid-cols-3">
+                            <div className="px-5 py-5 text-center sm:border-r sm:border-border">
+                                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                                    Free Shipping
+                                </p>
 
-                            <p className="mt-1 text-xs text-gray-500">
-                                On orders over $100
-                            </p>
-                        </div>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    On orders over $100
+                                </p>
+                            </div>
 
-                        <div className="border-t border-border px-5 py-5 text-center sm:border-r sm:border-t-0 sm:border-border">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                                Easy Returns
-                            </p>
+                            <div className="border-t border-border px-5 py-5 text-center sm:border-r sm:border-t-0">
+                                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                                    Easy Returns
+                                </p>
 
-                            <p className="mt-1 text-xs text-gray-500">
-                                7-day hassle-free returns
-                            </p>
-                        </div>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    7-day hassle-free returns
+                                </p>
+                            </div>
 
-                        <div className="border-t border-border px-5 py-5 text-center sm:border-t-0">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                                Secure Checkout
-                            </p>
+                            <div className="border-t border-border px-5 py-5 text-center sm:border-t-0">
+                                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                                    Secure Checkout
+                                </p>
 
-                            <p className="mt-1 text-xs text-gray-500">
-                                Safe & trusted payment
-                            </p>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Safe & trusted payment
+                                </p>
+                            </div>
                         </div>
                     </motion.div>
                 </div>

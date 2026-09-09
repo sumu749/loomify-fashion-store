@@ -1,6 +1,6 @@
 import Container from "@/components/common/Container";
 import SectionTitle from "@/components/common/SectionTitle";
-import CategoryCard from "@/components/categories/CategoryCard";
+import CategoryCarousel from "@/components/categories/CategoryCarousel";
 
 import { prisma } from "@/lib/prisma";
 
@@ -22,31 +22,26 @@ const Categories = async () => {
         },
     });
 
+    const mappedCategories = categories.map((category) => ({
+        id: category.id,
+        slug: category.slug,
+        title: category.name,
+        image: category.imageUrl ?? "",
+        products: category._count.products,
+    }));
+
     return (
-        <section className="py-20">
+        <section className="py-20 sm:py-24 lg:py-20">
             <Container>
                 <SectionTitle
-                    subtitle="Collections"
-                    title="Shop by Category"
-                    description="Explore our curated collections tailored to every lifestyle."
+                    subtitle="Top Categories"
+                    title="Shop By Category"
+                    description="Explore our curated collections and find the pieces that fit your style."
                 />
 
-                {categories.length > 0 ? (
-                    <div className="mt-10 grid gap-6 sm:mt-14 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                        {categories.map((category) => (
-                            <CategoryCard
-                                key={category.id}
-                                category={{
-                                    id: category.id,
-                                    slug: category.slug,
-                                    title: category.name,
-                                    image:
-                                        category.imageUrl ??
-                                        "/images/placeholder-product.jpg",
-                                    products: category._count.products,
-                                }}
-                            />
-                        ))}
+                {mappedCategories.length > 0 ? (
+                    <div className="mt-10 sm:mt-14">
+                        <CategoryCarousel categories={mappedCategories} />
                     </div>
                 ) : (
                     <div className="mt-10 rounded-2xl border border-border bg-stone-50 px-6 py-16 text-center sm:mt-14">

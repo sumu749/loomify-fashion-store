@@ -1,5 +1,5 @@
 import Categories from "@/components/home/Categories";
-import FeaturedProducts from "@/components/home/FeaturedProducts";
+import TopProducts from "@/components/home/TopProducts";
 import Hero from "@/components/home/Hero";
 import LoomifyPromise from "@/components/home/LoomifyPromise";
 import Newsletter from "@/components/home/Newsletter";
@@ -7,34 +7,26 @@ import StatsSection from "@/components/home/StatsSection";
 
 import { prisma } from "@/lib/prisma";
 import { mapProduct } from "@/lib/mappers/productMapper";
+import EditorialCampaigns from "@/components/home/EditorialCampaigns";
+import LatestProducts from "@/components/home/LatestProducts";
 
 export default async function HomePage() {
-    const featuredProductsFromDb = await prisma.product.findMany({
+    const topProducts = await prisma.product.findMany({
         where: {
             published: true,
             featured: true,
         },
         include: {
             category: true,
-
             images: {
                 orderBy: {
                     sortOrder: "asc",
                 },
             },
-
-            variants: {
-                orderBy: {
-                    createdAt: "asc",
-                },
-            },
-
+            variants: true,
             reviews: {
                 where: {
                     approved: true,
-                },
-                select: {
-                    rating: true,
                 },
             },
         },
@@ -44,7 +36,32 @@ export default async function HomePage() {
         take: 4,
     });
 
-    const featuredProducts = featuredProductsFromDb.map(mapProduct);
+    const latestProducts = await prisma.product.findMany({
+        where: {
+            published: true,
+        },
+        include: {
+            category: true,
+            images: {
+                orderBy: {
+                    sortOrder: "asc",
+                },
+            },
+            variants: true,
+            reviews: {
+                where: {
+                    approved: true,
+                },
+            },
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+        take: 4,
+    });
+
+    const mappedTopProducts = topProducts.map(mapProduct);
+    const mappedLatestProducts = latestProducts.map(mapProduct);
 
     return (
         <>
@@ -52,12 +69,14 @@ export default async function HomePage() {
 
             <Categories />
 
-            <FeaturedProducts products={featuredProducts} />
+            <LatestProducts products={mappedLatestProducts} />
+
+            <TopProducts products={mappedTopProducts} />
+
+            <EditorialCampaigns />
 
             <LoomifyPromise />
-
             <StatsSection />
-
             <Newsletter />
         </>
     );

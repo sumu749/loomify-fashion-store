@@ -29,12 +29,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
         name,
         category,
         image,
+        images,
         price,
         oldPrice,
         rating,
         reviews,
-        badge,
     } = product;
+
+    const hoverImage = images?.[1] ?? image;
+
+    const discountPercentage =
+        oldPrice && oldPrice > price
+            ? Math.round(((oldPrice - price) / oldPrice) * 100)
+            : null;
 
     const handleAddToCart = () => {
         const defaultVariant = product.variants.find(
@@ -71,15 +78,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
     return (
         <motion.article
-            whileHover={{ y: -8 }}
+            whileHover={{ y: -4 }}
             transition={{ duration: 0.25 }}
-            className="group overflow-hidden rounded-card border border-border bg-white shadow-sm transition-all duration-300 hover:shadow-2xl"
+            className="group"
         >
-            {/* Image */}
-            <div className="relative overflow-hidden">
-                {badge && (
-                    <span className="absolute left-4 top-4 z-20 rounded-full bg-accent px-3 py-1 text-xs font-semibold tracking-wide text-white">
-                        {badge}
+            {/* ================= Image ================= */}
+
+            <div className="relative overflow-hidden bg-stone-100">
+                {/* Discount */}
+                {discountPercentage && (
+                    <span className="absolute left-3 top-3 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-xs font-medium text-white sm:left-4 sm:top-4 sm:h-14 sm:w-14">
+                        -{discountPercentage}%
                     </span>
                 )}
 
@@ -92,109 +101,129 @@ const ProductCard = ({ product }: ProductCardProps) => {
                             ? `Remove ${name} from wishlist`
                             : `Add ${name} to wishlist`
                     }
-                    className={`absolute right-4 top-4 z-10 rounded-full p-2 shadow transition-all duration-300 ${
+                    className={`absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 sm:right-4 sm:top-4 ${
                         isInWishlist
                             ? "bg-accent text-white"
-                            : "bg-white hover:bg-accent hover:text-white"
+                            : "bg-white/90 text-primary opacity-100 shadow-sm lg:opacity-0 lg:group-hover:opacity-100"
                     }`}
                 >
                     <Heart
-                        size={18}
+                        size={17}
                         fill={isInWishlist ? "currentColor" : "none"}
                     />
                 </button>
 
-                {/* Product Image */}
-                <Link href={`/products/${slug}`} aria-label={`View ${name}`}>
+                {/* Product Images */}
+                <Link
+                    href={`/products/${slug}`}
+                    aria-label={`View ${name}`}
+                    className="relative block aspect-4/5 overflow-hidden"
+                >
+                    {/* Primary image */}
                     {image ? (
                         <Image
                             src={image}
                             alt={name}
-                            width={600}
-                            height={750}
-                            className="aspect-4/5 w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                            className="object-cover transition-all duration-700 ease-out group-hover:scale-105"
                         />
                     ) : (
-                        <div className="flex h-full min-h-75 items-center justify-center bg-stone-100 text-sm text-gray-400">
+                        <div className="absolute inset-0 flex items-center justify-center bg-stone-100 text-sm text-gray-400">
                             No image
                         </div>
                     )}
+
+                    {/* Hover image */}
+                    {hoverImage && hoverImage !== image && (
+                        <Image
+                            src={hoverImage}
+                            alt={`${name} alternate view`}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                            className="absolute inset-0 object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-100"
+                        />
+                    )}
+
+                    {/* Subtle overlay */}
+                    <div className="absolute inset-0 bg-black/0 transition-colors duration-500 group-hover:bg-black/5" />
+
+                    {/* Quick View */}
+                    <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white opacity-100 shadow-lg transition-all duration-500 lg:scale-75 lg:opacity-0 lg:group-hover:scale-100 lg:group-hover:opacity-100">
+                            <Eye size={18} />
+                        </span>
+                    </div>
                 </Link>
-
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent opacity-100 transition-all duration-500 lg:opacity-0 lg:group-hover:opacity-100" />
-
-                {/* Hover Actions */}
-                <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 translate-y-0 gap-3 opacity-100 transition-all duration-500 lg:translate-y-8 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
-                    <Link
-                        href={`/products/${slug}`}
-                        aria-label={`View ${name}`}
-                        className="flex h-11 w-11 items-center justify-center rounded-full bg-white transition hover:bg-accent hover:text-white"
-                    >
-                        <Eye size={18} />
-                    </Link>
-
-                    <button
-                        type="button"
-                        onClick={handleAddToCart}
-                        aria-label={`Add ${name} to cart`}
-                        className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white transition hover:bg-accent"
-                    >
-                        <ShoppingBag size={18} />
-                    </button>
-                </div>
             </div>
 
-            {/* Content */}
-            <div className="space-y-3 p-4 sm:space-y-4 sm:p-6">
-                <div>
-                    <p className="text-sm uppercase tracking-wider text-gray-500">
-                        {category}
-                    </p>
+            {/* ================= Product Info ================= */}
 
-                    <Link
-                        href={`/products/${slug}`}
-                        aria-label={`View ${name}`}
-                    >
-                        <h3 className="mt-2 text-lg font-semibold text-primary transition group-hover:text-accent sm:text-xl">
-                            {name}
-                        </h3>
-                    </Link>
-                </div>
+            <div className="pt-5 text-center sm:pt-6">
+                {/* Category */}
+                <Link
+                    href={`/products?category=${encodeURIComponent(category)}`}
+                    className="inline-block text-[11px] font-medium uppercase tracking-[0.16em] text-gray-400 transition-colors hover:text-accent"
+                >
+                    {category}
+                </Link>
+
+                {/* Product Name */}
+                <Link
+                    href={`/products/${slug}`}
+                    aria-label={`View ${name}`}
+                    className="block"
+                >
+                    <h3 className="mt-2 text-base font-medium text-primary transition-colors hover:text-accent sm:text-lg">
+                        {name}
+                    </h3>
+                </Link>
 
                 {/* Rating */}
-                <div className="flex items-center gap-2">
-                    <Star
-                        size={16}
-                        className="fill-yellow-400 text-yellow-400"
-                    />
+                {reviews > 0 && (
+                    <div className="mt-2 flex items-center justify-center gap-1">
+                        {Array.from({ length: 5 }).map((_, index) => (
+                            <Star
+                                key={index}
+                                size={13}
+                                className={
+                                    index < Math.round(rating)
+                                        ? "fill-accent text-accent"
+                                        : "text-gray-300"
+                                }
+                            />
+                        ))}
 
-                    <span className="text-sm font-medium">{rating}</span>
-
-                    <span className="text-sm text-gray-500">({reviews})</span>
-                </div>
+                        <span className="ml-1 text-xs text-gray-400">
+                            ({reviews})
+                        </span>
+                    </div>
+                )}
 
                 {/* Price */}
-                <div className="flex items-center gap-3">
-                    <span className="text-xl font-bold text-primary sm:text-2xl">
+                <div className="mt-3 flex items-center justify-center gap-2">
+                    <span className="text-base font-semibold text-accent sm:text-lg">
                         {formatCurrency(price)}
                     </span>
 
-                    {oldPrice && (
-                        <span className="text-gray-400 line-through">
+                    {oldPrice && oldPrice > price && (
+                        <span className="text-sm text-gray-400 line-through">
                             {formatCurrency(oldPrice)}
                         </span>
                     )}
                 </div>
 
-                {/* Add to Cart */}
-                <Button
-                    onClick={handleAddToCart}
-                    className="w-full translate-y-0 opacity-100 transition-all duration-500 lg:translate-y-3 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100"
-                >
-                    <ShoppingBag size={18} />
-                    Add to Cart
-                </Button>
+                {/* Add to cart */}
+                <div className="mt-4 overflow-hidden">
+                    <Button
+                        onClick={handleAddToCart}
+                        size="sm"
+                        className="w-full translate-y-0 opacity-100 transition-all duration-500 lg:translate-y-3 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100"
+                    >
+                        <ShoppingBag size={16} />
+                        Add to Cart
+                    </Button>
+                </div>
             </div>
         </motion.article>
     );
