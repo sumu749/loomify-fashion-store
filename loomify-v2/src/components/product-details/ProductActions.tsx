@@ -26,9 +26,15 @@ const ProductActions = ({ product }: ProductActionsProps) => {
      * --------------------------------------------------
      */
 
-    const [selectedSize, setSelectedSize] = useState(sizes[0] ?? "");
+    const defaultVariant = variants.find((variant) => variant.stock > 0);
 
-    const [selectedColor, setSelectedColor] = useState(colors[0] ?? "");
+    const [selectedSize, setSelectedSize] = useState(
+        defaultVariant?.size ?? sizes[0] ?? "",
+    );
+
+    const [selectedColor, setSelectedColor] = useState(
+        defaultVariant?.color ?? colors[0] ?? "",
+    );
 
     const [quantity, setQuantity] = useState(1);
 
