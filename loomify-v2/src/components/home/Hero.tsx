@@ -1,10 +1,11 @@
+/* eslint-disable indent */
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Button from "@/components/common/Button";
 import Container from "@/components/common/Container";
@@ -47,26 +48,147 @@ const heroSlides = [
     },
 ];
 
+type Direction = "left" | "right" | "top" | "bottom" | "diagonal";
+
+const directions: Direction[] = ["right", "left", "bottom", "top", "diagonal"];
+
+const imageVariants = {
+    enter: (direction: Direction) => {
+        switch (direction) {
+            case "left":
+                return {
+                    x: "-18%",
+                    clipPath: "inset(0 0 0 100%)",
+                    scale: 1.05,
+                };
+
+            case "right":
+                return {
+                    x: "18%",
+                    clipPath: "inset(0 100% 0 0)",
+                    scale: 1.05,
+                };
+
+            case "top":
+                return {
+                    y: "-14%",
+                    clipPath: "inset(100% 0 0 0)",
+                    scale: 1.05,
+                };
+
+            case "bottom":
+                return {
+                    y: "14%",
+                    clipPath: "inset(0 0 100% 0)",
+                    scale: 1.05,
+                };
+
+            case "diagonal":
+                return {
+                    x: "10%",
+                    y: "-8%",
+                    clipPath: "polygon(100% 0, 100% 0, 100% 100%, 100% 100%)",
+                    scale: 1.08,
+                };
+        }
+    },
+
+    center: {
+        x: 0,
+        y: 0,
+        clipPath: "inset(0% 0% 0% 0%)",
+        scale: 1,
+    },
+
+    exit: (direction: Direction) => {
+        switch (direction) {
+            case "left":
+                return {
+                    x: "-12%",
+                    clipPath: "inset(0 100% 0 0)",
+                    scale: 1.03,
+                };
+
+            case "right":
+                return {
+                    x: "12%",
+                    clipPath: "inset(0 0 0 100%)",
+                    scale: 1.03,
+                };
+
+            case "top":
+                return {
+                    y: "-10%",
+                    clipPath: "inset(0 0 100% 0)",
+                    scale: 1.03,
+                };
+
+            case "bottom":
+                return {
+                    y: "10%",
+                    clipPath: "inset(100% 0 0 0)",
+                    scale: 1.03,
+                };
+
+            case "diagonal":
+                return {
+                    x: "-8%",
+                    y: "8%",
+                    clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)",
+                    scale: 1.04,
+                };
+        }
+    },
+};
+
+const contentVariants = {
+    enter: {
+        opacity: 0,
+        y: 28,
+    },
+    center: {
+        opacity: 1,
+        y: 0,
+    },
+    exit: {
+        opacity: 0,
+        y: -20,
+    },
+};
+
 const Hero = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [direction, setDirection] = useState<Direction>("right");
 
     const slide = heroSlides[currentSlide];
 
-    const goToNext = () => {
+    const goToNext = useCallback(() => {
+        setDirection(directions[currentSlide]);
+
         setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    };
+    }, [currentSlide]);
 
     const goToPrevious = () => {
-        setCurrentSlide(
-            (prev) => (prev - 1 + heroSlides.length) % heroSlides.length,
-        );
+        const previousIndex =
+            (currentSlide - 1 + heroSlides.length) % heroSlides.length;
+
+        setDirection(directions[previousIndex]);
+
+        setCurrentSlide(previousIndex);
+    };
+
+    const goToSlide = (index: number) => {
+        if (index === currentSlide) return;
+
+        setDirection(directions[index]);
+        setCurrentSlide(index);
     };
 
     useEffect(() => {
         const interval = setInterval(goToNext, 6000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [goToNext]);
 
     return (
         <section className="bg-stone-50 pb-14 sm:pb-16">
@@ -74,16 +196,24 @@ const Hero = () => {
                 <div className="relative pt-4 sm:pt-6">
                     {/* ================= Hero ================= */}
 
-                    <div className="relative overflow-hidden lg:min-h-162.5">
-                        {/* Hero Image */}
-
-                        <AnimatePresence mode="wait">
+                    <div className="relative overflow-hidden ">
+                        {/* Images */}
+                        <AnimatePresence
+                            initial={false}
+                            custom={direction}
+                            mode="sync"
+                        >
                             <motion.div
                                 key={currentSlide}
-                                initial={{ opacity: 0, scale: 1.02 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.8 }}
+                                custom={direction}
+                                variants={imageVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{
+                                    duration: 1.05,
+                                    ease: [0.76, 0, 0.24, 1],
+                                }}
                                 className="absolute inset-0"
                             >
                                 <Image
@@ -95,7 +225,6 @@ const Hero = () => {
                                     className="object-cover"
                                 />
 
-                                {/* Subtle editorial overlays */}
                                 <div className="absolute inset-0 bg-black/10" />
 
                                 <div className="absolute inset-0 bg-linear-to-r from-black/65 via-black/25 to-transparent" />
@@ -103,15 +232,19 @@ const Hero = () => {
                         </AnimatePresence>
 
                         {/* Hero Content */}
-
                         <div className="relative z-10 flex min-h-140 items-center px-6 py-20 sm:min-h-155 sm:px-10 md:px-14 lg:min-h-162.5 lg:px-20">
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={currentSlide}
-                                    initial={{ opacity: 0, y: 25 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -15 }}
-                                    transition={{ duration: 0.65 }}
+                                    variants={contentVariants}
+                                    initial="enter"
+                                    animate="center"
+                                    exit="exit"
+                                    transition={{
+                                        duration: 0.7,
+                                        delay: 0.18,
+                                        ease: "easeOut",
+                                    }}
                                     className="max-w-xl text-white"
                                 >
                                     <p className="text-xs font-medium uppercase tracking-[0.35em] text-white/80 sm:text-sm">
@@ -150,7 +283,6 @@ const Hero = () => {
                         </div>
 
                         {/* Slide Controls */}
-
                         <div className="absolute bottom-7 left-6 z-20 flex items-center gap-3 sm:left-10 lg:left-20">
                             <button
                                 type="button"
@@ -172,7 +304,6 @@ const Hero = () => {
                         </div>
 
                         {/* Slide Indicator */}
-
                         <div className="absolute bottom-8 right-6 z-20 flex items-center gap-4 text-white sm:right-10 lg:right-20">
                             <span className="text-xs font-medium tracking-[0.2em] text-white/70">
                                 {String(currentSlide + 1).padStart(2, "0")}
@@ -184,7 +315,7 @@ const Hero = () => {
                                         key={index}
                                         type="button"
                                         aria-label={`Go to slide ${index + 1}`}
-                                        onClick={() => setCurrentSlide(index)}
+                                        onClick={() => goToSlide(index)}
                                         className={`h-px transition-all duration-300 ${
                                             index === currentSlide
                                                 ? "w-10 bg-white"
@@ -212,7 +343,6 @@ const Hero = () => {
                         className="relative z-20 mx-4 -mt-5 overflow-hidden rounded-2xl border border-border bg-white shadow-lg sm:mx-8"
                     >
                         <div className="grid sm:grid-cols-3">
-                            {/* Free Shipping */}
                             <div className="px-5 py-5 text-center sm:border-r sm:border-border">
                                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                                     Free Shipping
@@ -223,7 +353,6 @@ const Hero = () => {
                                 </p>
                             </div>
 
-                            {/* Easy Returns */}
                             <div className="border-t border-border px-5 py-5 text-center sm:border-r sm:border-t-0">
                                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                                     Easy Returns
@@ -234,7 +363,6 @@ const Hero = () => {
                                 </p>
                             </div>
 
-                            {/* Secure Checkout */}
                             <div className="border-t border-border px-5 py-5 text-center sm:border-t-0">
                                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                                     Secure Checkout
