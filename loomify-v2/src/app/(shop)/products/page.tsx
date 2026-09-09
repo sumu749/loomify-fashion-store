@@ -43,6 +43,14 @@ export default function ProductsPage() {
         filteredProducts,
     } = useProductFilters(products);
 
+    const pageTitle =
+        category !== "all" ? `${category} Collection` : "All Products";
+
+    const pageDescription =
+        category !== "all"
+            ? `Explore our curated collection of premium ${category.toLowerCase()} fashion essentials.`
+            : "Discover our curated collection of premium fashion essentials, designed for everyday style.";
+
     useEffect(() => {
         const categoryParam = searchParams.get("category");
 
@@ -127,12 +135,11 @@ export default function ProductsPage() {
                     </p>
 
                     <h1 className="mt-2 text-3xl font-bold tracking-tight text-primary sm:text-4xl lg:text-5xl">
-                        All Products
+                        {pageTitle}
                     </h1>
 
                     <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base">
-                        Discover our curated collection of premium fashion
-                        essentials, designed for everyday style.
+                        {pageDescription}
                     </p>
                 </div>
 
