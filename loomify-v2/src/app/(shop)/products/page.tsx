@@ -3,6 +3,7 @@
 
 import { SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import Container from "@/components/common/Container";
 import ProductFilterSidebar from "@/components/products/ProductFilterSidebar";
@@ -14,6 +15,8 @@ import useProductFilters from "@/hooks/useProductFilters";
 import useProducts from "@/hooks/useProducts";
 
 export default function ProductsPage() {
+    const searchParams = useSearchParams();
+
     const { data: products = [], isLoading, isError } = useProducts();
 
     const {
@@ -40,6 +43,23 @@ export default function ProductsPage() {
         filteredProducts,
     } = useProductFilters(products);
 
+    useEffect(() => {
+        const categoryParam = searchParams.get("category");
+
+        if (!categoryParam || categoryParam === "all") {
+            setCategory("all");
+            return;
+        }
+
+        const matchedCategory = categories.find(
+            (categoryName) =>
+                categoryName.toLowerCase().replace(/\s+/g, "-") ===
+                categoryParam.toLowerCase(),
+        );
+
+        setCategory(matchedCategory ?? "all");
+    }, [searchParams, categories, setCategory]);
+
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const PRODUCTS_PER_PAGE = 9;
 
@@ -59,6 +79,7 @@ export default function ProductsPage() {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentPage(1);
     }, [search, category, minPrice, maxPrice, availability, sort]);
+
     const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
 
     const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
