@@ -4,6 +4,77 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export async function GET(request: Request) {
+    try {
+        const session = await auth.api.getSession({
+            headers: await headers(),
+        });
+
+        if (!session) {
+            return NextResponse.json(
+                {
+                    success: true,
+                    data: {
+                        hasReviewed: false,
+                    },
+                },
+                { status: 200 },
+            );
+        }
+
+        const { searchParams } = new URL(request.url);
+
+        const productId = searchParams.get("productId")?.trim();
+
+        if (!productId) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Product ID is required",
+                },
+                { status: 400 },
+            );
+        }
+
+        const review = await prisma.review.findUnique({
+            where: {
+                userId_productId: {
+                    userId: session.user.id,
+                    productId,
+                },
+            },
+            select: {
+                id: true,
+                rating: true,
+                comment: true,
+                approved: true,
+                createdAt: true,
+            },
+        });
+
+        return NextResponse.json(
+            {
+                success: true,
+                data: {
+                    hasReviewed: Boolean(review),
+                    review,
+                },
+            },
+            { status: 200 },
+        );
+    } catch (error) {
+        console.error("Failed to check review:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to check review status",
+            },
+            { status: 500 },
+        );
+    }
+}
+
 export async function POST(request: Request) {
     try {
         // Check authentication
