@@ -43,6 +43,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const [country, setCountry] = useState("Bangladesh");
 
     const [loading, setLoading] = useState(false);
+    const [couponCode, setCouponCode] = useState("");
+    const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+    const [discount, setDiscount] = useState(0);
+    const [couponLoading, setCouponLoading] = useState(false);
 
     const subtotal = cartItems.reduce((total, item) => {
         const variant = item.variants.find(
@@ -56,9 +60,67 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
 
     const shipping = subtotal > 100 ? 0 : 15;
 
-    const total = subtotal + shipping;
+    const total = Math.max(subtotal + shipping - discount, 0);
 
     const [paymentMethod, setPaymentMethod] = useState<"COD">("COD");
+
+    const handleApplyCoupon = async () => {
+        const normalizedCode = couponCode.trim().toUpperCase();
+
+        if (!normalizedCode) {
+            toast.error("Please enter a coupon code.");
+            return;
+        }
+
+        if (subtotal <= 0) {
+            toast.error("Your cart is empty.");
+            return;
+        }
+
+        setCouponLoading(true);
+
+        try {
+            const response = await fetch("/api/coupons/validate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    code: normalizedCode,
+                    subtotal,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                setAppliedCoupon(null);
+                setDiscount(0);
+
+                toast.error(result.message || "Unable to apply coupon.");
+                return;
+            }
+
+            setAppliedCoupon(result.data.code);
+            setDiscount(Number(result.data.discount));
+
+            toast.success("Coupon applied successfully.");
+        } catch (error) {
+            console.error("Coupon validation failed:", error);
+
+            toast.error("Unable to validate coupon.");
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
+    const handleRemoveCoupon = () => {
+        setCouponCode("");
+        setAppliedCoupon(null);
+        setDiscount(0);
+
+        toast.success("Coupon removed.");
+    };
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -129,6 +191,7 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                     },
 
                     paymentMethod,
+                    couponCode: appliedCoupon || undefined,
                 }),
             });
 
@@ -546,6 +609,61 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                 </div>
 
                 <div className="mt-6 border-t border-border pt-6">
+                    <p className="text-sm font-semibold text-primary">
+                        Have a coupon?
+                    </p>
+
+                    {!appliedCoupon ? (
+                        <div className="mt-3 flex gap-2">
+                            <input
+                                type="text"
+                                value={couponCode}
+                                onChange={(event) =>
+                                    setCouponCode(
+                                        event.target.value.toUpperCase(),
+                                    )
+                                }
+                                onKeyDown={(event) => {
+                                    if (event.key === "Enter") {
+                                        event.preventDefault();
+                                        handleApplyCoupon();
+                                    }
+                                }}
+                                placeholder="Enter coupon code"
+                                className="h-11 min-w-0 flex-1 rounded-xl border border-border px-4 text-sm uppercase outline-none transition focus:border-accent"
+                            />
+
+                            <Button
+                                type="button"
+                                size="sm"
+                                onClick={handleApplyCoupon}
+                                disabled={couponLoading}
+                            >
+                                {couponLoading ? "Applying..." : "Apply"}
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="mt-3 flex items-center justify-between rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
+                            <div>
+                                <p className="text-sm font-semibold text-primary">
+                                    {appliedCoupon}
+                                </p>
+
+                                <p className="mt-1 text-xs text-accent">
+                                    Coupon applied
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={handleRemoveCoupon}
+                                className="text-xs font-medium text-gray-500 transition hover:text-red-500"
+                            >
+                                Remove
+                            </button>
+                        </div>
+                    )}
+
                     <div className="space-y-3 text-sm">
                         <div className="flex justify-between">
                             <span className="text-gray-500">Subtotal</span>
@@ -554,6 +672,16 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 {formatCurrency(subtotal)}
                             </span>
                         </div>
+
+                        {discount > 0 && (
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Discount</span>
+
+                                <span className="font-medium text-accent">
+                                    -{formatCurrency(discount)}
+                                </span>
+                            </div>
+                        )}
 
                         <div className="flex justify-between">
                             <span className="text-gray-500">Shipping</span>

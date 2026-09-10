@@ -43,10 +43,12 @@ export async function POST(request: Request) {
             items,
             shippingAddress,
             paymentMethod,
+            couponCode,
         }: {
             items: CartItemInput[];
             shippingAddress: ShippingAddress;
             paymentMethod: "COD";
+            couponCode?: string;
         } = body;
 
         if (!Array.isArray(items) || items.length === 0) {
@@ -192,13 +194,79 @@ export async function POST(request: Request) {
         });
 
         const shippingCost = subtotal > 100 ? 0 : 15;
-        const discount = 0;
-        const total = subtotal + shippingCost - discount;
 
         /*
          * Everything below happens in one transaction.
          */
         const order = await prisma.$transaction(async (tx) => {
+            let discount = 0;
+            let appliedCouponCode: string | null = null;
+            let couponId: string | null = null;
+
+            if (couponCode?.trim()) {
+                const normalizedCouponCode = couponCode.trim().toUpperCase();
+
+                const coupon = await tx.coupon.findUnique({
+                    where: {
+                        code: normalizedCouponCode,
+                    },
+                });
+
+                if (!coupon) {
+                    throw new Error("Invalid coupon code.");
+                }
+
+                if (!coupon.active) {
+                    throw new Error("This coupon is no longer active.");
+                }
+
+                if (coupon.expiresAt && coupon.expiresAt <= new Date()) {
+                    throw new Error("This coupon has expired.");
+                }
+
+                if (
+                    coupon.usageLimit !== null &&
+                    coupon.usedCount >= coupon.usageLimit
+                ) {
+                    throw new Error("This coupon has reached its usage limit.");
+                }
+
+                if (
+                    coupon.minOrderAmount !== null &&
+                    subtotal < Number(coupon.minOrderAmount)
+                ) {
+                    throw new Error(
+                        `Minimum order amount for this coupon is ${Number(
+                            coupon.minOrderAmount,
+                        ).toFixed(2)}.`,
+                    );
+                }
+
+                let calculatedDiscount = 0;
+
+                if (coupon.type === "PERCENTAGE") {
+                    calculatedDiscount =
+                        subtotal * (Number(coupon.value) / 100);
+                }
+
+                if (coupon.type === "FIXED") {
+                    calculatedDiscount = Number(coupon.value);
+                }
+
+                if (
+                    coupon.maxDiscount !== null &&
+                    calculatedDiscount > Number(coupon.maxDiscount)
+                ) {
+                    calculatedDiscount = Number(coupon.maxDiscount);
+                }
+
+                discount = Math.min(calculatedDiscount, subtotal);
+                appliedCouponCode = coupon.code;
+                couponId = coupon.id;
+            }
+
+            const total = subtotal + shippingCost - discount;
+
             /*
              * Re-check and decrement stock atomically.
              */
@@ -235,7 +303,7 @@ export async function POST(request: Request) {
                     shippingCost,
                     discount,
                     total,
-                    couponCode: null,
+                    couponCode: appliedCouponCode,
                     shippingAddress,
                 },
             });
@@ -251,6 +319,40 @@ export async function POST(request: Request) {
                     status: "PENDING",
                 },
             });
+
+            if (couponId) {
+                const coupon = await tx.coupon.findUnique({
+                    where: {
+                        id: couponId,
+                    },
+                    select: {
+                        usageLimit: true,
+                        usedCount: true,
+                    },
+                });
+
+                if (!coupon) {
+                    throw new Error("Coupon no longer exists.");
+                }
+
+                if (
+                    coupon.usageLimit !== null &&
+                    coupon.usedCount >= coupon.usageLimit
+                ) {
+                    throw new Error("This coupon has reached its usage limit.");
+                }
+
+                await tx.coupon.update({
+                    where: {
+                        id: couponId,
+                    },
+                    data: {
+                        usedCount: {
+                            increment: 1,
+                        },
+                    },
+                });
+            }
 
             /*
              * Create order items using a snapshot of
@@ -278,7 +380,11 @@ export async function POST(request: Request) {
                 })),
             });
 
-            return createdOrder;
+            return {
+                order: createdOrder,
+                discount,
+                total,
+            };
         });
 
         return NextResponse.json(
@@ -286,11 +392,11 @@ export async function POST(request: Request) {
                 success: true,
                 message: "Order created successfully.",
                 data: {
-                    orderId: order.id,
+                    orderId: order.order.id,
                     subtotal,
                     shippingCost,
-                    discount,
-                    total,
+                    discount: order.discount,
+                    total: order.total,
                 },
             },
             { status: 201 },
