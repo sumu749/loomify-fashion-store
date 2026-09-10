@@ -1,8 +1,10 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 import Container from "@/components/common/Container";
 import SectionTitle from "@/components/common/SectionTitle";
@@ -14,7 +16,69 @@ interface TopProductsProps {
     products: Product[];
 }
 
+const PRODUCTS_PER_SLIDE = 4;
+
 const TopProducts = ({ products }: TopProductsProps) => {
+    const [currentSlide, setCurrentSlide] = useState(0);
+
+    const slides = useMemo(() => {
+        const result: Product[][] = [];
+
+        for (
+            let index = 0;
+            index < products.length;
+            index += PRODUCTS_PER_SLIDE
+        ) {
+            result.push(products.slice(index, index + PRODUCTS_PER_SLIDE));
+        }
+
+        return result;
+    }, [products]);
+
+    const totalSlides = slides.length;
+
+    useEffect(() => {
+        if (totalSlides <= 1) {
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setCurrentSlide((previous) =>
+                previous + 1 >= totalSlides ? 0 : previous + 1,
+            );
+        }, 6000);
+
+        return () => clearInterval(interval);
+    }, [totalSlides]);
+
+    useEffect(() => {
+        if (currentSlide >= totalSlides && totalSlides > 0) {
+            setCurrentSlide(0);
+        }
+    }, [currentSlide, totalSlides]);
+
+    const goToNext = () => {
+        if (totalSlides <= 1) {
+            return;
+        }
+
+        setCurrentSlide((previous) =>
+            previous + 1 >= totalSlides ? 0 : previous + 1,
+        );
+    };
+
+    const goToPrevious = () => {
+        if (totalSlides <= 1) {
+            return;
+        }
+
+        setCurrentSlide((previous) =>
+            previous - 1 < 0 ? totalSlides - 1 : previous - 1,
+        );
+    };
+
+    const currentProducts = slides[currentSlide] ?? [];
+
     return (
         <section className="py-20 sm:py-24 lg:py-28">
             <Container>
@@ -59,28 +123,97 @@ const TopProducts = ({ products }: TopProductsProps) => {
 
                 {/* Products */}
                 {products.length > 0 ? (
-                    <motion.div
-                        initial={{
-                            opacity: 0,
-                            y: 30,
-                        }}
-                        whileInView={{
-                            opacity: 1,
-                            y: 0,
-                        }}
-                        viewport={{
-                            once: true,
-                        }}
-                        transition={{
-                            duration: 0.7,
-                            delay: 0.1,
-                        }}
-                        className="mt-12 grid grid-cols-2 gap-x-4 gap-y-10 sm:mt-14 sm:gap-x-6 sm:gap-y-12 lg:grid-cols-4 lg:gap-x-7"
-                    >
-                        {products.slice(0, 4).map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </motion.div>
+                    <>
+                        <div className="mt-12 overflow-hidden sm:mt-14">
+                            <AnimatePresence mode="wait" initial={false}>
+                                <motion.div
+                                    key={currentSlide}
+                                    initial={{
+                                        opacity: 0,
+                                        x: 70,
+                                    }}
+                                    animate={{
+                                        opacity: 1,
+                                        x: 0,
+                                    }}
+                                    exit={{
+                                        opacity: 0,
+                                        x: -70,
+                                    }}
+                                    transition={{
+                                        duration: 0.6,
+                                        ease: [0.76, 0, 0.24, 1],
+                                    }}
+                                    className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 sm:gap-y-12 lg:grid-cols-4 lg:gap-x-7"
+                                >
+                                    {currentProducts.map((product) => (
+                                        <ProductCard
+                                            key={product.id}
+                                            product={product}
+                                        />
+                                    ))}
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Slider controls */}
+                        {totalSlides > 1 && (
+                            <div className="mt-10 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={goToPrevious}
+                                        aria-label="Previous products"
+                                        className="flex h-10 w-10 items-center justify-center border border-border bg-white text-primary transition-colors hover:border-accent hover:bg-accent hover:text-white"
+                                    >
+                                        <ChevronLeft size={18} />
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={goToNext}
+                                        aria-label="Next products"
+                                        className="flex h-10 w-10 items-center justify-center border border-border bg-white text-primary transition-colors hover:border-accent hover:bg-accent hover:text-white"
+                                    >
+                                        <ChevronRight size={18} />
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    <span className="text-[11px] font-medium tracking-[0.2em] text-gray-400">
+                                        {String(currentSlide + 1).padStart(
+                                            2,
+                                            "0",
+                                        )}
+                                    </span>
+
+                                    <div className="flex items-center gap-1.5">
+                                        {slides.map((_, index) => (
+                                            <button
+                                                key={index}
+                                                type="button"
+                                                aria-label={`Show product group ${
+                                                    index + 1
+                                                }`}
+                                                onClick={() =>
+                                                    setCurrentSlide(index)
+                                                }
+                                                className={`h-px transition-all duration-300 ${
+                                                    index === currentSlide
+                                                        ? "w-8 bg-accent"
+                                                        : "w-4 bg-gray-300"
+                                                }`}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    <span className="text-[11px] font-medium tracking-[0.2em] text-gray-300">
+                                        {String(totalSlides).padStart(2, "0")}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div className="mt-12 rounded-2xl border border-border bg-stone-50 px-6 py-16 text-center sm:mt-14">
                         <h3 className="text-xl font-semibold text-primary">

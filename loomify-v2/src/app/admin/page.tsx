@@ -7,12 +7,17 @@ import {
     ShoppingBag,
     Users,
 } from "lucide-react";
+
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import Button from "@/components/common/Button";
 import { auth } from "@/lib/auth";
-import { getAdminStats } from "@/services/adminService";
+import {
+    getAdminRecentOrders,
+    getAdminStats,
+    getAdminTopProducts,
+} from "@/services/adminService";
 import formatCurrency from "@/utils/formatCurrency";
 
 export default async function AdminPage() {
@@ -28,7 +33,11 @@ export default async function AdminPage() {
         redirect("/unauthorized");
     }
 
-    const stats = await getAdminStats();
+    const [stats, recentOrders, topProducts] = await Promise.all([
+        getAdminStats(),
+        getAdminRecentOrders(),
+        getAdminTopProducts(),
+    ]);
 
     const statCards = [
         {
@@ -177,6 +186,223 @@ export default async function AdminPage() {
                         );
                     })}
                 </div>
+            </section>
+
+            {/* ================= Dashboard Insights ================= */}
+
+            <section className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                {/* Order Status */}
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                                Orders
+                            </p>
+
+                            <h2 className="mt-2 text-xl font-semibold text-primary">
+                                Order Status
+                            </h2>
+                        </div>
+
+                        <Link
+                            href="/admin/orders"
+                            className="text-sm font-medium text-primary transition hover:text-accent"
+                        >
+                            View all
+                        </Link>
+                    </div>
+
+                    <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                        {[
+                            {
+                                label: "Pending",
+                                value: stats.orderStatus.PENDING ?? 0,
+                            },
+                            {
+                                label: "Processing",
+                                value: stats.orderStatus.PROCESSING ?? 0,
+                            },
+                            {
+                                label: "Shipped",
+                                value: stats.orderStatus.SHIPPED ?? 0,
+                            },
+                            {
+                                label: "Delivered",
+                                value: stats.orderStatus.DELIVERED ?? 0,
+                            },
+                            {
+                                label: "Cancelled",
+                                value: stats.orderStatus.CANCELLED ?? 0,
+                            },
+                        ].map((item) => (
+                            <div
+                                key={item.label}
+                                className="border border-border bg-stone-50 p-4"
+                            >
+                                <p className="text-xs text-gray-500">
+                                    {item.label}
+                                </p>
+
+                                <p className="mt-2 text-2xl font-bold text-primary">
+                                    {item.value}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Recent Orders */}
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                                Recent Activity
+                            </p>
+
+                            <h2 className="mt-2 text-xl font-semibold text-primary">
+                                Recent Orders
+                            </h2>
+                        </div>
+
+                        <Link
+                            href="/admin/orders"
+                            className="text-sm font-medium text-primary transition hover:text-accent"
+                        >
+                            View all
+                        </Link>
+                    </div>
+
+                    <div className="mt-6 space-y-4">
+                        {recentOrders.length > 0 ? (
+                            recentOrders.map((order) => (
+                                <Link
+                                    key={order.id}
+                                    href={`/admin/orders/${order.id}`}
+                                    className="block border-b border-border pb-4 transition last:border-b-0 last:pb-0 hover:pl-1"
+                                >
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-semibold text-primary">
+                                                {order.user.name || "Customer"}
+                                            </p>
+
+                                            <p className="mt-1 text-xs text-gray-400">
+                                                {order.user.email}
+                                            </p>
+                                        </div>
+
+                                        <span className="shrink-0 text-sm font-semibold text-primary">
+                                            {formatCurrency(
+                                                Number(order.total),
+                                            )}
+                                        </span>
+                                    </div>
+
+                                    <div className="mt-2 flex items-center justify-between">
+                                        <span className="text-xs text-gray-400">
+                                            {new Date(
+                                                order.createdAt,
+                                            ).toLocaleDateString()}
+                                        </span>
+
+                                        <span className="text-xs font-medium uppercase tracking-wide text-accent">
+                                            {order.status}
+                                        </span>
+                                    </div>
+                                </Link>
+                            ))
+                        ) : (
+                            <p className="py-8 text-center text-sm text-gray-500">
+                                No orders yet.
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </section>
+
+            {/* ================= Top Products ================= */}
+
+            <section className="mt-6 rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                            Product Performance
+                        </p>
+
+                        <h2 className="mt-2 text-xl font-semibold text-primary">
+                            Top Products
+                        </h2>
+                    </div>
+
+                    <Link
+                        href="/admin/products"
+                        className="text-sm font-medium text-primary transition hover:text-accent"
+                    >
+                        Manage products
+                    </Link>
+                </div>
+
+                {topProducts.length > 0 ? (
+                    <div className="mt-6 overflow-x-auto">
+                        <table className="w-full min-w-150 text-left">
+                            <thead>
+                                <tr className="border-b border-border text-xs uppercase tracking-[0.16em] text-gray-400">
+                                    <th className="pb-4 font-medium">
+                                        Product
+                                    </th>
+
+                                    <th className="pb-4 font-medium">Price</th>
+
+                                    <th className="pb-4 text-right font-medium">
+                                        Sold
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {topProducts.map((product) => (
+                                    <tr
+                                        key={product.id}
+                                        className="border-b border-border last:border-0"
+                                    >
+                                        <td className="py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-12 w-10 overflow-hidden bg-stone-100">
+                                                    {product.image ? (
+                                                        // eslint-disable-next-line @next/next/no-img-element
+                                                        <img
+                                                            src={product.image}
+                                                            alt={product.name}
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="h-full w-full bg-stone-100" />
+                                                    )}
+                                                </div>
+
+                                                <span className="max-w-65 truncate text-sm font-medium text-primary">
+                                                    {product.name}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td className="py-4 text-sm text-gray-500">
+                                            {formatCurrency(product.price)}
+                                        </td>
+
+                                        <td className="py-4 text-right text-sm font-semibold text-primary">
+                                            {product.sold}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="py-10 text-center text-sm text-gray-500">
+                        No product sales data yet.
+                    </div>
+                )}
             </section>
 
             {/* ================= Management ================= */}

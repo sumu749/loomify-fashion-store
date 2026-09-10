@@ -33,7 +33,7 @@ export default async function HomePage() {
         orderBy: {
             createdAt: "desc",
         },
-        take: 4,
+        take: 8,
     });
 
     const latestProducts = await prisma.product.findMany({
