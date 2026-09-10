@@ -1,6 +1,6 @@
 import Container from "@/components/common/Container";
 import SectionTitle from "@/components/common/SectionTitle";
-import CategoryCarousel from "@/components/categories/CategoryCarousel";
+import CategoryMarquee from "@/components/categories/CategoryMarquee";
 
 import { prisma } from "@/lib/prisma";
 
@@ -41,7 +41,7 @@ const Categories = async () => {
 
                 {mappedCategories.length > 0 ? (
                     <div className="mt-10 sm:mt-14">
-                        <CategoryCarousel categories={mappedCategories} />
+                        <CategoryMarquee categories={mappedCategories} />
                     </div>
                 ) : (
                     <div className="mt-10 rounded-2xl border border-border bg-stone-50 px-6 py-16 text-center sm:mt-14">
