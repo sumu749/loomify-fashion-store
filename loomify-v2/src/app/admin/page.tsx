@@ -334,7 +334,7 @@ export default async function AdminPage() {
                 {/* Recent Orders */}
 
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
                                 Recent Activity
@@ -343,61 +343,146 @@ export default async function AdminPage() {
                             <h2 className="mt-2 text-xl font-semibold text-primary">
                                 Recent Orders
                             </h2>
+
+                            <p className="mt-1 text-sm text-gray-500">
+                                Latest customer orders and their current status.
+                            </p>
                         </div>
 
                         <Link
                             href="/admin/orders"
-                            className="text-sm font-medium text-primary transition hover:text-accent"
+                            className="shrink-0 text-sm font-medium text-primary transition hover:text-accent"
                         >
                             View all
                         </Link>
                     </div>
 
-                    <div className="mt-6 space-y-4">
-                        {recentOrders.length > 0 ? (
-                            recentOrders.map((order) => (
-                                <Link
-                                    key={order.id}
-                                    href={`/admin/orders/${order.id}`}
-                                    className="block border-b border-border pb-4 transition last:border-b-0 last:pb-0 hover:pl-1"
-                                >
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="min-w-0">
-                                            <p className="truncate text-sm font-semibold text-primary">
-                                                {order.user.name || "Customer"}
-                                            </p>
+                    {recentOrders.length > 0 ? (
+                        <div className="mt-6 overflow-x-auto">
+                            <table className="w-full min-w-180 text-left">
+                                <thead>
+                                    <tr className="border-b border-border">
+                                        <th className="pb-4 pr-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
+                                            Order
+                                        </th>
 
-                                            <p className="mt-1 text-xs text-gray-400">
-                                                {order.user.email}
-                                            </p>
-                                        </div>
+                                        <th className="pb-4 pr-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
+                                            Customer
+                                        </th>
 
-                                        <span className="shrink-0 text-sm font-semibold text-primary">
-                                            {formatCurrency(
-                                                Number(order.total),
-                                            )}
-                                        </span>
-                                    </div>
+                                        <th className="pb-4 pr-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
+                                            Total
+                                        </th>
 
-                                    <div className="mt-2 flex items-center justify-between">
-                                        <span className="text-xs text-gray-400">
-                                            {new Date(
-                                                order.createdAt,
-                                            ).toLocaleDateString()}
-                                        </span>
+                                        <th className="pb-4 pr-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
+                                            Status
+                                        </th>
 
-                                        <span className="text-xs font-medium uppercase tracking-wide text-accent">
-                                            {order.status}
-                                        </span>
-                                    </div>
-                                </Link>
-                            ))
-                        ) : (
-                            <p className="py-8 text-center text-sm text-gray-500">
-                                No orders yet.
+                                        <th className="pb-4 text-right text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
+                                            Date
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {recentOrders.map((order) => {
+                                        const statusStyles: Record<
+                                            string,
+                                            string
+                                        > = {
+                                            PENDING:
+                                                "bg-amber-50 text-amber-700 border-amber-200",
+                                            PROCESSING:
+                                                "bg-blue-50 text-blue-700 border-blue-200",
+                                            SHIPPED:
+                                                "bg-violet-50 text-violet-700 border-violet-200",
+                                            DELIVERED:
+                                                "bg-emerald-50 text-emerald-700 border-emerald-200",
+                                            CANCELLED:
+                                                "bg-red-50 text-red-700 border-red-200",
+                                        };
+
+                                        return (
+                                            <tr
+                                                key={order.id}
+                                                className="group border-b border-border last:border-b-0"
+                                            >
+                                                <td className="py-4 pr-4">
+                                                    <Link
+                                                        href={`/admin/orders/${order.id}`}
+                                                        className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors group-hover:text-accent"
+                                                    >
+                                                        #{order.id.slice(-8)}
+                                                        <ArrowRight
+                                                            size={14}
+                                                            className="opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100"
+                                                        />
+                                                    </Link>
+                                                </td>
+
+                                                <td className="py-4 pr-4">
+                                                    <p className="text-sm font-medium text-primary">
+                                                        {order.user.name ||
+                                                            "Customer"}
+                                                    </p>
+
+                                                    <p className="mt-0.5 text-xs text-gray-400">
+                                                        {order.user.email}
+                                                    </p>
+                                                </td>
+
+                                                <td className="py-4 pr-4 text-sm font-semibold text-primary">
+                                                    {formatCurrency(
+                                                        Number(order.total),
+                                                    )}
+                                                </td>
+
+                                                <td className="py-4 pr-4">
+                                                    <span
+                                                        className={`inline-flex border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${
+                                                            statusStyles[
+                                                                order.status
+                                                            ] ??
+                                                            "border-border bg-stone-50 text-gray-600"
+                                                        }`}
+                                                    >
+                                                        {order.status}
+                                                    </span>
+                                                </td>
+
+                                                <td className="py-4 text-right text-xs text-gray-400">
+                                                    {new Date(
+                                                        order.createdAt,
+                                                    ).toLocaleDateString(
+                                                        "en-US",
+                                                        {
+                                                            month: "short",
+                                                            day: "numeric",
+                                                            year: "numeric",
+                                                        },
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="py-12 text-center">
+                            <p className="text-sm text-gray-500">
+                                No orders have been placed yet.
                             </p>
-                        )}
-                    </div>
+
+                            <Link
+                                href="/admin/orders"
+                                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-accent"
+                            >
+                                Go to Orders
+                                <ArrowRight size={16} />
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </section>
 
