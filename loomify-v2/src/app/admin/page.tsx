@@ -15,10 +15,12 @@ import Button from "@/components/common/Button";
 import { auth } from "@/lib/auth";
 import {
     getAdminRecentOrders,
+    getAdminSalesOverview,
     getAdminStats,
     getAdminTopProducts,
 } from "@/services/adminService";
 import formatCurrency from "@/utils/formatCurrency";
+import SalesOverviewChart from "@/components/admin/SalesOverviewChart";
 
 export default async function AdminPage() {
     const session = await auth.api.getSession({
@@ -33,11 +35,14 @@ export default async function AdminPage() {
         redirect("/unauthorized");
     }
 
-    const [stats, recentOrders, topProducts] = await Promise.all([
-        getAdminStats(),
-        getAdminRecentOrders(),
-        getAdminTopProducts(),
-    ]);
+    const [stats, recentOrders, topProducts, salesOverview] = await Promise.all(
+        [
+            getAdminStats(),
+            getAdminRecentOrders(),
+            getAdminTopProducts(),
+            getAdminSalesOverview(),
+        ],
+    );
 
     const statCards = [
         {
@@ -186,6 +191,12 @@ export default async function AdminPage() {
                         );
                     })}
                 </div>
+            </section>
+
+            {/* ================= Sales Overview ================= */}
+
+            <section className="mt-8">
+                <SalesOverviewChart data={salesOverview} />
             </section>
 
             {/* ================= Dashboard Insights ================= */}
