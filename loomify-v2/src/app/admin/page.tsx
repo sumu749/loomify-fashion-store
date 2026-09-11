@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import Link from "next/link";
 import {
     ArrowRight,
@@ -15,10 +16,13 @@ import Button from "@/components/common/Button";
 import { auth } from "@/lib/auth";
 import {
     getAdminRecentOrders,
+    getAdminSalesOverview,
     getAdminStats,
     getAdminTopProducts,
 } from "@/services/adminService";
 import formatCurrency from "@/utils/formatCurrency";
+import SalesOverviewChart from "@/components/admin/SalesOverviewChart";
+import OrderStatusBar from "@/components/admin/OrderStatusBar";
 
 export default async function AdminPage() {
     const session = await auth.api.getSession({
@@ -33,11 +37,14 @@ export default async function AdminPage() {
         redirect("/unauthorized");
     }
 
-    const [stats, recentOrders, topProducts] = await Promise.all([
-        getAdminStats(),
-        getAdminRecentOrders(),
-        getAdminTopProducts(),
-    ]);
+    const [stats, recentOrders, topProducts, salesOverview] = await Promise.all(
+        [
+            getAdminStats(),
+            getAdminRecentOrders(),
+            getAdminTopProducts(),
+            getAdminSalesOverview(),
+        ],
+    );
 
     const statCards = [
         {
@@ -98,11 +105,11 @@ export default async function AdminPage() {
     ];
 
     return (
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto w-full min-w-0 max-w-7xl">
             {/* ================= Header ================= */}
 
             <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
-                <div className="relative p-6 sm:p-8 lg:p-10">
+                <div className="relative flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8 lg:p-10">
                     <div className="max-w-3xl">
                         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-accent">
                             Loomify Admin
@@ -121,7 +128,7 @@ export default async function AdminPage() {
                         </p>
                     </div>
 
-                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <div className="flex flex-wrap items-center gap-2">
                         <Button asChild>
                             <Link href="/admin/products/new">
                                 <Plus size={18} />
@@ -152,14 +159,14 @@ export default async function AdminPage() {
                     </h2>
                 </div>
 
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
                     {statCards.map((card) => {
                         const Icon = card.icon;
 
                         return (
                             <div
                                 key={card.label}
-                                className="rounded-2xl border border-border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md"
+                                className="rounded-2xl border border-border bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md sm:p-6"
                             >
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
@@ -167,7 +174,7 @@ export default async function AdminPage() {
                                             {card.label}
                                         </p>
 
-                                        <p className="mt-3 text-3xl font-bold tracking-tight text-primary">
+                                        <p className="mt-3 text-2xl font-semibold tracking-tight text-primary sm:text-3xl">
                                             {card.value}
                                         </p>
                                     </div>
@@ -188,73 +195,134 @@ export default async function AdminPage() {
                 </div>
             </section>
 
+            {/* ================= Sales Overview ================= */}
+
+            <section className="mt-8">
+                <SalesOverviewChart data={salesOverview} />
+            </section>
+
             {/* ================= Dashboard Insights ================= */}
 
-            <section className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                {/* Order Status */}
-                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                    <div className="flex items-center justify-between">
-                        <div>
+            <section className="mt-8 grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
+                {/* Order Pipeline */}
+
+                <div className="w-full rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-                                Orders
+                                Order Overview
                             </p>
 
                             <h2 className="mt-2 text-xl font-semibold text-primary">
-                                Order Status
+                                Order Pipeline
                             </h2>
+
+                            <p className="mt-1 text-sm leading-6 text-gray-500">
+                                Track customer orders through each stage.
+                            </p>
                         </div>
 
                         <Link
                             href="/admin/orders"
-                            className="text-sm font-medium text-primary transition hover:text-accent"
+                            className="shrink-0 text-sm font-medium text-primary transition hover:text-accent"
                         >
                             View all
                         </Link>
                     </div>
 
-                    <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                    <div className="mt-7 space-y-5">
                         {[
                             {
+                                key: "PENDING",
                                 label: "Pending",
-                                value: stats.orderStatus.PENDING ?? 0,
+                                color: "bg-amber-400",
                             },
                             {
+                                key: "PROCESSING",
                                 label: "Processing",
-                                value: stats.orderStatus.PROCESSING ?? 0,
+                                color: "bg-purple-500",
                             },
                             {
+                                key: "SHIPPED",
                                 label: "Shipped",
-                                value: stats.orderStatus.SHIPPED ?? 0,
+                                color: "bg-blue-500",
                             },
                             {
+                                key: "DELIVERED",
                                 label: "Delivered",
-                                value: stats.orderStatus.DELIVERED ?? 0,
+                                color: "bg-green-500",
                             },
-                            {
-                                label: "Cancelled",
-                                value: stats.orderStatus.CANCELLED ?? 0,
-                            },
-                        ].map((item) => (
-                            <div
-                                key={item.label}
-                                className="border border-border bg-stone-50 p-4"
-                            >
-                                <p className="text-xs text-gray-500">
-                                    {item.label}
-                                </p>
+                        ].map((status, index) => {
+                            const count = stats.orderStatus[status.key] ?? 0;
 
-                                <p className="mt-2 text-2xl font-bold text-primary">
-                                    {item.value}
-                                </p>
-                            </div>
-                        ))}
+                            const cancelledOrders =
+                                stats.orderStatus.CANCELLED ?? 0;
+
+                            const activeOrders = Math.max(
+                                stats.totalOrders - cancelledOrders,
+                                0,
+                            );
+
+                            const percentage =
+                                activeOrders > 0
+                                    ? Math.round((count / activeOrders) * 100)
+                                    : 0;
+
+                            return (
+                                <div key={status.key}>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="flex min-w-0 items-center gap-2.5">
+                                            <span
+                                                className={`h-2 w-2 shrink-0 rounded-full ${status.color}`}
+                                            />
+
+                                            <span className="truncate text-sm font-medium text-primary">
+                                                {status.label}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <span className="text-sm font-semibold text-primary">
+                                                {count}
+                                            </span>
+
+                                            <span className="text-xs text-gray-400">
+                                                {percentage}%
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <OrderStatusBar
+                                        percentage={percentage}
+                                        color={status.color}
+                                        delay={index * 0.08}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Cancelled */}
+                    <div className="mt-7 flex items-center justify-between border-t border-border pt-5">
+                        <div className="flex items-center gap-2.5">
+                            <span className="h-2 w-2 rounded-full bg-red-400" />
+
+                            <span className="text-sm font-medium text-gray-600">
+                                Cancelled Orders
+                            </span>
+                        </div>
+
+                        <span className="text-sm font-semibold text-primary">
+                            {stats.orderStatus.CANCELLED ?? 0}
+                        </span>
                     </div>
                 </div>
 
                 {/* Recent Orders */}
-                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                    <div className="flex items-center justify-between">
-                        <div>
+
+                <div className="w-full rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
                                 Recent Activity
                             </p>
@@ -262,68 +330,203 @@ export default async function AdminPage() {
                             <h2 className="mt-2 text-xl font-semibold text-primary">
                                 Recent Orders
                             </h2>
+
+                            <p className="mt-1 text-sm text-gray-500">
+                                Latest customer orders and their current status.
+                            </p>
                         </div>
 
                         <Link
                             href="/admin/orders"
-                            className="text-sm font-medium text-primary transition hover:text-accent"
+                            className="shrink-0 text-sm font-medium text-primary transition hover:text-accent"
                         >
                             View all
                         </Link>
                     </div>
 
-                    <div className="mt-6 space-y-4">
-                        {recentOrders.length > 0 ? (
-                            recentOrders.map((order) => (
-                                <Link
-                                    key={order.id}
-                                    href={`/admin/orders/${order.id}`}
-                                    className="block border-b border-border pb-4 transition last:border-b-0 last:pb-0 hover:pl-1"
-                                >
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="min-w-0">
-                                            <p className="truncate text-sm font-semibold text-primary">
-                                                {order.user.name || "Customer"}
-                                            </p>
+                    {recentOrders.length > 0 ? (
+                        <>
+                            {/* Desktop Table */}
+                            <div className="mt-6 hidden overflow-x-auto sm:block">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="border-b border-border text-xs uppercase tracking-wider text-gray-400">
+                                            <th className="w-[20%] pb-4 font-medium">
+                                                Order
+                                            </th>
+                                            <th className="w-[30%] pb-4 font-medium">
+                                                Customer
+                                            </th>
+                                            <th className="w-[15%] pb-4 font-medium">
+                                                Total
+                                            </th>
+                                            <th className="w-[16%] pb-4 font-medium">
+                                                Status
+                                            </th>
+                                            <th className="w-[18%] pb-4 text-right font-medium">
+                                                Date
+                                            </th>
+                                        </tr>
+                                    </thead>
 
-                                            <p className="mt-1 text-xs text-gray-400">
-                                                {order.user.email}
-                                            </p>
+                                    <tbody className="divide-y divide-border">
+                                        {recentOrders.map((order) => (
+                                            <tr
+                                                key={order.id}
+                                                className="transition hover:bg-stone-50"
+                                            >
+                                                <td className="py-4">
+                                                    <Link
+                                                        href={`/admin/orders/${order.id}`}
+                                                        className="font-medium text-primary hover:text-accent"
+                                                    >
+                                                        #
+                                                        {order.id
+                                                            .slice(-8)
+                                                            .toUpperCase()}
+                                                    </Link>
+                                                </td>
+
+                                                <td className="py-4">
+                                                    <div>
+                                                        <p className="font-medium text-primary">
+                                                            {order.user.name}
+                                                        </p>
+
+                                                        <p className="text-xs text-gray-400">
+                                                            {order.user.email}
+                                                        </p>
+                                                    </div>
+                                                </td>
+
+                                                <td className="py-4 font-medium text-primary">
+                                                    $
+                                                    {Number(
+                                                        order.total,
+                                                    ).toFixed(2)}
+                                                </td>
+
+                                                <td className="py-4">
+                                                    <span
+                                                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                                                            order.status ===
+                                                            "DELIVERED"
+                                                                ? "bg-green-50 text-green-700"
+                                                                : order.status ===
+                                                                    "CANCELLED"
+                                                                  ? "bg-red-50 text-red-700"
+                                                                  : order.status ===
+                                                                      "SHIPPED"
+                                                                    ? "bg-blue-50 text-blue-700"
+                                                                    : order.status ===
+                                                                        "PROCESSING"
+                                                                      ? "bg-purple-50 text-purple-700"
+                                                                      : "bg-amber-50 text-amber-700"
+                                                        }`}
+                                                    >
+                                                        {order.status}
+                                                    </span>
+                                                </td>
+
+                                                <td className="py-4 text-right text-sm text-gray-500">
+                                                    {new Date(
+                                                        order.createdAt,
+                                                    ).toLocaleDateString()}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile Cards */}
+                            <div className="mt-6 space-y-3 sm:hidden">
+                                {recentOrders.map((order) => (
+                                    <Link
+                                        key={order.id}
+                                        href={`/admin/orders/${order.id}`}
+                                        className="block rounded-xl border border-border p-4 transition hover:border-accent hover:bg-stone-50"
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-primary">
+                                                    #
+                                                    {order.id
+                                                        .slice(-8)
+                                                        .toUpperCase()}
+                                                </p>
+
+                                                <p className="mt-1 truncate text-sm text-gray-600">
+                                                    {order.user.name}
+                                                </p>
+
+                                                <p className="truncate text-xs text-gray-400">
+                                                    {order.user.email}
+                                                </p>
+                                            </div>
+
+                                            <span
+                                                className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                                                    order.status === "DELIVERED"
+                                                        ? "bg-green-50 text-green-700"
+                                                        : order.status ===
+                                                            "CANCELLED"
+                                                          ? "bg-red-50 text-red-700"
+                                                          : order.status ===
+                                                              "SHIPPED"
+                                                            ? "bg-blue-50 text-blue-700"
+                                                            : order.status ===
+                                                                "PROCESSING"
+                                                              ? "bg-purple-50 text-purple-700"
+                                                              : "bg-amber-50 text-amber-700"
+                                                }`}
+                                            >
+                                                {order.status}
+                                            </span>
                                         </div>
 
-                                        <span className="shrink-0 text-sm font-semibold text-primary">
-                                            {formatCurrency(
-                                                Number(order.total),
-                                            )}
-                                        </span>
-                                    </div>
+                                        <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+                                            <div>
+                                                <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                    Total
+                                                </p>
+                                                <p className="mt-0.5 font-semibold text-primary">
+                                                    $
+                                                    {Number(
+                                                        order.total,
+                                                    ).toFixed(2)}
+                                                </p>
+                                            </div>
 
-                                    <div className="mt-2 flex items-center justify-between">
-                                        <span className="text-xs text-gray-400">
-                                            {new Date(
-                                                order.createdAt,
-                                            ).toLocaleDateString()}
-                                        </span>
-
-                                        <span className="text-xs font-medium uppercase tracking-wide text-accent">
-                                            {order.status}
-                                        </span>
-                                    </div>
-                                </Link>
-                            ))
-                        ) : (
-                            <p className="py-8 text-center text-sm text-gray-500">
-                                No orders yet.
+                                            <div className="text-right">
+                                                <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                    Date
+                                                </p>
+                                                <p className="mt-0.5 text-sm text-gray-500">
+                                                    {new Date(
+                                                        order.createdAt,
+                                                    ).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="mt-6 rounded-xl border border-dashed border-border py-10 text-center">
+                            <p className="text-sm text-gray-500">
+                                No recent orders found.
                             </p>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </section>
 
             {/* ================= Top Products ================= */}
 
             <section className="mt-6 rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between gap-4">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
                             Product Performance
@@ -332,75 +535,101 @@ export default async function AdminPage() {
                         <h2 className="mt-2 text-xl font-semibold text-primary">
                             Top Products
                         </h2>
+
+                        <p className="mt-1 text-sm text-gray-500">
+                            Best-selling products based on order quantity.
+                        </p>
                     </div>
 
                     <Link
                         href="/admin/products"
-                        className="text-sm font-medium text-primary transition hover:text-accent"
+                        className="shrink-0 text-sm font-medium text-primary transition hover:text-accent"
                     >
                         Manage products
                     </Link>
                 </div>
 
                 {topProducts.length > 0 ? (
-                    <div className="mt-6 overflow-x-auto">
-                        <table className="w-full min-w-150 text-left">
-                            <thead>
-                                <tr className="border-b border-border text-xs uppercase tracking-[0.16em] text-gray-400">
-                                    <th className="pb-4 font-medium">
-                                        Product
-                                    </th>
+                    <div className="mt-7 space-y-5">
+                        {topProducts.map((product, index) => {
+                            const maxSold = Math.max(
+                                ...topProducts.map((item) => item.sold),
+                                1,
+                            );
 
-                                    <th className="pb-4 font-medium">Price</th>
+                            const percentage = Math.round(
+                                (product.sold / maxSold) * 100,
+                            );
 
-                                    <th className="pb-4 text-right font-medium">
-                                        Sold
-                                    </th>
-                                </tr>
-                            </thead>
+                            return (
+                                <Link
+                                    key={product.id}
+                                    href={`/admin/products/${product.id}`}
+                                    className="group block"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        {/* Rank */}
+                                        <span className="w-6 shrink-0 text-xs font-semibold tracking-wider text-gray-300">
+                                            {String(index + 1).padStart(2, "0")}
+                                        </span>
 
-                            <tbody>
-                                {topProducts.map((product) => (
-                                    <tr
-                                        key={product.id}
-                                        className="border-b border-border last:border-0"
-                                    >
-                                        <td className="py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-12 w-10 overflow-hidden bg-stone-100">
-                                                    {product.image ? (
-                                                        // eslint-disable-next-line @next/next/no-img-element
-                                                        <img
-                                                            src={product.image}
-                                                            alt={product.name}
-                                                            className="h-full w-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="h-full w-full bg-stone-100" />
-                                                    )}
+                                        {/* Product Image */}
+                                        <div className="h-14 w-11 shrink-0 overflow-hidden bg-stone-100">
+                                            {product.image ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img
+                                                    src={product.image}
+                                                    alt={product.name}
+                                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
+                                                    No image
                                                 </div>
+                                            )}
+                                        </div>
 
-                                                <span className="max-w-65 truncate text-sm font-medium text-primary">
+                                        {/* Product Info */}
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center justify-between gap-4">
+                                                <p className="truncate text-sm font-medium text-primary transition-colors group-hover:text-accent">
                                                     {product.name}
+                                                </p>
+
+                                                <span className="shrink-0 text-sm font-semibold text-primary">
+                                                    {product.sold} sold
                                                 </span>
                                             </div>
-                                        </td>
 
-                                        <td className="py-4 text-sm text-gray-500">
+                                            <div className="mt-2 h-1.5 overflow-hidden bg-stone-100">
+                                                <div
+                                                    className="h-full bg-accent transition-all duration-700 group-hover:bg-primary"
+                                                    style={{
+                                                        width: `${percentage}%`,
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Price */}
+                                        <span className="hidden w-20 shrink-0 text-right text-sm text-gray-500 sm:block">
                                             {formatCurrency(product.price)}
-                                        </td>
+                                        </span>
 
-                                        <td className="py-4 text-right text-sm font-semibold text-primary">
-                                            {product.sold}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                        <ArrowRight
+                                            size={16}
+                                            className="shrink-0 text-gray-300 transition duration-300 group-hover:translate-x-1 group-hover:text-primary"
+                                        />
+                                    </div>
+                                </Link>
+                            );
+                        })}
                     </div>
                 ) : (
-                    <div className="py-10 text-center text-sm text-gray-500">
-                        No product sales data yet.
+                    <div className="py-12 text-center">
+                        <p className="text-sm text-gray-500">
+                            No product sales data yet.
+                        </p>
                     </div>
                 )}
             </section>
