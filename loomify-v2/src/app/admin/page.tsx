@@ -159,14 +159,14 @@ export default async function AdminPage() {
                     </h2>
                 </div>
 
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
                     {statCards.map((card) => {
                         const Icon = card.icon;
 
                         return (
                             <div
                                 key={card.label}
-                                className="rounded-2xl border border-border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md"
+                                className="rounded-2xl border border-border bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md sm:p-6"
                             >
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
@@ -174,7 +174,7 @@ export default async function AdminPage() {
                                             {card.label}
                                         </p>
 
-                                        <p className="mt-3 text-3xl font-bold tracking-tight text-primary">
+                                        <p className="mt-3 text-2xl font-semibold tracking-tight text-primary sm:text-3xl">
                                             {card.value}
                                         </p>
                                     </div>
