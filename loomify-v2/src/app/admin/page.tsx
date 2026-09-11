@@ -489,7 +489,7 @@ export default async function AdminPage() {
             {/* ================= Top Products ================= */}
 
             <section className="mt-6 rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between gap-4">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
                             Product Performance
@@ -498,75 +498,101 @@ export default async function AdminPage() {
                         <h2 className="mt-2 text-xl font-semibold text-primary">
                             Top Products
                         </h2>
+
+                        <p className="mt-1 text-sm text-gray-500">
+                            Best-selling products based on order quantity.
+                        </p>
                     </div>
 
                     <Link
                         href="/admin/products"
-                        className="text-sm font-medium text-primary transition hover:text-accent"
+                        className="shrink-0 text-sm font-medium text-primary transition hover:text-accent"
                     >
                         Manage products
                     </Link>
                 </div>
 
                 {topProducts.length > 0 ? (
-                    <div className="mt-6 overflow-x-auto">
-                        <table className="w-full min-w-150 text-left">
-                            <thead>
-                                <tr className="border-b border-border text-xs uppercase tracking-[0.16em] text-gray-400">
-                                    <th className="pb-4 font-medium">
-                                        Product
-                                    </th>
+                    <div className="mt-7 space-y-5">
+                        {topProducts.map((product, index) => {
+                            const maxSold = Math.max(
+                                ...topProducts.map((item) => item.sold),
+                                1,
+                            );
 
-                                    <th className="pb-4 font-medium">Price</th>
+                            const percentage = Math.round(
+                                (product.sold / maxSold) * 100,
+                            );
 
-                                    <th className="pb-4 text-right font-medium">
-                                        Sold
-                                    </th>
-                                </tr>
-                            </thead>
+                            return (
+                                <Link
+                                    key={product.id}
+                                    href={`/admin/products/${product.id}`}
+                                    className="group block"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        {/* Rank */}
+                                        <span className="w-6 shrink-0 text-xs font-semibold tracking-wider text-gray-300">
+                                            {String(index + 1).padStart(2, "0")}
+                                        </span>
 
-                            <tbody>
-                                {topProducts.map((product) => (
-                                    <tr
-                                        key={product.id}
-                                        className="border-b border-border last:border-0"
-                                    >
-                                        <td className="py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-12 w-10 overflow-hidden bg-stone-100">
-                                                    {product.image ? (
-                                                        // eslint-disable-next-line @next/next/no-img-element
-                                                        <img
-                                                            src={product.image}
-                                                            alt={product.name}
-                                                            className="h-full w-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="h-full w-full bg-stone-100" />
-                                                    )}
+                                        {/* Product Image */}
+                                        <div className="h-14 w-11 shrink-0 overflow-hidden bg-stone-100">
+                                            {product.image ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img
+                                                    src={product.image}
+                                                    alt={product.name}
+                                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
+                                                    No image
                                                 </div>
+                                            )}
+                                        </div>
 
-                                                <span className="max-w-65 truncate text-sm font-medium text-primary">
+                                        {/* Product Info */}
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center justify-between gap-4">
+                                                <p className="truncate text-sm font-medium text-primary transition-colors group-hover:text-accent">
                                                     {product.name}
+                                                </p>
+
+                                                <span className="shrink-0 text-sm font-semibold text-primary">
+                                                    {product.sold} sold
                                                 </span>
                                             </div>
-                                        </td>
 
-                                        <td className="py-4 text-sm text-gray-500">
+                                            <div className="mt-2 h-1.5 overflow-hidden bg-stone-100">
+                                                <div
+                                                    className="h-full bg-accent transition-all duration-700 group-hover:bg-primary"
+                                                    style={{
+                                                        width: `${percentage}%`,
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Price */}
+                                        <span className="hidden w-20 shrink-0 text-right text-sm text-gray-500 sm:block">
                                             {formatCurrency(product.price)}
-                                        </td>
+                                        </span>
 
-                                        <td className="py-4 text-right text-sm font-semibold text-primary">
-                                            {product.sold}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                        <ArrowRight
+                                            size={16}
+                                            className="shrink-0 text-gray-300 transition duration-300 group-hover:translate-x-1 group-hover:text-primary"
+                                        />
+                                    </div>
+                                </Link>
+                            );
+                        })}
                     </div>
                 ) : (
-                    <div className="py-10 text-center text-sm text-gray-500">
-                        No product sales data yet.
+                    <div className="py-12 text-center">
+                        <p className="text-sm text-gray-500">
+                            No product sales data yet.
+                        </p>
                     </div>
                 )}
             </section>
