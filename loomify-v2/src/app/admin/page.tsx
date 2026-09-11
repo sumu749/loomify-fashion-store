@@ -109,7 +109,7 @@ export default async function AdminPage() {
             {/* ================= Header ================= */}
 
             <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
-                <div className="relative p-6 sm:p-8 lg:p-10">
+                <div className="relative flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8 lg:p-10">
                     <div className="max-w-3xl">
                         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-accent">
                             Loomify Admin
@@ -128,7 +128,7 @@ export default async function AdminPage() {
                         </p>
                     </div>
 
-                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <div className="flex flex-wrap items-center gap-2">
                         <Button asChild>
                             <Link href="/admin/products/new">
                                 <Plus size={18} />
