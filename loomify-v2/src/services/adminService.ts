@@ -77,8 +77,15 @@ export const getAdminRecentOrders = async () => {
 };
 
 export const getAdminTopProducts = async () => {
-    const topProducts = await prisma.orderItem.groupBy({
+    const topProductGroups = await prisma.orderItem.groupBy({
         by: ["productId"],
+        where: {
+            order: {
+                status: {
+                    not: "CANCELLED",
+                },
+            },
+        },
         _sum: {
             quantity: true,
         },
@@ -90,11 +97,11 @@ export const getAdminTopProducts = async () => {
         take: 5,
     });
 
-    if (topProducts.length === 0) {
+    if (topProductGroups.length === 0) {
         return [];
     }
 
-    const productIds = topProducts.map((item) => item.productId);
+    const productIds = topProductGroups.map((item) => item.productId);
 
     const products = await prisma.product.findMany({
         where: {
@@ -118,7 +125,7 @@ export const getAdminTopProducts = async () => {
         },
     });
 
-    return topProducts.map((item) => {
+    return topProductGroups.map((item) => {
         const product = products.find(
             (currentProduct) => currentProduct.id === item.productId,
         );
