@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import Link from "next/link";
 import {
     ArrowRight,
@@ -21,6 +22,7 @@ import {
 } from "@/services/adminService";
 import formatCurrency from "@/utils/formatCurrency";
 import SalesOverviewChart from "@/components/admin/SalesOverviewChart";
+import OrderStatusBar from "@/components/admin/OrderStatusBar";
 
 export default async function AdminPage() {
     const session = await auth.api.getSession({
@@ -202,17 +204,23 @@ export default async function AdminPage() {
             {/* ================= Dashboard Insights ================= */}
 
             <section className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                {/* Order Status */}
+                {/* Order Pipeline */}
+
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-                                Orders
+                                Order Overview
                             </p>
 
                             <h2 className="mt-2 text-xl font-semibold text-primary">
-                                Order Status
+                                Order Pipeline
                             </h2>
+
+                            <p className="mt-1 text-sm text-gray-500">
+                                Track how customer orders are moving through
+                                your store.
+                            </p>
                         </div>
 
                         <Link
@@ -223,46 +231,108 @@ export default async function AdminPage() {
                         </Link>
                     </div>
 
-                    <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                    <div className="mt-8">
                         {[
                             {
+                                key: "PENDING",
                                 label: "Pending",
-                                value: stats.orderStatus.PENDING ?? 0,
                             },
                             {
+                                key: "PROCESSING",
                                 label: "Processing",
-                                value: stats.orderStatus.PROCESSING ?? 0,
                             },
                             {
+                                key: "SHIPPED",
                                 label: "Shipped",
-                                value: stats.orderStatus.SHIPPED ?? 0,
                             },
                             {
+                                key: "DELIVERED",
                                 label: "Delivered",
-                                value: stats.orderStatus.DELIVERED ?? 0,
                             },
-                            {
-                                label: "Cancelled",
-                                value: stats.orderStatus.CANCELLED ?? 0,
-                            },
-                        ].map((item) => (
-                            <div
-                                key={item.label}
-                                className="border border-border bg-stone-50 p-4"
-                            >
-                                <p className="text-xs text-gray-500">
-                                    {item.label}
-                                </p>
+                        ].map((status, index, items) => {
+                            const count = stats.orderStatus[status.key] ?? 0;
 
-                                <p className="mt-2 text-2xl font-bold text-primary">
-                                    {item.value}
-                                </p>
-                            </div>
-                        ))}
+                            const totalOrders = stats.totalOrders || 1;
+
+                            const percentage = Math.round(
+                                (count / totalOrders) * 100,
+                            );
+
+                            return (
+                                <div key={status.key}>
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="flex min-w-0 items-center gap-3">
+                                            <span
+                                                className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                                                    status.key === "PENDING"
+                                                        ? "bg-amber-400"
+                                                        : status.key ===
+                                                            "PROCESSING"
+                                                          ? "bg-blue-500"
+                                                          : status.key ===
+                                                              "SHIPPED"
+                                                            ? "bg-violet-500"
+                                                            : "bg-emerald-500"
+                                                }`}
+                                            />
+
+                                            <span className="text-sm font-medium text-primary">
+                                                {status.label}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-xs text-gray-400">
+                                                {percentage}%
+                                            </span>
+
+                                            <span className="w-8 text-right text-sm font-semibold text-primary">
+                                                {count}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <OrderStatusBar
+                                        percentage={percentage}
+                                        delay={index * 0.1}
+                                        color={
+                                            status.key === "PENDING"
+                                                ? "bg-amber-400"
+                                                : status.key === "PROCESSING"
+                                                  ? "bg-blue-500"
+                                                  : status.key === "SHIPPED"
+                                                    ? "bg-violet-500"
+                                                    : "bg-emerald-500"
+                                        }
+                                    />
+
+                                    {index < items.length - 1 && (
+                                        <div className="my-5 border-b border-border" />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Cancelled */}
+                    <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+                        <div>
+                            <p className="text-sm font-medium text-primary">
+                                Cancelled Orders
+                            </p>
+
+                            <p className="mt-1 text-xs text-gray-400">
+                                Orders removed from active fulfillment.
+                            </p>
+                        </div>
+
+                        <span className="text-lg font-bold text-primary">
+                            {stats.orderStatus.CANCELLED ?? 0}
+                        </span>
                     </div>
                 </div>
 
                 {/* Recent Orders */}
+
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
                     <div className="flex items-center justify-between">
                         <div>
