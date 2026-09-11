@@ -14,7 +14,7 @@ const OrderStatusBar = ({
     delay = 0,
 }: OrderStatusBarProps) => {
     return (
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-100">
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-stone-100 sm:h-2">
             <motion.div
                 initial={{ width: 0 }}
                 whileInView={{

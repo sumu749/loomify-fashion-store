@@ -105,7 +105,7 @@ export default async function AdminPage() {
     ];
 
     return (
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto w-full min-w-0 max-w-7xl">
             {/* ================= Header ================= */}
 
             <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
@@ -206,9 +206,9 @@ export default async function AdminPage() {
             <section className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
                 {/* Order Pipeline */}
 
-                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+                <div className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                     <div className="flex items-start justify-between gap-4">
-                        <div>
+                        <div className="min-w-0">
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
                                 Order Overview
                             </p>
@@ -217,7 +217,7 @@ export default async function AdminPage() {
                                 Order Pipeline
                             </h2>
 
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 max-w-xl text-sm leading-6 text-gray-500">
                                 Track how customer orders are moving through
                                 your store.
                             </p>
@@ -225,117 +225,127 @@ export default async function AdminPage() {
 
                         <Link
                             href="/admin/orders"
-                            className="text-sm font-medium text-primary transition hover:text-accent"
+                            className="shrink-0 text-sm font-medium text-primary transition hover:text-accent"
                         >
                             View all
                         </Link>
                     </div>
 
-                    <div className="mt-8">
-                        {[
+                    {(() => {
+                        const cancelledOrders =
+                            stats.orderStatus.CANCELLED ?? 0;
+
+                        const activeOrders = Math.max(
+                            stats.totalOrders - cancelledOrders,
+                            0,
+                        );
+
+                        const statuses = [
                             {
                                 key: "PENDING",
                                 label: "Pending",
+                                color: "bg-amber-400",
                             },
                             {
                                 key: "PROCESSING",
                                 label: "Processing",
+                                color: "bg-blue-500",
                             },
                             {
                                 key: "SHIPPED",
                                 label: "Shipped",
+                                color: "bg-violet-500",
                             },
                             {
                                 key: "DELIVERED",
                                 label: "Delivered",
+                                color: "bg-emerald-500",
                             },
-                        ].map((status, index, items) => {
-                            const count = stats.orderStatus[status.key] ?? 0;
+                        ];
 
-                            const totalOrders = stats.totalOrders || 1;
+                        return (
+                            <>
+                                <div className="mt-7 sm:mt-8">
+                                    {statuses.map((status, index) => {
+                                        const count =
+                                            stats.orderStatus[status.key] ?? 0;
 
-                            const percentage = Math.round(
-                                (count / totalOrders) * 100,
-                            );
+                                        const percentage =
+                                            activeOrders > 0
+                                                ? Math.round(
+                                                      (count / activeOrders) *
+                                                          100,
+                                                  )
+                                                : 0;
 
-                            return (
-                                <div key={status.key}>
-                                    <div className="flex items-center justify-between gap-4">
-                                        <div className="flex min-w-0 items-center gap-3">
-                                            <span
-                                                className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                                                    status.key === "PENDING"
-                                                        ? "bg-amber-400"
-                                                        : status.key ===
-                                                            "PROCESSING"
-                                                          ? "bg-blue-500"
-                                                          : status.key ===
-                                                              "SHIPPED"
-                                                            ? "bg-violet-500"
-                                                            : "bg-emerald-500"
-                                                }`}
-                                            />
+                                        return (
+                                            <div
+                                                key={status.key}
+                                                className={
+                                                    index > 0
+                                                        ? "mt-5 border-t border-border pt-5 sm:mt-6 sm:pt-6"
+                                                        : ""
+                                                }
+                                            >
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div className="flex min-w-0 items-center gap-2.5">
+                                                        <span
+                                                            className={`h-2.5 w-2.5 shrink-0 rounded-full ${status.color}`}
+                                                        />
 
-                                            <span className="text-sm font-medium text-primary">
-                                                {status.label}
-                                            </span>
-                                        </div>
+                                                        <span className="truncate text-sm font-medium text-primary">
+                                                            {status.label}
+                                                        </span>
+                                                    </div>
 
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-xs text-gray-400">
-                                                {percentage}%
-                                            </span>
+                                                    <div className="flex shrink-0 items-center gap-2">
+                                                        <span className="text-xs text-gray-400">
+                                                            {percentage}%
+                                                        </span>
 
-                                            <span className="w-8 text-right text-sm font-semibold text-primary">
-                                                {count}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <OrderStatusBar
-                                        percentage={percentage}
-                                        delay={index * 0.1}
-                                        color={
-                                            status.key === "PENDING"
-                                                ? "bg-amber-400"
-                                                : status.key === "PROCESSING"
-                                                  ? "bg-blue-500"
-                                                  : status.key === "SHIPPED"
-                                                    ? "bg-violet-500"
-                                                    : "bg-emerald-500"
-                                        }
-                                    />
+                                                        <span className="min-w-6 text-right text-sm font-semibold text-primary">
+                                                            {count}
+                                                        </span>
+                                                    </div>
+                                                </div>
 
-                                    {index < items.length - 1 && (
-                                        <div className="my-5 border-b border-border" />
-                                    )}
+                                                <OrderStatusBar
+                                                    percentage={percentage}
+                                                    delay={index * 0.1}
+                                                    color={status.color}
+                                                />
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            );
-                        })}
-                    </div>
 
-                    {/* Cancelled */}
-                    <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
-                        <div>
-                            <p className="text-sm font-medium text-primary">
-                                Cancelled Orders
-                            </p>
+                                {/* Cancelled */}
+                                <div className="mt-6 flex items-center justify-between gap-4 border-t border-border pt-5">
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium text-primary">
+                                            Cancelled Orders
+                                        </p>
 
-                            <p className="mt-1 text-xs text-gray-400">
-                                Orders removed from active fulfillment.
-                            </p>
-                        </div>
+                                        <p className="mt-1 text-xs leading-5 text-gray-400">
+                                            Orders removed from active
+                                            fulfillment.
+                                        </p>
+                                    </div>
 
-                        <span className="text-lg font-bold text-primary">
-                            {stats.orderStatus.CANCELLED ?? 0}
-                        </span>
-                    </div>
+                                    <span className="shrink-0 text-lg font-bold text-primary">
+                                        {cancelledOrders}
+                                    </span>
+                                </div>
+                            </>
+                        );
+                    })()}
                 </div>
 
                 {/* Recent Orders */}
 
-                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+                <div className="w-full rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                     <div className="flex items-start justify-between gap-4">
-                        <div>
+                        <div className="min-w-0">
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
                                 Recent Activity
                             </p>
@@ -358,129 +368,179 @@ export default async function AdminPage() {
                     </div>
 
                     {recentOrders.length > 0 ? (
-                        <div className="mt-6 overflow-x-auto">
-                            <table className="w-full min-w-180 text-left">
-                                <thead>
-                                    <tr className="border-b border-border">
-                                        <th className="pb-4 pr-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
-                                            Order
-                                        </th>
+                        <>
+                            {/* Desktop Table */}
+                            <div className="mt-6 hidden overflow-x-auto sm:block">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="border-b border-border text-xs uppercase tracking-wider text-gray-400">
+                                            <th className="pb-4 font-medium">
+                                                Order
+                                            </th>
+                                            <th className="pb-4 font-medium">
+                                                Customer
+                                            </th>
+                                            <th className="pb-4 font-medium">
+                                                Total
+                                            </th>
+                                            <th className="pb-4 font-medium">
+                                                Status
+                                            </th>
+                                            <th className="pb-4 text-right font-medium">
+                                                Date
+                                            </th>
+                                        </tr>
+                                    </thead>
 
-                                        <th className="pb-4 pr-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
-                                            Customer
-                                        </th>
-
-                                        <th className="pb-4 pr-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
-                                            Total
-                                        </th>
-
-                                        <th className="pb-4 pr-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
-                                            Status
-                                        </th>
-
-                                        <th className="pb-4 text-right text-xs font-medium uppercase tracking-[0.15em] text-gray-400">
-                                            Date
-                                        </th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {recentOrders.map((order) => {
-                                        const statusStyles: Record<
-                                            string,
-                                            string
-                                        > = {
-                                            PENDING:
-                                                "bg-amber-50 text-amber-700 border-amber-200",
-                                            PROCESSING:
-                                                "bg-blue-50 text-blue-700 border-blue-200",
-                                            SHIPPED:
-                                                "bg-violet-50 text-violet-700 border-violet-200",
-                                            DELIVERED:
-                                                "bg-emerald-50 text-emerald-700 border-emerald-200",
-                                            CANCELLED:
-                                                "bg-red-50 text-red-700 border-red-200",
-                                        };
-
-                                        return (
+                                    <tbody className="divide-y divide-border">
+                                        {recentOrders.map((order) => (
                                             <tr
                                                 key={order.id}
-                                                className="group border-b border-border last:border-b-0"
+                                                className="transition hover:bg-stone-50"
                                             >
-                                                <td className="py-4 pr-4">
+                                                <td className="py-4">
                                                     <Link
                                                         href={`/admin/orders/${order.id}`}
-                                                        className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors group-hover:text-accent"
+                                                        className="font-medium text-primary hover:text-accent"
                                                     >
-                                                        #{order.id.slice(-8)}
-                                                        <ArrowRight
-                                                            size={14}
-                                                            className="opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100"
-                                                        />
+                                                        #
+                                                        {order.id
+                                                            .slice(-8)
+                                                            .toUpperCase()}
                                                     </Link>
                                                 </td>
 
-                                                <td className="py-4 pr-4">
-                                                    <p className="text-sm font-medium text-primary">
-                                                        {order.user.name ||
-                                                            "Customer"}
-                                                    </p>
+                                                <td className="py-4">
+                                                    <div>
+                                                        <p className="font-medium text-primary">
+                                                            {order.user.name}
+                                                        </p>
 
-                                                    <p className="mt-0.5 text-xs text-gray-400">
-                                                        {order.user.email}
-                                                    </p>
+                                                        <p className="text-xs text-gray-400">
+                                                            {order.user.email}
+                                                        </p>
+                                                    </div>
                                                 </td>
 
-                                                <td className="py-4 pr-4 text-sm font-semibold text-primary">
-                                                    {formatCurrency(
-                                                        Number(order.total),
-                                                    )}
+                                                <td className="py-4 font-medium text-primary">
+                                                    $
+                                                    {Number(
+                                                        order.total,
+                                                    ).toFixed(2)}
                                                 </td>
 
-                                                <td className="py-4 pr-4">
+                                                <td className="py-4">
                                                     <span
-                                                        className={`inline-flex border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${
-                                                            statusStyles[
-                                                                order.status
-                                                            ] ??
-                                                            "border-border bg-stone-50 text-gray-600"
+                                                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                                                            order.status ===
+                                                            "DELIVERED"
+                                                                ? "bg-green-50 text-green-700"
+                                                                : order.status ===
+                                                                    "CANCELLED"
+                                                                  ? "bg-red-50 text-red-700"
+                                                                  : order.status ===
+                                                                      "SHIPPED"
+                                                                    ? "bg-blue-50 text-blue-700"
+                                                                    : order.status ===
+                                                                        "PROCESSING"
+                                                                      ? "bg-purple-50 text-purple-700"
+                                                                      : "bg-amber-50 text-amber-700"
                                                         }`}
                                                     >
                                                         {order.status}
                                                     </span>
                                                 </td>
 
-                                                <td className="py-4 text-right text-xs text-gray-400">
+                                                <td className="py-4 text-right text-sm text-gray-500">
                                                     {new Date(
                                                         order.createdAt,
-                                                    ).toLocaleDateString(
-                                                        "en-US",
-                                                        {
-                                                            month: "short",
-                                                            day: "numeric",
-                                                            year: "numeric",
-                                                        },
-                                                    )}
+                                                    ).toLocaleDateString()}
                                                 </td>
                                             </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
-                        <div className="py-12 text-center">
-                            <p className="text-sm text-gray-500">
-                                No orders have been placed yet.
-                            </p>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                            <Link
-                                href="/admin/orders"
-                                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-accent"
-                            >
-                                Go to Orders
-                                <ArrowRight size={16} />
-                            </Link>
+                            {/* Mobile Cards */}
+                            <div className="mt-6 space-y-3 sm:hidden">
+                                {recentOrders.map((order) => (
+                                    <Link
+                                        key={order.id}
+                                        href={`/admin/orders/${order.id}`}
+                                        className="block rounded-xl border border-border p-4 transition hover:border-accent hover:bg-stone-50"
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-primary">
+                                                    #
+                                                    {order.id
+                                                        .slice(-8)
+                                                        .toUpperCase()}
+                                                </p>
+
+                                                <p className="mt-1 truncate text-sm text-gray-600">
+                                                    {order.user.name}
+                                                </p>
+
+                                                <p className="truncate text-xs text-gray-400">
+                                                    {order.user.email}
+                                                </p>
+                                            </div>
+
+                                            <span
+                                                className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                                                    order.status === "DELIVERED"
+                                                        ? "bg-green-50 text-green-700"
+                                                        : order.status ===
+                                                            "CANCELLED"
+                                                          ? "bg-red-50 text-red-700"
+                                                          : order.status ===
+                                                              "SHIPPED"
+                                                            ? "bg-blue-50 text-blue-700"
+                                                            : order.status ===
+                                                                "PROCESSING"
+                                                              ? "bg-purple-50 text-purple-700"
+                                                              : "bg-amber-50 text-amber-700"
+                                                }`}
+                                            >
+                                                {order.status}
+                                            </span>
+                                        </div>
+
+                                        <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+                                            <div>
+                                                <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                    Total
+                                                </p>
+                                                <p className="mt-0.5 font-semibold text-primary">
+                                                    $
+                                                    {Number(
+                                                        order.total,
+                                                    ).toFixed(2)}
+                                                </p>
+                                            </div>
+
+                                            <div className="text-right">
+                                                <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                    Date
+                                                </p>
+                                                <p className="mt-0.5 text-sm text-gray-500">
+                                                    {new Date(
+                                                        order.createdAt,
+                                                    ).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="mt-6 rounded-xl border border-dashed border-border py-10 text-center">
+                            <p className="text-sm text-gray-500">
+                                No recent orders found.
+                            </p>
                         </div>
                     )}
                 </div>
