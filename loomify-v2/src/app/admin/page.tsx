@@ -206,7 +206,7 @@ export default async function AdminPage() {
             <section className="mt-8 grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
                 {/* Order Pipeline */}
 
-                <div className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
+                <div className="w-full rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                     <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
@@ -217,9 +217,8 @@ export default async function AdminPage() {
                                 Order Pipeline
                             </h2>
 
-                            <p className="mt-1 max-w-xl text-sm leading-6 text-gray-500">
-                                Track how customer orders are moving through
-                                your store.
+                            <p className="mt-1 text-sm leading-6 text-gray-500">
+                                Track customer orders through each stage.
                             </p>
                         </div>
 
@@ -231,16 +230,8 @@ export default async function AdminPage() {
                         </Link>
                     </div>
 
-                    {(() => {
-                        const cancelledOrders =
-                            stats.orderStatus.CANCELLED ?? 0;
-
-                        const activeOrders = Math.max(
-                            stats.totalOrders - cancelledOrders,
-                            0,
-                        );
-
-                        const statuses = [
+                    <div className="mt-7 space-y-5">
+                        {[
                             {
                                 key: "PENDING",
                                 label: "Pending",
@@ -249,96 +240,82 @@ export default async function AdminPage() {
                             {
                                 key: "PROCESSING",
                                 label: "Processing",
-                                color: "bg-blue-500",
+                                color: "bg-purple-500",
                             },
                             {
                                 key: "SHIPPED",
                                 label: "Shipped",
-                                color: "bg-violet-500",
+                                color: "bg-blue-500",
                             },
                             {
                                 key: "DELIVERED",
                                 label: "Delivered",
-                                color: "bg-emerald-500",
+                                color: "bg-green-500",
                             },
-                        ];
+                        ].map((status, index) => {
+                            const count = stats.orderStatus[status.key] ?? 0;
 
-                        return (
-                            <>
-                                <div className="mt-7 sm:mt-8">
-                                    {statuses.map((status, index) => {
-                                        const count =
-                                            stats.orderStatus[status.key] ?? 0;
+                            const cancelledOrders =
+                                stats.orderStatus.CANCELLED ?? 0;
 
-                                        const percentage =
-                                            activeOrders > 0
-                                                ? Math.round(
-                                                      (count / activeOrders) *
-                                                          100,
-                                                  )
-                                                : 0;
+                            const activeOrders = Math.max(
+                                stats.totalOrders - cancelledOrders,
+                                0,
+                            );
 
-                                        return (
-                                            <div
-                                                key={status.key}
-                                                className={
-                                                    index > 0
-                                                        ? "mt-5 border-t border-border pt-5 sm:mt-6 sm:pt-6"
-                                                        : ""
-                                                }
-                                            >
-                                                <div className="flex items-center justify-between gap-3">
-                                                    <div className="flex min-w-0 items-center gap-2.5">
-                                                        <span
-                                                            className={`h-2.5 w-2.5 shrink-0 rounded-full ${status.color}`}
-                                                        />
+                            const percentage =
+                                activeOrders > 0
+                                    ? Math.round((count / activeOrders) * 100)
+                                    : 0;
 
-                                                        <span className="truncate text-sm font-medium text-primary">
-                                                            {status.label}
-                                                        </span>
-                                                    </div>
+                            return (
+                                <div key={status.key}>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="flex min-w-0 items-center gap-2.5">
+                                            <span
+                                                className={`h-2 w-2 shrink-0 rounded-full ${status.color}`}
+                                            />
 
-                                                    <div className="flex shrink-0 items-center gap-2">
-                                                        <span className="text-xs text-gray-400">
-                                                            {percentage}%
-                                                        </span>
+                                            <span className="truncate text-sm font-medium text-primary">
+                                                {status.label}
+                                            </span>
+                                        </div>
 
-                                                        <span className="min-w-6 text-right text-sm font-semibold text-primary">
-                                                            {count}
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <span className="text-sm font-semibold text-primary">
+                                                {count}
+                                            </span>
 
-                                                <OrderStatusBar
-                                                    percentage={percentage}
-                                                    delay={index * 0.1}
-                                                    color={status.color}
-                                                />
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {/* Cancelled */}
-                                <div className="mt-6 flex items-center justify-between gap-4 border-t border-border pt-5">
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium text-primary">
-                                            Cancelled Orders
-                                        </p>
-
-                                        <p className="mt-1 text-xs leading-5 text-gray-400">
-                                            Orders removed from active
-                                            fulfillment.
-                                        </p>
+                                            <span className="text-xs text-gray-400">
+                                                {percentage}%
+                                            </span>
+                                        </div>
                                     </div>
 
-                                    <span className="shrink-0 text-lg font-bold text-primary">
-                                        {cancelledOrders}
-                                    </span>
+                                    <OrderStatusBar
+                                        percentage={percentage}
+                                        color={status.color}
+                                        delay={index * 0.08}
+                                    />
                                 </div>
-                            </>
-                        );
-                    })()}
+                            );
+                        })}
+                    </div>
+
+                    {/* Cancelled */}
+                    <div className="mt-7 flex items-center justify-between border-t border-border pt-5">
+                        <div className="flex items-center gap-2.5">
+                            <span className="h-2 w-2 rounded-full bg-red-400" />
+
+                            <span className="text-sm font-medium text-gray-600">
+                                Cancelled Orders
+                            </span>
+                        </div>
+
+                        <span className="text-sm font-semibold text-primary">
+                            {stats.orderStatus.CANCELLED ?? 0}
+                        </span>
+                    </div>
                 </div>
 
                 {/* Recent Orders */}
@@ -374,19 +351,19 @@ export default async function AdminPage() {
                                 <table className="w-full text-left">
                                     <thead>
                                         <tr className="border-b border-border text-xs uppercase tracking-wider text-gray-400">
-                                            <th className="w-[18%] pb-4 font-medium">
+                                            <th className="w-[20%] pb-4 font-medium">
                                                 Order
                                             </th>
-                                            <th className="w-[28%] pb-4 font-medium">
+                                            <th className="w-[30%] pb-4 font-medium">
                                                 Customer
                                             </th>
                                             <th className="w-[15%] pb-4 font-medium">
                                                 Total
                                             </th>
-                                            <th className="w-[18%] pb-4 font-medium">
+                                            <th className="w-[16%] pb-4 font-medium">
                                                 Status
                                             </th>
-                                            <th className="w-[21%] pb-4 text-right font-medium">
+                                            <th className="w-[18%] pb-4 text-right font-medium">
                                                 Date
                                             </th>
                                         </tr>
