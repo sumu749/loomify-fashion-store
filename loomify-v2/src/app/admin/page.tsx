@@ -203,7 +203,7 @@ export default async function AdminPage() {
 
             {/* ================= Dashboard Insights ================= */}
 
-            <section className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <section className="mt-8 grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
                 {/* Order Pipeline */}
 
                 <div className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
@@ -374,19 +374,19 @@ export default async function AdminPage() {
                                 <table className="w-full text-left">
                                     <thead>
                                         <tr className="border-b border-border text-xs uppercase tracking-wider text-gray-400">
-                                            <th className="pb-4 font-medium">
+                                            <th className="w-[18%] pb-4 font-medium">
                                                 Order
                                             </th>
-                                            <th className="pb-4 font-medium">
+                                            <th className="w-[28%] pb-4 font-medium">
                                                 Customer
                                             </th>
-                                            <th className="pb-4 font-medium">
+                                            <th className="w-[15%] pb-4 font-medium">
                                                 Total
                                             </th>
-                                            <th className="pb-4 font-medium">
+                                            <th className="w-[18%] pb-4 font-medium">
                                                 Status
                                             </th>
-                                            <th className="pb-4 text-right font-medium">
+                                            <th className="w-[21%] pb-4 text-right font-medium">
                                                 Date
                                             </th>
                                         </tr>
