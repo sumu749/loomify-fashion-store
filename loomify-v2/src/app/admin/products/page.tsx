@@ -285,100 +285,238 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                     </div>
 
                     {products.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-250">
-                                <thead className="border-b border-border bg-stone-50/80">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Product
-                                        </th>
+                        <>
+                            <div className="hidden overflow-x-auto sm:block">
+                                <table className="w-full min-w-250">
+                                    <thead className="border-b border-border bg-stone-50/80">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Product
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Category
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Category
+                                            </th>
 
-                                        <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Price
-                                        </th>
+                                            <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Price
+                                            </th>
 
-                                        <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Stock
-                                        </th>
+                                            <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Stock
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Status
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Status
+                                            </th>
 
-                                        <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
+                                            <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
 
-                                <tbody className="divide-y divide-border">
-                                    {products.map((product) => {
-                                        const totalVariantStock =
-                                            product.variants.reduce(
-                                                (total, variant) =>
-                                                    total + variant.stock,
-                                                0,
-                                            );
+                                    <tbody className="divide-y divide-border">
+                                        {products.map((product) => {
+                                            const totalVariantStock =
+                                                product.variants.reduce(
+                                                    (total, variant) =>
+                                                        total + variant.stock,
+                                                    0,
+                                                );
 
-                                        const isOutOfStock =
-                                            totalVariantStock === 0;
+                                            const isOutOfStock =
+                                                totalVariantStock === 0;
 
-                                        const isLowStock =
-                                            totalVariantStock > 0 &&
-                                            totalVariantStock <= 5;
+                                            const isLowStock =
+                                                totalVariantStock > 0 &&
+                                                totalVariantStock <= 5;
 
-                                        return (
-                                            <tr
-                                                key={product.id}
-                                                className="group transition hover:bg-stone-50/60"
-                                            >
-                                                {/* Product */}
+                                            return (
+                                                <tr
+                                                    key={product.id}
+                                                    className="group transition hover:bg-stone-50/60"
+                                                >
+                                                    {/* Product */}
 
-                                                <td className="px-6 py-5">
-                                                    <div className="min-w-0">
-                                                        <Link
-                                                            href={`/admin/products/${product.id}`}
-                                                            className="font-semibold text-primary transition hover:text-accent"
-                                                        >
-                                                            {product.name}
-                                                        </Link>
+                                                    <td className="px-6 py-5">
+                                                        <div className="min-w-0">
+                                                            <Link
+                                                                href={`/admin/products/${product.id}`}
+                                                                className="font-semibold text-primary transition hover:text-accent"
+                                                            >
+                                                                {product.name}
+                                                            </Link>
 
-                                                        <p className="mt-1 text-xs text-gray-400">
-                                                            {product.sku}
+                                                            <p className="mt-1 text-xs text-gray-400">
+                                                                {product.sku}
+                                                            </p>
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Category */}
+
+                                                    <td className="px-6 py-5">
+                                                        <span className="inline-flex rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-medium text-gray-700">
+                                                            {
+                                                                product.category
+                                                                    .name
+                                                            }
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Price */}
+
+                                                    <td className="px-6 py-5 text-right">
+                                                        <p className="text-sm font-semibold text-primary">
+                                                            {formatCurrency(
+                                                                Number(
+                                                                    product.price,
+                                                                ),
+                                                            )}
                                                         </p>
-                                                    </div>
-                                                </td>
+                                                    </td>
 
-                                                {/* Category */}
+                                                    {/* Stock */}
 
-                                                <td className="px-6 py-5">
-                                                    <span className="inline-flex rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-medium text-gray-700">
-                                                        {product.category.name}
-                                                    </span>
-                                                </td>
+                                                    <td className="px-6 py-5 text-center">
+                                                        <div className="flex flex-col items-center gap-1.5">
+                                                            <span
+                                                                className={`inline-flex min-w-10 items-center justify-center rounded-lg px-2.5 py-1.5 text-sm font-semibold ${
+                                                                    isOutOfStock
+                                                                        ? "bg-red-50 text-red-700"
+                                                                        : isLowStock
+                                                                          ? "bg-amber-50 text-amber-700"
+                                                                          : "bg-green-50 text-green-700"
+                                                                }`}
+                                                            >
+                                                                {
+                                                                    totalVariantStock
+                                                                }
+                                                            </span>
 
-                                                {/* Price */}
+                                                            <span className="text-[11px] text-gray-400">
+                                                                {isOutOfStock
+                                                                    ? "Out of stock"
+                                                                    : isLowStock
+                                                                      ? "Low stock"
+                                                                      : "In stock"}
+                                                            </span>
+                                                        </div>
+                                                    </td>
 
-                                                <td className="px-6 py-5 text-right">
-                                                    <p className="text-sm font-semibold text-primary">
+                                                    {/* Status */}
+
+                                                    <td className="px-6 py-5">
+                                                        <ProductStatusToggle
+                                                            productId={
+                                                                product.id
+                                                            }
+                                                            published={
+                                                                product.published
+                                                            }
+                                                        />
+                                                    </td>
+
+                                                    {/* Actions */}
+
+                                                    <td className="px-6 py-5">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Button
+                                                                asChild
+                                                                variant="outline"
+                                                                size="sm"
+                                                            >
+                                                                <Link
+                                                                    href={`/admin/products/${product.id}`}
+                                                                >
+                                                                    Manage
+                                                                </Link>
+                                                            </Button>
+
+                                                            <ProductDeleteButton
+                                                                productId={
+                                                                    product.id
+                                                                }
+                                                                productName={
+                                                                    product.name
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile Products */}
+                            <div className="space-y-3 p-4 sm:hidden">
+                                {products.map((product) => {
+                                    const totalVariantStock =
+                                        product.variants.reduce(
+                                            (total, variant) =>
+                                                total + variant.stock,
+                                            0,
+                                        );
+
+                                    const isOutOfStock =
+                                        totalVariantStock === 0;
+
+                                    const isLowStock =
+                                        totalVariantStock > 0 &&
+                                        totalVariantStock <= 5;
+
+                                    return (
+                                        <div
+                                            key={product.id}
+                                            className="rounded-xl border border-border p-4 transition hover:border-accent"
+                                        >
+                                            {/* Product Info */}
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <Link
+                                                        href={`/admin/products/${product.id}`}
+                                                        className="line-clamp-2 text-sm font-semibold text-primary hover:text-accent"
+                                                    >
+                                                        {product.name}
+                                                    </Link>
+
+                                                    <p className="mt-1 truncate text-xs text-gray-400">
+                                                        {product.sku}
+                                                    </p>
+                                                </div>
+
+                                                <span className="shrink-0 rounded-lg bg-stone-100 px-2.5 py-1 text-xs font-medium text-gray-600">
+                                                    {product.category.name}
+                                                </span>
+                                            </div>
+
+                                            {/* Product Details */}
+                                            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
+                                                <div>
+                                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                        Price
+                                                    </p>
+
+                                                    <p className="mt-1 text-sm font-semibold text-primary">
                                                         {formatCurrency(
                                                             Number(
                                                                 product.price,
                                                             ),
                                                         )}
                                                     </p>
-                                                </td>
+                                                </div>
 
-                                                {/* Stock */}
+                                                <div>
+                                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                        Stock
+                                                    </p>
 
-                                                <td className="px-6 py-5 text-center">
-                                                    <div className="flex flex-col items-center gap-1.5">
+                                                    <div className="mt-1 flex items-center gap-2">
                                                         <span
-                                                            className={`inline-flex min-w-10 items-center justify-center rounded-lg px-2.5 py-1.5 text-sm font-semibold ${
+                                                            className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold ${
                                                                 isOutOfStock
                                                                     ? "bg-red-50 text-red-700"
                                                                     : isLowStock
@@ -391,57 +529,50 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
 
                                                         <span className="text-[11px] text-gray-400">
                                                             {isOutOfStock
-                                                                ? "Out of stock"
+                                                                ? "Out"
                                                                 : isLowStock
-                                                                  ? "Low stock"
-                                                                  : "In stock"}
+                                                                  ? "Low"
+                                                                  : "In"}
                                                         </span>
                                                     </div>
-                                                </td>
+                                                </div>
+                                            </div>
 
-                                                {/* Status */}
+                                            {/* Status + Actions */}
+                                            <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
+                                                <ProductStatusToggle
+                                                    productId={product.id}
+                                                    published={
+                                                        product.published
+                                                    }
+                                                />
 
-                                                <td className="px-6 py-5">
-                                                    <ProductStatusToggle
+                                                <div className="flex items-center gap-2">
+                                                    <Button
+                                                        asChild
+                                                        variant="outline"
+                                                        size="sm"
+                                                    >
+                                                        <Link
+                                                            href={`/admin/products/${product.id}`}
+                                                        >
+                                                            Manage
+                                                        </Link>
+                                                    </Button>
+
+                                                    <ProductDeleteButton
                                                         productId={product.id}
-                                                        published={
-                                                            product.published
+                                                        productName={
+                                                            product.name
                                                         }
                                                     />
-                                                </td>
-
-                                                {/* Actions */}
-
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Button
-                                                            asChild
-                                                            variant="outline"
-                                                            size="sm"
-                                                        >
-                                                            <Link
-                                                                href={`/admin/products/${product.id}`}
-                                                            >
-                                                                Manage
-                                                            </Link>
-                                                        </Button>
-
-                                                        <ProductDeleteButton
-                                                            productId={
-                                                                product.id
-                                                            }
-                                                            productName={
-                                                                product.name
-                                                            }
-                                                        />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     ) : (
                         <div className="px-6 py-20 text-center sm:px-8">
                             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100 text-xl">
