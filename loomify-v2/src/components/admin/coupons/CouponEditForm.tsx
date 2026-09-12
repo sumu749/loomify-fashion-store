@@ -36,11 +36,19 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
     const [active, setActive] = useState(coupon.active);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const today = new Date().toISOString().split("T")[0];
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         const normalizedCode = code.trim().toUpperCase();
         const discountValue = Number(value);
+
+        const minimumOrder = minOrderAmount ? Number(minOrderAmount) : null;
+
+        const maximumDiscount = maxDiscount ? Number(maxDiscount) : null;
+
+        const limit = usageLimit ? Number(usageLimit) : null;
 
         if (!normalizedCode) {
             toast.error("Coupon code is required");
@@ -58,33 +66,36 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
         }
 
         if (
-            minOrderAmount &&
-            (Number.isNaN(Number(minOrderAmount)) || Number(minOrderAmount) < 0)
+            minimumOrder !== null &&
+            (Number.isNaN(minimumOrder) || minimumOrder < 0)
         ) {
             toast.error("Minimum order amount is invalid");
             return;
         }
 
         if (
-            maxDiscount &&
-            (Number.isNaN(Number(maxDiscount)) || Number(maxDiscount) <= 0)
+            type === "PERCENTAGE" &&
+            maximumDiscount !== null &&
+            (Number.isNaN(maximumDiscount) || maximumDiscount <= 0)
         ) {
-            toast.error("Maximum discount is invalid");
+            toast.error("Maximum discount must be greater than 0");
             return;
         }
 
-        if (
-            usageLimit &&
-            (!Number.isInteger(Number(usageLimit)) || Number(usageLimit) <= 0)
-        ) {
+        if (limit !== null && (!Number.isInteger(limit) || limit <= 0)) {
             toast.error("Usage limit must be a positive integer");
             return;
         }
 
-        if (usageLimit && Number(usageLimit) < coupon.usedCount) {
+        if (limit !== null && limit < coupon.usedCount) {
             toast.error(
                 `Usage limit cannot be less than current usage (${coupon.usedCount})`,
             );
+            return;
+        }
+
+        if (expiresAt && expiresAt < today) {
+            toast.error("Expiry date cannot be in the past");
             return;
         }
 
@@ -101,11 +112,9 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
                     code: normalizedCode,
                     type,
                     value: discountValue,
-                    minOrderAmount: minOrderAmount
-                        ? Number(minOrderAmount)
-                        : null,
-                    maxDiscount: maxDiscount ? Number(maxDiscount) : null,
-                    usageLimit: usageLimit ? Number(usageLimit) : null,
+                    minOrderAmount: minimumOrder,
+                    maxDiscount: type === "PERCENTAGE" ? maximumDiscount : null,
+                    usageLimit: limit,
                     active,
                     expiresAt: expiresAt
                         ? new Date(`${expiresAt}T23:59:59`).toISOString()
@@ -137,7 +146,7 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Coupon Details */}
 
-            <section className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <section className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                 <div className="mb-6">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
                         Coupon Details
@@ -165,13 +174,16 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
 
                         <input
                             id="coupon-code"
+                            name="code"
                             type="text"
                             value={code}
                             onChange={(event) =>
                                 setCode(event.target.value.toUpperCase())
                             }
                             maxLength={50}
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm font-medium tracking-wide text-primary uppercase outline-none transition placeholder:text-gray-400 focus:border-accent"
+                            required
+                            autoComplete="off"
+                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm font-medium tracking-wide text-primary uppercase outline-none transition placeholder:text-gray-400 focus:border-accent focus:ring-1 focus:ring-accent/20"
                         />
 
                         <p className="mt-2 text-xs text-gray-400">
@@ -192,11 +204,12 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
 
                         <select
                             id="discount-type"
+                            name="type"
                             value={type}
                             onChange={(event) =>
                                 setType(event.target.value as DiscountType)
                             }
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent focus:ring-1 focus:ring-accent/20"
                         >
                             <option value="PERCENTAGE">Percentage</option>
 
@@ -218,27 +231,36 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
                         <div className="relative">
                             <input
                                 id="discount-value"
+                                name="value"
                                 type="number"
-                                min="0"
+                                min="0.01"
+                                max={type === "PERCENTAGE" ? "100" : undefined}
                                 step="0.01"
                                 value={value}
                                 onChange={(event) =>
                                     setValue(event.target.value)
                                 }
-                                className="h-12 w-full rounded-xl border border-border bg-white px-4 pr-14 text-sm text-primary outline-none transition focus:border-accent"
+                                required
+                                className="h-12 w-full rounded-xl border border-border bg-white px-4 pr-14 text-sm text-primary outline-none transition focus:border-accent focus:ring-1 focus:ring-accent/20"
                             />
 
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400">
                                 {type === "PERCENTAGE" ? "%" : "BDT"}
                             </span>
                         </div>
+
+                        <p className="mt-2 text-xs text-gray-400">
+                            {type === "PERCENTAGE"
+                                ? "Enter a value between 1 and 100."
+                                : "Enter the fixed discount amount."}
+                        </p>
                     </div>
                 </div>
             </section>
 
             {/* Discount Rules */}
 
-            <section className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <section className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                 <div className="mb-6">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
                         Discount Rules
@@ -264,41 +286,65 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
                             Minimum Order Amount
                         </label>
 
-                        <input
-                            id="min-order"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={minOrderAmount}
-                            onChange={(event) =>
-                                setMinOrderAmount(event.target.value)
-                            }
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent"
-                        />
+                        <div className="relative">
+                            <input
+                                id="min-order"
+                                name="minOrderAmount"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={minOrderAmount}
+                                onChange={(event) =>
+                                    setMinOrderAmount(event.target.value)
+                                }
+                                className="h-12 w-full rounded-xl border border-border bg-white px-4 pr-14 text-sm text-primary outline-none transition focus:border-accent focus:ring-1 focus:ring-accent/20"
+                            />
+
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400">
+                                BDT
+                            </span>
+                        </div>
+
+                        <p className="mt-2 text-xs text-gray-400">
+                            Leave empty if there is no minimum order.
+                        </p>
                     </div>
 
                     {/* Maximum Discount */}
 
-                    <div>
-                        <label
-                            htmlFor="max-discount"
-                            className="mb-2 block text-sm font-medium text-primary"
-                        >
-                            Maximum Discount
-                        </label>
+                    {type === "PERCENTAGE" && (
+                        <div>
+                            <label
+                                htmlFor="max-discount"
+                                className="mb-2 block text-sm font-medium text-primary"
+                            >
+                                Maximum Discount
+                            </label>
 
-                        <input
-                            id="max-discount"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={maxDiscount}
-                            onChange={(event) =>
-                                setMaxDiscount(event.target.value)
-                            }
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent"
-                        />
-                    </div>
+                            <div className="relative">
+                                <input
+                                    id="max-discount"
+                                    name="maxDiscount"
+                                    type="number"
+                                    min="0.01"
+                                    step="0.01"
+                                    value={maxDiscount}
+                                    onChange={(event) =>
+                                        setMaxDiscount(event.target.value)
+                                    }
+                                    className="h-12 w-full rounded-xl border border-border bg-white px-4 pr-14 text-sm text-primary outline-none transition focus:border-accent focus:ring-1 focus:ring-accent/20"
+                                />
+
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400">
+                                    BDT
+                                </span>
+                            </div>
+
+                            <p className="mt-2 text-xs text-gray-400">
+                                Caps the discount for percentage coupons.
+                            </p>
+                        </div>
+                    )}
 
                     {/* Usage Limit */}
 
@@ -312,18 +358,26 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
 
                         <input
                             id="usage-limit"
+                            name="usageLimit"
                             type="number"
-                            min={coupon.usedCount || 1}
+                            min={Math.max(coupon.usedCount, 1)}
                             step="1"
                             value={usageLimit}
                             onChange={(event) =>
                                 setUsageLimit(event.target.value)
                             }
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent focus:ring-1 focus:ring-accent/20"
                         />
 
                         <p className="mt-2 text-xs text-gray-400">
-                            Current usage: {coupon.usedCount}
+                            Current usage:{" "}
+                            <span className="font-medium text-gray-600">
+                                {coupon.usedCount}
+                            </span>
+                        </p>
+
+                        <p className="mt-1 text-xs text-gray-400">
+                            The limit cannot be lower than current usage.
                         </p>
                     </div>
 
@@ -339,20 +393,26 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
 
                         <input
                             id="expires-at"
+                            name="expiresAt"
                             type="date"
+                            min={today}
                             value={expiresAt}
                             onChange={(event) =>
                                 setExpiresAt(event.target.value)
                             }
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent focus:ring-1 focus:ring-accent/20"
                         />
+
+                        <p className="mt-2 text-xs text-gray-400">
+                            Leave empty if the coupon never expires.
+                        </p>
                     </div>
                 </div>
             </section>
 
             {/* Status */}
 
-            <section className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <section className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -378,7 +438,7 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
                             className="peer sr-only"
                         />
 
-                        <span className="relative h-6 w-11 rounded-full bg-gray-200 transition peer-checked:bg-primary">
+                        <span className="relative h-6 w-11 shrink-0 rounded-full bg-gray-200 transition peer-checked:bg-primary">
                             <span className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5" />
                         </span>
 
@@ -397,11 +457,16 @@ const CouponEditForm = ({ coupon }: CouponEditFormProps) => {
                     variant="outline"
                     onClick={() => router.push("/admin/coupons")}
                     disabled={isSubmitting}
+                    className="w-full sm:w-auto"
                 >
                     Cancel
                 </Button>
 
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full sm:w-auto"
+                >
                     {isSubmitting ? "Saving..." : "Save Changes"}
                 </Button>
             </div>
