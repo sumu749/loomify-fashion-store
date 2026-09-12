@@ -333,7 +333,7 @@ const AdminOrderDetailsPage = async ({
                         {Object.entries(
                             order.shippingAddress as Record<string, unknown>,
                         ).map(([key, value]) => (
-                            <p key={key} className="break-words">
+                            <p key={key} className="wrap-break-word">
                                 <span className="font-medium capitalize text-primary">
                                     {key.replaceAll("_", " ")}:
                                 </span>{" "}

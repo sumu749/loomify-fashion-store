@@ -209,101 +209,220 @@ const AdminUsersPage = async ({ searchParams }: AdminUsersPageProps) => {
                     </div>
 
                     {users.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-237.5">
-                                <thead className="border-b border-border bg-stone-50/80">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            User
-                                        </th>
+                        <>
+                            {/* Desktop Table */}
+                            <div className="hidden overflow-x-auto sm:block">
+                                <table className="w-full min-w-237.5">
+                                    <thead className="border-b border-border bg-stone-50/60">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                User
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Email
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Email
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Role
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Role
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Joined
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Joined
+                                            </th>
 
-                                        <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
+                                            <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
 
-                                <tbody className="divide-y divide-border">
-                                    {users.map((user) => {
-                                        const initials =
-                                            user.name?.trim().charAt(0) || "U";
+                                    <tbody className="divide-y divide-border">
+                                        {users.map((user) => {
+                                            const initials =
+                                                user.name?.trim().charAt(0) ||
+                                                "U";
 
-                                        const isCurrentUser =
-                                            user.id === session.user.id;
+                                            const isCurrentUser =
+                                                user.id === session.user.id;
 
-                                        return (
-                                            <tr
-                                                key={user.id}
-                                                className="group transition hover:bg-stone-50/60"
-                                            >
-                                                {/* User */}
+                                            return (
+                                                <tr
+                                                    key={user.id}
+                                                    className="group transition-colors hover:bg-stone-50/70"
+                                                >
+                                                    {/* User */}
 
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-stone-100 text-sm font-bold text-primary">
-                                                            {initials.toUpperCase()}
-                                                        </div>
-
-                                                        <div className="min-w-0">
-                                                            <div className="flex flex-wrap items-center gap-2">
-                                                                <p className="font-semibold text-primary">
-                                                                    {user.name}
-                                                                </p>
-
-                                                                {isCurrentUser && (
-                                                                    <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-                                                                        You
-                                                                    </span>
-                                                                )}
+                                                    <td className="px-6 py-5">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-stone-100 text-sm font-bold text-primary">
+                                                                {initials.toUpperCase()}
                                                             </div>
 
-                                                            <p className="mt-1 max-w-55 truncate text-xs text-gray-400">
-                                                                {user.id}
-                                                            </p>
+                                                            <div className="min-w-0">
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    <p className="text-sm font-semibold text-primary">
+                                                                        {
+                                                                            user.name
+                                                                        }
+                                                                    </p>
+
+                                                                    {isCurrentUser && (
+                                                                        <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                                                            You
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+
+                                                                <p className="mt-1 max-w-55 truncate text-xs text-gray-400">
+                                                                    {user.id}
+                                                                </p>
+                                                            </div>
                                                         </div>
+                                                    </td>
+
+                                                    {/* Email */}
+
+                                                    <td className="px-6 py-5">
+                                                        <p className="max-w-60 truncate text-sm text-gray-600">
+                                                            {user.email}
+                                                        </p>
+                                                    </td>
+
+                                                    {/* Role */}
+
+                                                    <td className="px-6 py-5">
+                                                        <span
+                                                            className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
+                                                                roleStyles[
+                                                                    user.role
+                                                                ]
+                                                            }`}
+                                                        >
+                                                            <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />
+
+                                                            {
+                                                                roleLabels[
+                                                                    user.role
+                                                                ]
+                                                            }
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Joined */}
+
+                                                    <td className="px-6 py-5">
+                                                        <p className="text-sm font-medium text-gray-700">
+                                                            {user.createdAt.toLocaleDateString(
+                                                                "en-US",
+                                                                {
+                                                                    year: "numeric",
+                                                                    month: "short",
+                                                                    day: "numeric",
+                                                                },
+                                                            )}
+                                                        </p>
+
+                                                        <p className="mt-1 text-xs text-gray-400">
+                                                            {user.createdAt.toLocaleTimeString(
+                                                                "en-US",
+                                                                {
+                                                                    hour: "numeric",
+                                                                    minute: "2-digit",
+                                                                },
+                                                            )}
+                                                        </p>
+                                                    </td>
+
+                                                    {/* Actions */}
+
+                                                    <td className="whitespace-nowrap px-6 py-5">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Button
+                                                                asChild
+                                                                variant="outline"
+                                                                size="sm"
+                                                            >
+                                                                <Link
+                                                                    href={`/admin/users/${user.id}`}
+                                                                >
+                                                                    View
+                                                                </Link>
+                                                            </Button>
+
+                                                            <UserRoleToggle
+                                                                userId={user.id}
+                                                                role={user.role}
+                                                                currentUserId={
+                                                                    session.user
+                                                                        .id
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile Users */}
+                            <div className="space-y-3 p-4 sm:hidden">
+                                {users.map((user) => {
+                                    const initials =
+                                        user.name?.trim().charAt(0) || "U";
+
+                                    const isCurrentUser =
+                                        user.id === session.user.id;
+
+                                    return (
+                                        <div
+                                            key={user.id}
+                                            className="rounded-xl border border-border p-4 transition hover:border-accent"
+                                        >
+                                            {/* User Header */}
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex min-w-0 items-center gap-3">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-stone-100 text-sm font-bold text-primary">
+                                                        {initials.toUpperCase()}
                                                     </div>
-                                                </td>
 
-                                                {/* Email */}
+                                                    <div className="min-w-0">
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <p className="truncate text-sm font-semibold text-primary">
+                                                                {user.name}
+                                                            </p>
 
-                                                <td className="px-6 py-5">
-                                                    <p className="max-w-60 truncate text-sm text-gray-600">
-                                                        {user.email}
+                                                            {isCurrentUser && (
+                                                                <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                                                    You
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        <p className="mt-1 truncate text-xs text-gray-400">
+                                                            {user.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <span
+                                                    className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${roleStyles[user.role]}`}
+                                                >
+                                                    <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />
+                                                    {roleLabels[user.role]}
+                                                </span>
+                                            </div>
+
+                                            {/* User Details */}
+                                            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
+                                                <div>
+                                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                        Joined
                                                     </p>
-                                                </td>
 
-                                                {/* Role */}
-
-                                                <td className="px-6 py-5">
-                                                    <span
-                                                        className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
-                                                            roleStyles[
-                                                                user.role
-                                                            ]
-                                                        }`}
-                                                    >
-                                                        <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />
-
-                                                        {roleLabels[user.role]}
-                                                    </span>
-                                                </td>
-
-                                                {/* Joined */}
-
-                                                <td className="px-6 py-5">
-                                                    <p className="text-sm font-medium text-gray-700">
+                                                    <p className="mt-1 text-sm font-medium text-gray-700">
                                                         {user.createdAt.toLocaleDateString(
                                                             "en-US",
                                                             {
@@ -313,49 +432,46 @@ const AdminUsersPage = async ({ searchParams }: AdminUsersPageProps) => {
                                                             },
                                                         )}
                                                     </p>
+                                                </div>
 
-                                                    <p className="mt-1 text-xs text-gray-400">
-                                                        {user.createdAt.toLocaleTimeString(
-                                                            "en-US",
-                                                            {
-                                                                hour: "numeric",
-                                                                minute: "2-digit",
-                                                            },
-                                                        )}
+                                                <div>
+                                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                        User ID
                                                     </p>
-                                                </td>
 
-                                                {/* Actions */}
+                                                    <p className="mt-1 truncate font-mono text-[11px] text-gray-500">
+                                                        {user.id}
+                                                    </p>
+                                                </div>
+                                            </div>
 
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Button
-                                                            asChild
-                                                            variant="outline"
-                                                            size="sm"
-                                                        >
-                                                            <Link
-                                                                href={`/admin/users/${user.id}`}
-                                                            >
-                                                                View
-                                                            </Link>
-                                                        </Button>
+                                            {/* Actions */}
+                                            <div className="mt-4 flex items-center justify-end gap-2 border-t border-border pt-4">
+                                                <Button
+                                                    asChild
+                                                    variant="outline"
+                                                    size="sm"
+                                                >
+                                                    <Link
+                                                        href={`/admin/users/${user.id}`}
+                                                    >
+                                                        View
+                                                    </Link>
+                                                </Button>
 
-                                                        <UserRoleToggle
-                                                            userId={user.id}
-                                                            role={user.role}
-                                                            currentUserId={
-                                                                session.user.id
-                                                            }
-                                                        />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                                <UserRoleToggle
+                                                    userId={user.id}
+                                                    role={user.role}
+                                                    currentUserId={
+                                                        session.user.id
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     ) : (
                         <div className="px-6 py-20 text-center sm:px-8">
                             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100 text-xl">
