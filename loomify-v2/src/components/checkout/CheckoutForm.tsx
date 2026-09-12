@@ -1,9 +1,11 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable indent */
 "use client";
 
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Check, MapPin, ShieldCheck, Tag, Truck } from "lucide-react";
 
@@ -32,6 +34,12 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const dispatch = useAppDispatch();
 
     const cartItems = useAppSelector((state) => state.cart.items);
+    const cartVersion = useAppSelector((state) => state.cart.version);
+    const cartVersionRef = useRef(cartVersion);
+
+    useEffect(() => {
+        cartVersionRef.current = cartVersion;
+    }, [cartVersion]);
 
     const [selectedAddressId, setSelectedAddressId] = useState("");
     const [district, setDistrict] = useState("");
@@ -44,10 +52,14 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const [country, setCountry] = useState("Bangladesh");
 
     const [loading, setLoading] = useState(false);
+
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
     const [discount, setDiscount] = useState(0);
     const [couponLoading, setCouponLoading] = useState(false);
+    const [couponCartVersion, setCouponCartVersion] = useState<number | null>(
+        null,
+    );
 
     const [paymentMethod, setPaymentMethod] = useState<"COD">("COD");
 
@@ -64,8 +76,33 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const shipping = subtotal > 100 ? 0 : 15;
 
     const total = Math.max(subtotal + shipping - discount, 0);
+    useEffect(() => {
+        if (!appliedCoupon || couponCartVersion === null) {
+            return;
+        }
+
+        if (cartVersion === couponCartVersion) {
+            return;
+        }
+
+        setAppliedCoupon(null);
+        setCouponCode("");
+        setDiscount(0);
+        setCouponCartVersion(null);
+
+        toast("Cart changed. Please reapply your coupon.", {
+            icon: "↻",
+        });
+    }, [cartVersion, couponCartVersion, appliedCoupon]);
 
     const handleApplyCoupon = async () => {
+        const code = couponCode.trim().toUpperCase();
+        const requestCartVersion = cartVersionRef.current;
+
+        if (!code) {
+            toast.error("Please enter a coupon code.");
+            return;
+        }
         const normalizedCode = couponCode.trim().toUpperCase();
 
         if (!normalizedCode) {
@@ -94,17 +131,29 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
 
             const result = await response.json();
 
+            if (cartVersionRef.current !== requestCartVersion) {
+                setAppliedCoupon(null);
+                setDiscount(0);
+                setCouponCartVersion(null);
+
+                toast.error(
+                    "Cart changed while applying the coupon. Please try again.",
+                );
+                return;
+            }
+
             if (!response.ok) {
                 setAppliedCoupon(null);
                 setDiscount(0);
+                setCouponCartVersion(null);
 
-                toast.error(result.message || "Unable to apply coupon.");
-
+                toast.error(result.message || "Invalid coupon.");
                 return;
             }
 
             setAppliedCoupon(result.data.code);
             setDiscount(Number(result.data.discount));
+            setCouponCartVersion(cartVersion);
 
             toast.success("Coupon applied successfully.");
         } catch (error) {
@@ -120,8 +169,46 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
         setCouponCode("");
         setAppliedCoupon(null);
         setDiscount(0);
+        setCouponCartVersion(null);
 
         toast.success("Coupon removed.");
+    };
+
+    const updateAddressField = <K extends keyof SavedAddress>(
+        field: K,
+        value: SavedAddress[K],
+    ) => {
+        setSelectedAddressId("");
+
+        switch (field) {
+            case "fullName":
+                setFullName(value as string);
+                break;
+
+            case "phone":
+                setPhone(value as string);
+                break;
+
+            case "addressLine":
+                setAddress(value as string);
+                break;
+
+            case "city":
+                setCity(value as string);
+                break;
+
+            case "district":
+                setDistrict(value as string);
+                break;
+
+            case "postalCode":
+                setPostalCode(value as string);
+                break;
+
+            case "country":
+                setCountry(value as string);
+                break;
+        }
     };
 
     const clearAddressForm = () => {
@@ -138,6 +225,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        if (loading) {
+            return;
+        }
+
         if (cartItems.length === 0) {
             toast.error("Your cart is empty.");
             return;
@@ -150,6 +241,13 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
 
         if (!phone.trim()) {
             toast.error("Please enter your phone number.");
+            return;
+        }
+
+        const normalizedPhone = phone.replace(/\s+/g, "");
+
+        if (!/^01\d{9}$/.test(normalizedPhone)) {
+            toast.error("Please enter a valid Bangladesh phone number.");
             return;
         }
 
@@ -170,6 +268,11 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
 
         if (!postalCode.trim()) {
             toast.error("Please enter your postal code.");
+            return;
+        }
+
+        if (!/^\d{4}$/.test(postalCode.trim())) {
+            toast.error("Please enter a valid 4-digit postal code.");
             return;
         }
 
@@ -216,6 +319,11 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
             }
 
             const orderId = result.data.orderId;
+
+            setAppliedCoupon(null);
+            setCouponCode("");
+            setDiscount(0);
+            setCouponCartVersion(null);
 
             dispatch(clearCart());
 
@@ -399,7 +507,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 type="text"
                                 value={fullName}
                                 onChange={(event) =>
-                                    setFullName(event.target.value)
+                                    updateAddressField(
+                                        "fullName",
+                                        event.target.value,
+                                    )
                                 }
                                 placeholder="Enter your full name"
                                 autoComplete="name"
@@ -420,9 +531,13 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                             <input
                                 id="phone"
                                 type="tel"
+                                inputMode="numeric"
                                 value={phone}
                                 onChange={(event) =>
-                                    setPhone(event.target.value)
+                                    updateAddressField(
+                                        "phone",
+                                        event.target.value,
+                                    )
                                 }
                                 placeholder="01XXXXXXXXX"
                                 autoComplete="tel"
@@ -444,7 +559,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 id="address"
                                 value={address}
                                 onChange={(event) =>
-                                    setAddress(event.target.value)
+                                    updateAddressField(
+                                        "addressLine",
+                                        event.target.value,
+                                    )
                                 }
                                 rows={4}
                                 placeholder="House, road, area, etc."
@@ -468,7 +586,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 type="text"
                                 value={city}
                                 onChange={(event) =>
-                                    setCity(event.target.value)
+                                    updateAddressField(
+                                        "city",
+                                        event.target.value,
+                                    )
                                 }
                                 placeholder="Dhaka"
                                 autoComplete="address-level2"
@@ -491,7 +612,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 type="text"
                                 value={district}
                                 onChange={(event) =>
-                                    setDistrict(event.target.value)
+                                    updateAddressField(
+                                        "district",
+                                        event.target.value,
+                                    )
                                 }
                                 placeholder="Dhaka"
                                 className="h-12 w-full border border-border px-4 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/10"
@@ -511,9 +635,13 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                             <input
                                 id="postalCode"
                                 type="text"
+                                inputMode="numeric"
                                 value={postalCode}
                                 onChange={(event) =>
-                                    setPostalCode(event.target.value)
+                                    updateAddressField(
+                                        "postalCode",
+                                        event.target.value,
+                                    )
                                 }
                                 placeholder="1207"
                                 autoComplete="postal-code"
@@ -534,9 +662,13 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                             <input
                                 id="country"
                                 type="text"
+                                inputMode="text"
                                 value={country}
                                 onChange={(event) =>
-                                    setCountry(event.target.value)
+                                    updateAddressField(
+                                        "country",
+                                        event.target.value,
+                                    )
                                 }
                                 autoComplete="country-name"
                                 className="h-12 w-full border border-border px-4 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/10"
@@ -690,53 +822,83 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                         </div>
 
                         {!appliedCoupon ? (
-                            <div className="mt-3 flex gap-2">
-                                <input
-                                    type="text"
-                                    value={couponCode}
-                                    onChange={(event) =>
-                                        setCouponCode(
-                                            event.target.value.toUpperCase(),
-                                        )
-                                    }
-                                    onKeyDown={(event) => {
-                                        if (event.key === "Enter") {
-                                            event.preventDefault();
-                                            handleApplyCoupon();
+                            <div className="mt-3">
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={couponCode}
+                                        onChange={(event) =>
+                                            setCouponCode(
+                                                event.target.value.toUpperCase(),
+                                            )
                                         }
-                                    }}
-                                    placeholder="Coupon code"
-                                    className="h-11 min-w-0 flex-1 border border-border px-3 text-sm uppercase outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/10"
-                                />
+                                        onKeyDown={(event) => {
+                                            if (event.key === "Enter") {
+                                                event.preventDefault();
+                                                handleApplyCoupon();
+                                            }
+                                        }}
+                                        placeholder="Enter coupon code"
+                                        disabled={couponLoading || loading}
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                        className="h-11 min-w-0 flex-1 border border-border px-3 text-sm uppercase outline-none transition placeholder:text-gray-400 focus:border-accent focus:ring-2 focus:ring-accent/10 disabled:cursor-not-allowed disabled:bg-stone-50 disabled:text-gray-400"
+                                    />
 
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    onClick={handleApplyCoupon}
-                                    disabled={couponLoading}
-                                >
-                                    {couponLoading ? "..." : "Apply"}
-                                </Button>
-                            </div>
-                        ) : (
-                            <div className="mt-3 flex items-center justify-between border border-accent/20 bg-accent/5 px-4 py-3">
-                                <div>
-                                    <p className="text-sm font-semibold text-primary">
-                                        {appliedCoupon}
-                                    </p>
-
-                                    <p className="mt-1 text-xs text-accent">
-                                        Coupon applied
-                                    </p>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={handleApplyCoupon}
+                                        disabled={
+                                            couponLoading ||
+                                            loading ||
+                                            !couponCode.trim()
+                                        }
+                                    >
+                                        {couponLoading
+                                            ? "Applying..."
+                                            : "Apply"}
+                                    </Button>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    onClick={handleRemoveCoupon}
-                                    className="text-xs font-medium text-gray-500 transition hover:text-red-500"
-                                >
-                                    Remove
-                                </button>
+                                <p className="mt-2 text-xs leading-5 text-gray-400">
+                                    Enter a valid coupon code to receive your
+                                    discount.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="mt-3 border border-accent/20 bg-accent/5 px-4 py-4">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-white">
+                                                <Check size={14} />
+                                            </div>
+
+                                            <p className="truncate text-sm font-semibold uppercase text-primary">
+                                                {appliedCoupon}
+                                            </p>
+                                        </div>
+
+                                        <p className="mt-2 text-xs leading-5 text-accent">
+                                            Coupon applied successfully.
+                                        </p>
+
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            You saved {formatCurrency(discount)}{" "}
+                                            on this order.
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleRemoveCoupon}
+                                        disabled={loading}
+                                        className="shrink-0 text-xs font-medium text-gray-500 transition hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>

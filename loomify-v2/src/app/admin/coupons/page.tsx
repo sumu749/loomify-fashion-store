@@ -194,159 +194,281 @@ const AdminCouponsPage = async ({ searchParams }: AdminCouponsPageProps) => {
                     </div>
 
                     {coupons.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-225">
-                                <thead className="border-b border-border bg-stone-50/80">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Coupon
-                                        </th>
+                        <>
+                            <div className="hidden overflow-x-auto sm:block">
+                                <table className="w-full min-w-225">
+                                    <thead className="border-b border-border bg-stone-50/80">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Coupon
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Discount
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Discount
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Usage
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Usage
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Status
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Status
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Expiry
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Expiry
+                                            </th>
 
-                                        <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
+                                            <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
 
-                                <tbody className="divide-y divide-border">
-                                    {coupons.map((coupon) => {
-                                        const isExpired =
-                                            coupon.expiresAt &&
-                                            new Date(coupon.expiresAt) <
-                                                new Date();
+                                    <tbody className="divide-y divide-border">
+                                        {coupons.map((coupon) => {
+                                            const isExpired =
+                                                coupon.expiresAt &&
+                                                new Date(coupon.expiresAt) <
+                                                    new Date();
 
-                                        const usagePercentage =
-                                            coupon.usageLimit &&
-                                            coupon.usageLimit > 0
-                                                ? Math.min(
-                                                      (coupon.usedCount /
-                                                          coupon.usageLimit) *
+                                            const usagePercentage =
+                                                coupon.usageLimit &&
+                                                coupon.usageLimit > 0
+                                                    ? Math.min(
+                                                          (coupon.usedCount /
+                                                              coupon.usageLimit) *
+                                                              100,
                                                           100,
-                                                      100,
-                                                  )
-                                                : null;
+                                                      )
+                                                    : null;
 
-                                        return (
-                                            <tr
-                                                key={coupon.id}
-                                                className="group transition hover:bg-stone-50/60"
-                                            >
-                                                {/* Coupon */}
+                                            return (
+                                                <tr
+                                                    key={coupon.id}
+                                                    className="group transition hover:bg-stone-50/60"
+                                                >
+                                                    {/* Coupon */}
 
-                                                <td className="px-6 py-5">
-                                                    <div className="min-w-0">
-                                                        <p className="font-semibold tracking-wide text-primary">
-                                                            {coupon.code}
-                                                        </p>
-
-                                                        <p className="mt-1 text-xs text-gray-400">
-                                                            {coupon.type ===
-                                                            "PERCENTAGE"
-                                                                ? "Percentage discount"
-                                                                : "Fixed discount"}
-                                                        </p>
-                                                    </div>
-                                                </td>
-
-                                                {/* Discount */}
-
-                                                <td className="px-6 py-5">
-                                                    <div>
-                                                        <p className="text-sm font-semibold text-primary">
-                                                            {coupon.type ===
-                                                            "PERCENTAGE"
-                                                                ? `${Number(
-                                                                      coupon.value,
-                                                                  )}%`
-                                                                : formatCurrency(
-                                                                      Number(
-                                                                          coupon.value,
-                                                                      ),
-                                                                  )}
-                                                        </p>
-
-                                                        {coupon.minOrderAmount && (
-                                                            <p className="mt-1 text-xs text-gray-400">
-                                                                Min. order{" "}
-                                                                {formatCurrency(
-                                                                    Number(
-                                                                        coupon.minOrderAmount,
-                                                                    ),
-                                                                )}
+                                                    <td className="px-6 py-5">
+                                                        <div className="min-w-0">
+                                                            <p className="font-semibold tracking-wide text-primary">
+                                                                {coupon.code}
                                                             </p>
+
+                                                            <p className="mt-1 text-xs text-gray-400">
+                                                                {coupon.type ===
+                                                                "PERCENTAGE"
+                                                                    ? "Percentage discount"
+                                                                    : "Fixed discount"}
+                                                            </p>
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Discount */}
+
+                                                    <td className="px-6 py-5">
+                                                        <div>
+                                                            <p className="text-sm font-semibold text-primary">
+                                                                {coupon.type ===
+                                                                "PERCENTAGE"
+                                                                    ? `${Number(
+                                                                          coupon.value,
+                                                                      )}%`
+                                                                    : formatCurrency(
+                                                                          Number(
+                                                                              coupon.value,
+                                                                          ),
+                                                                      )}
+                                                            </p>
+
+                                                            {coupon.minOrderAmount && (
+                                                                <p className="mt-1 text-xs text-gray-400">
+                                                                    Min. order{" "}
+                                                                    {formatCurrency(
+                                                                        Number(
+                                                                            coupon.minOrderAmount,
+                                                                        ),
+                                                                    )}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Usage */}
+
+                                                    <td className="px-6 py-5">
+                                                        <p className="text-sm font-semibold text-primary">
+                                                            {coupon.usedCount}
+                                                            {coupon.usageLimit
+                                                                ? ` / ${coupon.usageLimit}`
+                                                                : ""}
+                                                        </p>
+
+                                                        {usagePercentage !==
+                                                            null && (
+                                                            <div className="mt-2 h-1.5 w-24 overflow-hidden rounded-full bg-stone-100">
+                                                                <div
+                                                                    className="h-full rounded-full bg-primary"
+                                                                    style={{
+                                                                        width: `${usagePercentage}%`,
+                                                                    }}
+                                                                />
+                                                            </div>
                                                         )}
-                                                    </div>
-                                                </td>
+                                                    </td>
 
-                                                {/* Usage */}
+                                                    {/* Status */}
 
-                                                <td className="px-6 py-5">
-                                                    <p className="text-sm font-semibold text-primary">
-                                                        {coupon.usedCount}
-                                                        {coupon.usageLimit
-                                                            ? ` / ${coupon.usageLimit}`
-                                                            : ""}
+                                                    <td className="px-6 py-5">
+                                                        <div className="flex flex-col items-start gap-1.5">
+                                                            <span
+                                                                className={`inline-flex rounded-lg px-2.5 py-1.5 text-xs font-semibold ${
+                                                                    coupon.active &&
+                                                                    !isExpired
+                                                                        ? "bg-green-50 text-green-700"
+                                                                        : "bg-red-50 text-red-700"
+                                                                }`}
+                                                            >
+                                                                {coupon.active &&
+                                                                !isExpired
+                                                                    ? "Active"
+                                                                    : "Inactive"}
+                                                            </span>
+
+                                                            {isExpired && (
+                                                                <span className="text-[11px] text-red-500">
+                                                                    Expired
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Expiry */}
+
+                                                    <td className="px-6 py-5">
+                                                        <p className="text-sm text-gray-600">
+                                                            {coupon.expiresAt
+                                                                ? new Date(
+                                                                      coupon.expiresAt,
+                                                                  ).toLocaleDateString(
+                                                                      "en-US",
+                                                                      {
+                                                                          year: "numeric",
+                                                                          month: "short",
+                                                                          day: "numeric",
+                                                                      },
+                                                                  )
+                                                                : "No expiry"}
+                                                        </p>
+                                                    </td>
+
+                                                    {/* Actions */}
+
+                                                    <td className="px-6 py-5">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Button
+                                                                asChild
+                                                                variant="outline"
+                                                                size="sm"
+                                                            >
+                                                                <Link
+                                                                    href={`/admin/coupons/${coupon.id}`}
+                                                                >
+                                                                    Manage
+                                                                </Link>
+                                                            </Button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile Coupon Cards */}
+
+                            <div className="space-y-3 p-4 sm:hidden">
+                                {coupons.map((coupon) => {
+                                    const isExpired =
+                                        coupon.expiresAt &&
+                                        new Date(coupon.expiresAt) < new Date();
+
+                                    const usagePercentage =
+                                        coupon.usageLimit &&
+                                        coupon.usageLimit > 0
+                                            ? Math.min(
+                                                  (coupon.usedCount /
+                                                      coupon.usageLimit) *
+                                                      100,
+                                                  100,
+                                              )
+                                            : null;
+
+                                    const isAvailable =
+                                        coupon.active && !isExpired;
+
+                                    return (
+                                        <div
+                                            key={coupon.id}
+                                            className="rounded-xl border border-border p-4"
+                                        >
+                                            {/* Header */}
+
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-bold tracking-wide text-primary">
+                                                        {coupon.code}
                                                     </p>
 
-                                                    {usagePercentage !==
-                                                        null && (
-                                                        <div className="mt-2 h-1.5 w-24 overflow-hidden rounded-full bg-stone-100">
-                                                            <div
-                                                                className="h-full rounded-full bg-primary"
-                                                                style={{
-                                                                    width: `${usagePercentage}%`,
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </td>
+                                                    <p className="mt-1 text-xs text-gray-400">
+                                                        {coupon.type ===
+                                                        "PERCENTAGE"
+                                                            ? "Percentage discount"
+                                                            : "Fixed discount"}
+                                                    </p>
+                                                </div>
 
-                                                {/* Status */}
+                                                <span
+                                                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                                                        isAvailable
+                                                            ? "bg-green-50 text-green-700"
+                                                            : "bg-red-50 text-red-700"
+                                                    }`}
+                                                >
+                                                    {isAvailable
+                                                        ? "Active"
+                                                        : "Inactive"}
+                                                </span>
+                                            </div>
 
-                                                <td className="px-6 py-5">
-                                                    <div className="flex flex-col items-start gap-1.5">
-                                                        <span
-                                                            className={`inline-flex rounded-lg px-2.5 py-1.5 text-xs font-semibold ${
-                                                                coupon.active &&
-                                                                !isExpired
-                                                                    ? "bg-green-50 text-green-700"
-                                                                    : "bg-red-50 text-red-700"
-                                                            }`}
-                                                        >
-                                                            {coupon.active &&
-                                                            !isExpired
-                                                                ? "Active"
-                                                                : "Inactive"}
-                                                        </span>
+                                            {/* Discount */}
 
-                                                        {isExpired && (
-                                                            <span className="text-[11px] text-red-500">
-                                                                Expired
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </td>
+                                            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
+                                                <div>
+                                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                        Discount
+                                                    </p>
 
-                                                {/* Expiry */}
+                                                    <p className="mt-1 text-sm font-semibold text-primary">
+                                                        {coupon.type ===
+                                                        "PERCENTAGE"
+                                                            ? `${Number(coupon.value)}%`
+                                                            : formatCurrency(
+                                                                  Number(
+                                                                      coupon.value,
+                                                                  ),
+                                                              )}
+                                                    </p>
+                                                </div>
 
-                                                <td className="px-6 py-5">
-                                                    <p className="text-sm text-gray-600">
+                                                <div className="text-right">
+                                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                        Expiry
+                                                    </p>
+
+                                                    <p className="mt-1 text-sm text-gray-600">
                                                         {coupon.expiresAt
                                                             ? new Date(
                                                                   coupon.expiresAt,
@@ -360,31 +482,80 @@ const AdminCouponsPage = async ({ searchParams }: AdminCouponsPageProps) => {
                                                               )
                                                             : "No expiry"}
                                                     </p>
-                                                </td>
+                                                </div>
+                                            </div>
 
-                                                {/* Actions */}
+                                            {/* Usage */}
 
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Button
-                                                            asChild
-                                                            variant="outline"
-                                                            size="sm"
-                                                        >
-                                                            <Link
-                                                                href={`/admin/coupons/${coupon.id}`}
-                                                            >
-                                                                Manage
-                                                            </Link>
-                                                        </Button>
+                                            <div className="mt-4 border-t border-border pt-4">
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                        Usage
+                                                    </p>
+
+                                                    <p className="text-xs font-semibold text-primary">
+                                                        {coupon.usedCount}
+                                                        {coupon.usageLimit
+                                                            ? ` / ${coupon.usageLimit}`
+                                                            : " used"}
+                                                    </p>
+                                                </div>
+
+                                                {usagePercentage !== null && (
+                                                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-100">
+                                                        <div
+                                                            className="h-full rounded-full bg-primary"
+                                                            style={{
+                                                                width: `${usagePercentage}%`,
+                                                            }}
+                                                        />
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                                )}
+                                            </div>
+
+                                            {/* Minimum Order */}
+
+                                            {coupon.minOrderAmount && (
+                                                <div className="mt-3 text-xs text-gray-500">
+                                                    Minimum order:{" "}
+                                                    <span className="font-medium text-gray-700">
+                                                        {formatCurrency(
+                                                            Number(
+                                                                coupon.minOrderAmount,
+                                                            ),
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Expired */}
+
+                                            {isExpired && (
+                                                <p className="mt-2 text-xs font-medium text-red-500">
+                                                    This coupon has expired.
+                                                </p>
+                                            )}
+
+                                            {/* Action */}
+
+                                            <div className="mt-4 flex justify-end border-t border-border pt-4">
+                                                <Button
+                                                    asChild
+                                                    variant="outline"
+                                                    size="sm"
+                                                >
+                                                    <Link
+                                                        href={`/admin/coupons/${coupon.id}`}
+                                                    >
+                                                        Manage
+                                                    </Link>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     ) : (
                         <div className="px-6 py-20 text-center sm:px-8">
                             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100 text-xl">
@@ -406,20 +577,5 @@ const AdminCouponsPage = async ({ searchParams }: AdminCouponsPageProps) => {
         </div>
     );
 };
-
-interface Coupon {
-    id: string;
-    code: string;
-    type: "PERCENTAGE" | "FIXED";
-    value: string;
-    minOrderAmount: string | null;
-    maxDiscount: string | null;
-    usageLimit: number | null;
-    usedCount: number;
-    active: boolean;
-    expiresAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-}
 
 export default AdminCouponsPage;

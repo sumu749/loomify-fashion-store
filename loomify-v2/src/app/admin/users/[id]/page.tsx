@@ -227,96 +227,181 @@ const AdminUserDetailsPage = async ({ params }: AdminUserDetailsPageProps) => {
                 </div>
 
                 {user.orders.length > 0 ? (
-                    <div className="overflow-x-auto">
-                        <table className="w-full min-w-175">
-                            <thead className="border-b border-border bg-stone-50/80">
-                                <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                        Order
-                                    </th>
+                    <>
+                        <div className="hidden overflow-x-auto sm:block">
+                            <table className="w-full min-w-212.5">
+                                <thead className="border-b border-border bg-stone-50/60">
+                                    <tr>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            Order
+                                        </th>
 
-                                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                        Status
-                                    </th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            Status
+                                        </th>
 
-                                    <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                        Total
-                                    </th>
+                                        <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            Total
+                                        </th>
 
-                                    <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                        Date
-                                    </th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            Date
+                                        </th>
 
-                                    <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                        Action
-                                    </th>
-                                </tr>
-                            </thead>
+                                        <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            Action
+                                        </th>
+                                    </tr>
+                                </thead>
 
-                            <tbody className="divide-y divide-border">
-                                {user.orders.map((order) => (
-                                    <tr
-                                        key={order.id}
-                                        className="transition hover:bg-stone-50/60"
-                                    >
-                                        <td className="px-6 py-5">
-                                            <span className="font-semibold text-primary">
+                                <tbody className="divide-y divide-border">
+                                    {user.orders.map((order) => (
+                                        <tr
+                                            key={order.id}
+                                            className="transition-colors hover:bg-stone-50/70"
+                                        >
+                                            <td className="px-6 py-5">
+                                                <span className="font-semibold text-primary">
+                                                    #
+                                                    {order.id
+                                                        .slice(-8)
+                                                        .toUpperCase()}
+                                                </span>
+
+                                                <p className="mt-1 text-xs text-gray-400">
+                                                    {order.id}
+                                                </p>
+                                            </td>
+
+                                            <td className="px-6 py-5">
+                                                <span
+                                                    className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                                                        statusStyles[
+                                                            order.status
+                                                        ]
+                                                    }`}
+                                                >
+                                                    {order.status}
+                                                </span>
+                                            </td>
+
+                                            <td className="px-6 py-5 text-right text-sm font-semibold text-primary">
+                                                {formatCurrency(
+                                                    Number(order.total),
+                                                )}
+                                            </td>
+
+                                            <td className="px-6 py-5 text-sm text-gray-600">
+                                                {order.createdAt.toLocaleDateString(
+                                                    "en-US",
+                                                    {
+                                                        year: "numeric",
+                                                        month: "short",
+                                                        day: "numeric",
+                                                    },
+                                                )}
+                                            </td>
+
+                                            <td className="px-6 py-5 text-right">
+                                                <Button
+                                                    asChild
+                                                    variant="outline"
+                                                    size="sm"
+                                                >
+                                                    <Link
+                                                        href={`/admin/orders/${order.id}`}
+                                                    >
+                                                        View
+                                                    </Link>
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile Recent Orders */}
+                        <div className="space-y-3 p-4 sm:hidden">
+                            {user.orders.map((order) => (
+                                <div
+                                    key={order.id}
+                                    className="rounded-xl border border-border p-4"
+                                >
+                                    {/* Header */}
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-semibold text-primary">
                                                 #
                                                 {order.id
                                                     .slice(-8)
                                                     .toUpperCase()}
-                                            </span>
+                                            </p>
 
-                                            <p className="mt-1 text-xs text-gray-400">
+                                            <p className="mt-1 truncate text-xs text-gray-400">
                                                 {order.id}
                                             </p>
-                                        </td>
+                                        </div>
 
-                                        <td className="px-6 py-5">
-                                            <span
-                                                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                                                    statusStyles[order.status]
-                                                }`}
+                                        <span
+                                            className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                                                statusStyles[order.status]
+                                            }`}
+                                        >
+                                            {order.status}
+                                        </span>
+                                    </div>
+
+                                    {/* Order Details */}
+                                    <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
+                                        <div>
+                                            <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                Total
+                                            </p>
+
+                                            <p className="mt-1 text-sm font-semibold text-primary">
+                                                {formatCurrency(
+                                                    Number(order.total),
+                                                )}
+                                            </p>
+                                        </div>
+
+                                        <div className="text-right">
+                                            <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                Date
+                                            </p>
+
+                                            <p className="mt-1 text-sm text-gray-600">
+                                                {order.createdAt.toLocaleDateString(
+                                                    "en-US",
+                                                    {
+                                                        year: "numeric",
+                                                        month: "short",
+                                                        day: "numeric",
+                                                    },
+                                                )}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Action */}
+                                    <div className="mt-4 flex justify-end border-t border-border pt-4">
+                                        <Button
+                                            asChild
+                                            variant="outline"
+                                            size="sm"
+                                        >
+                                            <Link
+                                                href={`/admin/orders/${order.id}`}
                                             >
-                                                {order.status}
-                                            </span>
-                                        </td>
-
-                                        <td className="px-6 py-5 text-right text-sm font-semibold text-primary">
-                                            {formatCurrency(
-                                                Number(order.total),
-                                            )}
-                                        </td>
-
-                                        <td className="px-6 py-5 text-sm text-gray-600">
-                                            {order.createdAt.toLocaleDateString(
-                                                "en-US",
-                                                {
-                                                    year: "numeric",
-                                                    month: "short",
-                                                    day: "numeric",
-                                                },
-                                            )}
-                                        </td>
-
-                                        <td className="px-6 py-5 text-right">
-                                            <Button
-                                                asChild
-                                                variant="outline"
-                                                size="sm"
-                                            >
-                                                <Link
-                                                    href={`/admin/orders/${order.id}`}
-                                                >
-                                                    View
-                                                </Link>
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                                View
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
                 ) : (
                     <div className="px-6 py-16 text-center">
                         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100 text-lg">
