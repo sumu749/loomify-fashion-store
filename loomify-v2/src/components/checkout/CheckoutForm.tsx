@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 "use client";
 
 import type { FormEvent } from "react";
@@ -122,6 +123,43 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
         setDiscount(0);
 
         toast.success("Coupon removed.");
+    };
+
+    const updateAddressField = <K extends keyof SavedAddress>(
+        field: K,
+        value: SavedAddress[K],
+    ) => {
+        setSelectedAddressId("");
+
+        switch (field) {
+            case "fullName":
+                setFullName(value as string);
+                break;
+
+            case "phone":
+                setPhone(value as string);
+                break;
+
+            case "addressLine":
+                setAddress(value as string);
+                break;
+
+            case "city":
+                setCity(value as string);
+                break;
+
+            case "district":
+                setDistrict(value as string);
+                break;
+
+            case "postalCode":
+                setPostalCode(value as string);
+                break;
+
+            case "country":
+                setCountry(value as string);
+                break;
+        }
     };
 
     const clearAddressForm = () => {
@@ -399,7 +437,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 type="text"
                                 value={fullName}
                                 onChange={(event) =>
-                                    setFullName(event.target.value)
+                                    updateAddressField(
+                                        "fullName",
+                                        event.target.value,
+                                    )
                                 }
                                 placeholder="Enter your full name"
                                 autoComplete="name"
@@ -422,7 +463,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 type="tel"
                                 value={phone}
                                 onChange={(event) =>
-                                    setPhone(event.target.value)
+                                    updateAddressField(
+                                        "phone",
+                                        event.target.value,
+                                    )
                                 }
                                 placeholder="01XXXXXXXXX"
                                 autoComplete="tel"
@@ -444,7 +488,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 id="address"
                                 value={address}
                                 onChange={(event) =>
-                                    setAddress(event.target.value)
+                                    updateAddressField(
+                                        "addressLine",
+                                        event.target.value,
+                                    )
                                 }
                                 rows={4}
                                 placeholder="House, road, area, etc."
@@ -468,7 +515,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 type="text"
                                 value={city}
                                 onChange={(event) =>
-                                    setCity(event.target.value)
+                                    updateAddressField(
+                                        "city",
+                                        event.target.value,
+                                    )
                                 }
                                 placeholder="Dhaka"
                                 autoComplete="address-level2"
@@ -491,7 +541,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 type="text"
                                 value={district}
                                 onChange={(event) =>
-                                    setDistrict(event.target.value)
+                                    updateAddressField(
+                                        "district",
+                                        event.target.value,
+                                    )
                                 }
                                 placeholder="Dhaka"
                                 className="h-12 w-full border border-border px-4 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/10"
@@ -513,7 +566,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 type="text"
                                 value={postalCode}
                                 onChange={(event) =>
-                                    setPostalCode(event.target.value)
+                                    updateAddressField(
+                                        "postalCode",
+                                        event.target.value,
+                                    )
                                 }
                                 placeholder="1207"
                                 autoComplete="postal-code"
@@ -536,7 +592,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 type="text"
                                 value={country}
                                 onChange={(event) =>
-                                    setCountry(event.target.value)
+                                    updateAddressField(
+                                        "country",
+                                        event.target.value,
+                                    )
                                 }
                                 autoComplete="country-name"
                                 className="h-12 w-full border border-border px-4 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/10"
