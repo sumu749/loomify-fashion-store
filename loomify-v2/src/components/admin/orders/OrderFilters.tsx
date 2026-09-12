@@ -27,7 +27,9 @@ const OrderFilters = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [search, setSearch] = useState(() => searchParams.get("search") ?? "");
+    const [search, setSearch] = useState(
+        () => searchParams.get("search") ?? "",
+    );
     const status = searchParams.get("status") ?? "ALL";
     const sort = searchParams.get("sort") ?? "newest";
 
@@ -97,13 +99,13 @@ const OrderFilters = () => {
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
                         placeholder="Order ID, name, email..."
-                        className="h-11 w-full rounded-xl border border-border bg-white px-4 pr-10 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent"
+                        className="h-11 w-full rounded-xl border border-border bg-stone-50 px-4 pr-10 text-sm text-primary outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-accent focus:bg-white"
                     />
 
                     <button
                         type="submit"
                         aria-label="Search orders"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-primary"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md px-1 text-sm text-gray-400 transition hover:bg-stone-100 hover:text-primary"
                     >
                         ↵
                     </button>
@@ -118,7 +120,13 @@ const OrderFilters = () => {
                 </p>
 
                 <div className="space-y-2">
-                    <label className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-stone-50">
+                    <label
+                        className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
+                            status === "ALL"
+                                ? "border-border bg-stone-50"
+                                : "border-transparent hover:border-border hover:bg-stone-50"
+                        }`}
+                    >
                         <input
                             type="radio"
                             name="order-status"
@@ -132,25 +140,35 @@ const OrderFilters = () => {
                         </span>
                     </label>
 
-                    {statuses.map((item) => (
-                        <label
-                            key={item.value}
-                            className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-stone-50"
-                        >
-                            <input
-                                type="radio"
-                                name="order-status"
-                                value={item.value}
-                                checked={status === item.value}
-                                onChange={() => handleStatusChange(item.value)}
-                                className="h-4 w-4 accent-black"
-                            />
+                    {statuses.map((item) => {
+                        const isSelected = status === item.value;
 
-                            <span className="text-sm text-gray-700">
-                                {item.label}
-                            </span>
-                        </label>
-                    ))}
+                        return (
+                            <label
+                                key={item.value}
+                                className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
+                                    isSelected
+                                        ? "border-border bg-stone-50"
+                                        : "border-transparent hover:border-border hover:bg-stone-50"
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="order-status"
+                                    value={item.value}
+                                    checked={status === item.value}
+                                    onChange={() =>
+                                        handleStatusChange(item.value)
+                                    }
+                                    className="h-4 w-4 accent-black"
+                                />
+
+                                <span className="text-sm text-gray-700">
+                                    {item.label}
+                                </span>
+                            </label>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -168,7 +186,7 @@ const OrderFilters = () => {
                     id="order-sort"
                     value={sort}
                     onChange={(event) => handleSortChange(event.target.value)}
-                    className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-primary outline-none transition focus:border-accent"
+                    className="h-11 w-full rounded-xl border border-border bg-stone-50 px-3 text-sm text-primary outline-none transition hover:border-gray-300 focus:border-accent focus:bg-white"
                 >
                     <option value="newest">Newest first</option>
                     <option value="oldest">Oldest first</option>

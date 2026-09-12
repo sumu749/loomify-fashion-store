@@ -13,40 +13,40 @@ import {
 } from "lucide-react";
 import Button from "../common/Button";
 
-const adminNavItems = [
+export const adminNavItems = [
     {
-        name: "Dashboard",
         href: "/admin",
+        label: "Dashboard",
         icon: LayoutDashboard,
     },
     {
-        name: "Products",
         href: "/admin/products",
+        label: "Products",
         icon: Boxes,
     },
     {
-        name: "Categories",
         href: "/admin/categories",
+        label: "Categories",
         icon: FolderKanban,
     },
     {
-        name: "Orders",
         href: "/admin/orders",
+        label: "Orders",
         icon: ClipboardList,
     },
     {
-        name: "Users",
         href: "/admin/users",
+        label: "Users",
         icon: Users,
     },
     {
-        name: "Coupons",
         href: "/admin/coupons",
+        label: "Coupons",
         icon: TicketPercent,
     },
     {
-        name: "Reviews",
         href: "/admin/reviews",
+        label: "Reviews",
         icon: MessageSquare,
     },
 ];
@@ -92,7 +92,7 @@ const AdminSidebar = () => {
                             >
                                 <Link href={item.href}>
                                     <Icon size={19} />
-                                    <span>{item.name}</span>
+                                    <span>{item.label}</span>
                                 </Link>
                             </Button>
                         );

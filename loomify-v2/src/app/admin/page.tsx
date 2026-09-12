@@ -2,6 +2,9 @@
 import Link from "next/link";
 import {
     ArrowRight,
+    Boxes,
+    ClipboardList,
+    DollarSign,
     FolderTree,
     Package,
     Plus,
@@ -20,7 +23,6 @@ import {
     getAdminStats,
     getAdminTopProducts,
 } from "@/services/adminService";
-import formatCurrency from "@/utils/formatCurrency";
 import SalesOverviewChart from "@/components/admin/SalesOverviewChart";
 import OrderStatusBar from "@/components/admin/OrderStatusBar";
 
@@ -50,30 +52,26 @@ export default async function AdminPage() {
         {
             label: "Total Products",
             value: stats.totalProducts,
-            description: "Products in your catalog",
-            icon: Package,
-            iconWrapper: "bg-stone-100 text-primary",
+            supportingText: "Current store overview",
+            icon: Boxes,
         },
         {
             label: "Total Users",
             value: stats.totalUsers,
-            description: "Registered customer accounts",
+            supportingText: "Current store overview",
             icon: Users,
-            iconWrapper: "bg-blue-50 text-blue-700",
         },
         {
             label: "Total Orders",
             value: stats.totalOrders,
-            description: "Orders placed by customers",
-            icon: ShoppingBag,
-            iconWrapper: "bg-amber-50 text-amber-700",
+            supportingText: "All customer orders",
+            icon: ClipboardList,
         },
         {
             label: "Total Revenue",
-            value: formatCurrency(stats.totalRevenue),
-            description: "Revenue generated from orders",
-            icon: FolderTree,
-            iconWrapper: "bg-green-50 text-green-700",
+            value: stats.totalRevenue.toFixed(2),
+            supportingText: "From non-cancelled orders",
+            icon: DollarSign,
         },
     ];
 
@@ -159,36 +157,38 @@ export default async function AdminPage() {
                     </h2>
                 </div>
 
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {statCards.map((card) => {
                         const Icon = card.icon;
 
                         return (
                             <div
                                 key={card.label}
-                                className="rounded-2xl border border-border bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md sm:p-6"
+                                className="group rounded-2xl border border-border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-6"
                             >
                                 <div className="flex items-start justify-between gap-4">
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-500">
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
                                             {card.label}
                                         </p>
 
                                         <p className="mt-3 text-2xl font-semibold tracking-tight text-primary sm:text-3xl">
+                                            {card.label === "Total Revenue" &&
+                                                "$"}
                                             {card.value}
                                         </p>
                                     </div>
 
-                                    <div
-                                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${card.iconWrapper}`}
-                                    >
-                                        <Icon size={20} />
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-primary transition group-hover:bg-primary group-hover:text-white">
+                                        <Icon size={19} />
                                     </div>
                                 </div>
 
-                                <p className="mt-4 text-xs leading-5 text-gray-400">
-                                    {card.description}
-                                </p>
+                                <div className="mt-5 border-t border-border pt-4">
+                                    <p className="text-xs text-gray-400">
+                                        {card.supportingText}
+                                    </p>
+                                </div>
                             </div>
                         );
                     })}
@@ -525,7 +525,7 @@ export default async function AdminPage() {
 
             {/* ================= Top Products ================= */}
 
-            <section className="mt-6 rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <section className="w-full rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                 <div className="flex items-start justify-between gap-4">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
@@ -550,7 +550,7 @@ export default async function AdminPage() {
                 </div>
 
                 {topProducts.length > 0 ? (
-                    <div className="mt-7 space-y-5">
+                    <div className="mt-6 space-y-4">
                         {topProducts.map((product, index) => {
                             const maxSold = Math.max(
                                 ...topProducts.map((item) => item.sold),
@@ -565,61 +565,55 @@ export default async function AdminPage() {
                                 <Link
                                     key={product.id}
                                     href={`/admin/products/${product.id}`}
-                                    className="group block"
+                                    className="group flex items-center gap-3 rounded-xl border border-border p-3 transition hover:border-accent hover:bg-stone-50 sm:gap-4 sm:p-4"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        {/* Rank */}
-                                        <span className="w-6 shrink-0 text-xs font-semibold tracking-wider text-gray-300">
-                                            {String(index + 1).padStart(2, "0")}
-                                        </span>
+                                    {/* Product Image */}
+                                    <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-stone-100 sm:h-12 sm:w-12">
+                                        {product.image ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                        ) : (
+                                            <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
+                                                No image
+                                            </div>
+                                        )}
+                                    </div>
 
-                                        {/* Product Image */}
-                                        <div className="h-14 w-11 shrink-0 overflow-hidden bg-stone-100">
-                                            {product.image ? (
-                                                // eslint-disable-next-line @next/next/no-img-element
-                                                <img
-                                                    src={product.image}
-                                                    alt={product.name}
-                                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                />
-                                            ) : (
-                                                <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
-                                                    No image
-                                                </div>
-                                            )}
+                                    {/* Product Info */}
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <p className="truncate text-sm font-medium text-primary">
+                                                {product.name}
+                                            </p>
+
+                                            <span className="shrink-0 text-xs font-medium text-gray-500">
+                                                {product.sold} sold
+                                            </span>
                                         </div>
 
-                                        {/* Product Info */}
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-center justify-between gap-4">
-                                                <p className="truncate text-sm font-medium text-primary transition-colors group-hover:text-accent">
-                                                    {product.name}
-                                                </p>
-
-                                                <span className="shrink-0 text-sm font-semibold text-primary">
-                                                    {product.sold} sold
-                                                </span>
-                                            </div>
-
-                                            <div className="mt-2 h-1.5 overflow-hidden bg-stone-100">
-                                                <div
-                                                    className="h-full bg-accent transition-all duration-700 group-hover:bg-primary"
-                                                    style={{
-                                                        width: `${percentage}%`,
-                                                    }}
-                                                />
-                                            </div>
+                                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-100">
+                                            <div
+                                                className="h-full rounded-full bg-primary"
+                                                style={{
+                                                    width: `${percentage}%`,
+                                                }}
+                                            />
                                         </div>
+                                    </div>
 
-                                        {/* Price */}
-                                        <span className="hidden w-20 shrink-0 text-right text-sm text-gray-500 sm:block">
-                                            {formatCurrency(product.price)}
-                                        </span>
+                                    {/* Price */}
+                                    <div className="shrink-0 text-right">
+                                        <p className="text-sm font-semibold text-primary">
+                                            ${Number(product.price).toFixed(2)}
+                                        </p>
 
-                                        <ArrowRight
-                                            size={16}
-                                            className="shrink-0 text-gray-300 transition duration-300 group-hover:translate-x-1 group-hover:text-primary"
-                                        />
+                                        <p className="mt-1 text-xs text-gray-400">
+                                            #{index + 1}
+                                        </p>
                                     </div>
                                 </Link>
                             );

@@ -1,5 +1,6 @@
 /* eslint-disable indent */
 import Link from "next/link";
+import { CreditCard, MapPin, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
@@ -259,7 +260,7 @@ const AdminOrderDetailsPage = async ({
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* Customer */}
 
-                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition hover:shadow-md">
+                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-colors hover:border-gray-300">
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -271,8 +272,8 @@ const AdminOrderDetailsPage = async ({
                             </h2>
                         </div>
 
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-sm font-bold text-primary">
-                            C
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-primary">
+                            <UserRound size={19} />
                         </div>
                     </div>
 
@@ -311,7 +312,7 @@ const AdminOrderDetailsPage = async ({
 
                 {/* Shipping */}
 
-                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition hover:shadow-md">
+                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-colors hover:border-gray-300">
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -323,16 +324,16 @@ const AdminOrderDetailsPage = async ({
                             </h2>
                         </div>
 
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-sm font-bold text-primary">
-                            S
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-primary">
+                            <MapPin size={19} />
                         </div>
                     </div>
 
-                    <div className="mt-6 space-y-2.5 text-sm leading-6 text-gray-600">
+                    <div className="mt-6 space-y-3 text-sm leading-6 text-gray-600">
                         {Object.entries(
                             order.shippingAddress as Record<string, unknown>,
                         ).map(([key, value]) => (
-                            <p key={key}>
+                            <p key={key} className="wrap-break-word">
                                 <span className="font-medium capitalize text-primary">
                                     {key.replaceAll("_", " ")}:
                                 </span>{" "}
@@ -344,7 +345,7 @@ const AdminOrderDetailsPage = async ({
 
                 {/* Payment */}
 
-                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition hover:shadow-md">
+                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-colors hover:border-gray-300">
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -356,8 +357,8 @@ const AdminOrderDetailsPage = async ({
                             </h2>
                         </div>
 
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-sm font-bold text-primary">
-                            $
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-primary">
+                            <CreditCard size={19} />
                         </div>
                     </div>
 
@@ -425,9 +426,10 @@ const AdminOrderDetailsPage = async ({
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-190">
-                        <thead className="border-b border-border bg-stone-50/80">
+                {/* Desktop Items Table */}
+                <div className="hidden overflow-x-auto sm:block">
+                    <table className="w-full min-w-225">
+                        <thead className="border-b border-border bg-stone-50/60">
                             <tr>
                                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
                                     Product
@@ -455,7 +457,7 @@ const AdminOrderDetailsPage = async ({
                             {order.items.map((item) => (
                                 <tr
                                     key={item.id}
-                                    className="transition hover:bg-stone-50/60"
+                                    className="transition-colors hover:bg-stone-50/70"
                                 >
                                     <td className="px-6 py-5">
                                         <p className="font-semibold text-primary">
@@ -505,6 +507,86 @@ const AdminOrderDetailsPage = async ({
                             ))}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Items */}
+                <div className="space-y-3 p-4 sm:hidden">
+                    {order.items.map((item) => (
+                        <div
+                            key={item.id}
+                            className="rounded-xl border border-border p-4"
+                        >
+                            {/* Product */}
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-primary">
+                                    {item.productName}
+                                </p>
+
+                                <p className="mt-1 truncate text-xs text-gray-400">
+                                    Product ID: {item.productId}
+                                </p>
+                            </div>
+
+                            {/* Variant */}
+                            <div className="mt-4 border-t border-border pt-4">
+                                <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                    Variant
+                                </p>
+
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                                        {item.size}
+                                    </span>
+
+                                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                                        {item.color}
+                                    </span>
+                                </div>
+
+                                <p className="mt-2 break-all text-xs text-gray-400">
+                                    SKU: {item.variantSku}
+                                </p>
+                            </div>
+
+                            {/* Pricing */}
+                            <div className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-4">
+                                <div>
+                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                        Unit Price
+                                    </p>
+
+                                    <p className="mt-1 text-sm font-medium text-primary">
+                                        {formatCurrency(
+                                            Number(item.productPrice),
+                                        )}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                        Qty
+                                    </p>
+
+                                    <p className="mt-1 text-sm font-semibold text-primary">
+                                        {item.quantity}
+                                    </p>
+                                </div>
+
+                                <div className="text-right">
+                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                        Total
+                                    </p>
+
+                                    <p className="mt-1 text-sm font-bold text-primary">
+                                        {formatCurrency(
+                                            Number(item.productPrice) *
+                                                item.quantity,
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </section>
 

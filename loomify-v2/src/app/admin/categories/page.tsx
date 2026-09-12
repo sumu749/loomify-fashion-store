@@ -182,130 +182,226 @@ const AdminCategoriesPage = async ({
                     </div>
 
                     {categories.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-200">
-                                <thead className="border-b border-border bg-stone-50/80">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Category
-                                        </th>
+                        <>
+                            {/* Desktop Table */}
+                            <div className="hidden overflow-x-auto sm:block">
+                                <table className="w-full min-w-212.5">
+                                    <thead className="border-b border-border bg-stone-50/60">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Category
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Slug
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Slug
+                                            </th>
 
-                                        <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Products
-                                        </th>
+                                            <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Products
+                                            </th>
 
-                                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Status
-                                        </th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Status
+                                            </th>
 
-                                        <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
+                                            <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
 
-                                <tbody className="divide-y divide-border">
-                                    {categories.map((category) => {
-                                        const hasProducts =
-                                            category._count.products > 0;
+                                    <tbody className="divide-y divide-border">
+                                        {categories.map((category) => {
+                                            const hasProducts =
+                                                category._count.products > 0;
 
-                                        return (
-                                            <tr
-                                                key={category.id}
-                                                className="group transition hover:bg-stone-50/60"
-                                            >
-                                                {/* Category */}
+                                            return (
+                                                <tr
+                                                    key={category.id}
+                                                    className="group transition-colors hover:bg-stone-50/70"
+                                                >
+                                                    {/* Category */}
 
-                                                <td className="px-6 py-5">
+                                                    <td className="px-6 py-5">
+                                                        <Link
+                                                            href={`/admin/categories/${category.id}`}
+                                                            className="text-sm font-semibold text-primary transition hover:text-accent"
+                                                        >
+                                                            {category.name}
+                                                        </Link>
+
+                                                        {category.description && (
+                                                            <p className="mt-1 max-w-md text-sm leading-5 text-gray-500">
+                                                                {
+                                                                    category.description
+                                                                }
+                                                            </p>
+                                                        )}
+                                                    </td>
+
+                                                    {/* Slug */}
+
+                                                    <td className="px-6 py-5">
+                                                        <span className="inline-flex rounded-full border border-border bg-stone-50 px-3 py-1 font-mono text-xs text-gray-600">
+                                                            {category.slug}
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Products */}
+
+                                                    <td className="px-6 py-5 text-center">
+                                                        <span className="inline-flex min-w-10 items-center justify-center rounded-lg bg-stone-100 px-2.5 py-1.5 text-sm font-semibold text-primary">
+                                                            {
+                                                                category._count
+                                                                    .products
+                                                            }
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Status */}
+
+                                                    <td className="px-6 py-5">
+                                                        <span
+                                                            className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
+                                                                hasProducts
+                                                                    ? "border-green-200 bg-green-50 text-green-700"
+                                                                    : "border-amber-200 bg-amber-50 text-amber-700"
+                                                            }`}
+                                                        >
+                                                            <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />
+
+                                                            {hasProducts
+                                                                ? "In use"
+                                                                : "Empty"}
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Actions */}
+
+                                                    <td className="px-6 py-5">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Button
+                                                                asChild
+                                                                variant="outline"
+                                                                size="sm"
+                                                            >
+                                                                <Link
+                                                                    href={`/admin/categories/${category.id}`}
+                                                                >
+                                                                    Manage
+                                                                </Link>
+                                                            </Button>
+
+                                                            <CategoryDeleteButton
+                                                                categoryId={
+                                                                    category.id
+                                                                }
+                                                                categoryName={
+                                                                    category.name
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile Categories */}
+                            <div className="space-y-3 p-4 sm:hidden">
+                                {categories.map((category) => {
+                                    const hasProducts =
+                                        category._count.products > 0;
+
+                                    return (
+                                        <div
+                                            key={category.id}
+                                            className="rounded-xl border border-border p-4 transition hover:border-accent"
+                                        >
+                                            {/* Category Header */}
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
                                                     <Link
                                                         href={`/admin/categories/${category.id}`}
-                                                        className="font-semibold text-primary transition hover:text-accent"
+                                                        className="text-sm font-semibold text-primary hover:text-accent"
                                                     >
                                                         {category.name}
                                                     </Link>
 
                                                     {category.description && (
-                                                        <p className="mt-1 max-w-md text-sm leading-5 text-gray-500">
+                                                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-gray-500">
                                                             {
                                                                 category.description
                                                             }
                                                         </p>
                                                     )}
-                                                </td>
+                                                </div>
 
-                                                {/* Slug */}
+                                                <span
+                                                    className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+                                                        hasProducts
+                                                            ? "border-green-200 bg-green-50 text-green-700"
+                                                            : "border-amber-200 bg-amber-50 text-amber-700"
+                                                    }`}
+                                                >
+                                                    {hasProducts
+                                                        ? "In use"
+                                                        : "Empty"}
+                                                </span>
+                                            </div>
 
-                                                <td className="px-6 py-5">
-                                                    <span className="inline-flex rounded-lg bg-stone-100 px-3 py-1.5 font-mono text-xs text-gray-600">
+                                            {/* Category Details */}
+                                            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
+                                                <div>
+                                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                        Slug
+                                                    </p>
+
+                                                    <p className="mt-1 truncate font-mono text-xs text-gray-600">
                                                         {category.slug}
-                                                    </span>
-                                                </td>
+                                                    </p>
+                                                </div>
 
-                                                {/* Products */}
+                                                <div>
+                                                    <p className="text-[11px] uppercase tracking-wider text-gray-400">
+                                                        Products
+                                                    </p>
 
-                                                <td className="px-6 py-5 text-center">
-                                                    <span className="inline-flex min-w-10 items-center justify-center rounded-lg bg-stone-100 px-2.5 py-1.5 text-sm font-semibold text-primary">
+                                                    <p className="mt-1 text-sm font-semibold text-primary">
                                                         {
                                                             category._count
                                                                 .products
                                                         }
-                                                    </span>
-                                                </td>
+                                                    </p>
+                                                </div>
+                                            </div>
 
-                                                {/* Status */}
-
-                                                <td className="px-6 py-5">
-                                                    <span
-                                                        className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
-                                                            hasProducts
-                                                                ? "border-green-200 bg-green-50 text-green-700"
-                                                                : "border-amber-200 bg-amber-50 text-amber-700"
-                                                        }`}
+                                            {/* Actions */}
+                                            <div className="mt-4 flex items-center justify-end gap-2 border-t border-border pt-4">
+                                                <Button
+                                                    asChild
+                                                    variant="outline"
+                                                    size="sm"
+                                                >
+                                                    <Link
+                                                        href={`/admin/categories/${category.id}`}
                                                     >
-                                                        <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />
+                                                        Manage
+                                                    </Link>
+                                                </Button>
 
-                                                        {hasProducts
-                                                            ? "In use"
-                                                            : "Empty"}
-                                                    </span>
-                                                </td>
-
-                                                {/* Actions */}
-
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Button
-                                                            asChild
-                                                            variant="outline"
-                                                            size="sm"
-                                                        >
-                                                            <Link
-                                                                href={`/admin/categories/${category.id}`}
-                                                            >
-                                                                Manage
-                                                            </Link>
-                                                        </Button>
-
-                                                        <CategoryDeleteButton
-                                                            categoryId={
-                                                                category.id
-                                                            }
-                                                            categoryName={
-                                                                category.name
-                                                            }
-                                                        />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                                <CategoryDeleteButton
+                                                    categoryId={category.id}
+                                                    categoryName={category.name}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     ) : (
                         <div className="px-6 py-20 text-center sm:px-8">
                             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100 text-xl">
