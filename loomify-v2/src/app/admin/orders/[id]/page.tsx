@@ -427,7 +427,7 @@ const AdminOrderDetailsPage = async ({
 
                 {/* Desktop Items Table */}
                 <div className="hidden overflow-x-auto sm:block">
-                    <table className="w-full min-w-[900px]">
+                    <table className="w-full min-w-225">
                         <thead className="border-b border-border bg-stone-50/60">
                             <tr>
                                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
