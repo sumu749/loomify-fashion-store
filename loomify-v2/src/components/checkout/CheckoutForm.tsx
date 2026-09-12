@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable indent */
 "use client";
 
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Check, MapPin, ShieldCheck, Tag, Truck } from "lucide-react";
 
@@ -33,6 +34,7 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const dispatch = useAppDispatch();
 
     const cartItems = useAppSelector((state) => state.cart.items);
+    const cartVersion = useAppSelector((state) => state.cart.version);
 
     const [selectedAddressId, setSelectedAddressId] = useState("");
     const [district, setDistrict] = useState("");
@@ -45,10 +47,14 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const [country, setCountry] = useState("Bangladesh");
 
     const [loading, setLoading] = useState(false);
+
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
     const [discount, setDiscount] = useState(0);
     const [couponLoading, setCouponLoading] = useState(false);
+    const [couponCartVersion, setCouponCartVersion] = useState<number | null>(
+        null,
+    );
 
     const [paymentMethod, setPaymentMethod] = useState<"COD">("COD");
 
@@ -65,6 +71,24 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const shipping = subtotal > 100 ? 0 : 15;
 
     const total = Math.max(subtotal + shipping - discount, 0);
+    useEffect(() => {
+        if (!appliedCoupon || couponCartVersion === null) {
+            return;
+        }
+
+        if (cartVersion === couponCartVersion) {
+            return;
+        }
+
+        setAppliedCoupon(null);
+        setCouponCode("");
+        setDiscount(0);
+        setCouponCartVersion(null);
+
+        toast("Cart changed. Please reapply your coupon.", {
+            icon: "↻",
+        });
+    }, [cartVersion, couponCartVersion, appliedCoupon]);
 
     const handleApplyCoupon = async () => {
         const normalizedCode = couponCode.trim().toUpperCase();
@@ -106,6 +130,7 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
 
             setAppliedCoupon(result.data.code);
             setDiscount(Number(result.data.discount));
+            setCouponCartVersion(cartVersion);
 
             toast.success("Coupon applied successfully.");
         } catch (error) {
@@ -121,6 +146,7 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
         setCouponCode("");
         setAppliedCoupon(null);
         setDiscount(0);
+        setCouponCartVersion(null);
 
         toast.success("Coupon removed.");
     };
@@ -270,6 +296,11 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
             }
 
             const orderId = result.data.orderId;
+
+            setAppliedCoupon(null);
+            setCouponCode("");
+            setDiscount(0);
+            setCouponCartVersion(null);
 
             dispatch(clearCart());
 
