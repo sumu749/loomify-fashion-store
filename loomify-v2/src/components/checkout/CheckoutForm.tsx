@@ -176,6 +176,10 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        if (loading) {
+            return;
+        }
+
         if (cartItems.length === 0) {
             toast.error("Your cart is empty.");
             return;
@@ -188,6 +192,13 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
 
         if (!phone.trim()) {
             toast.error("Please enter your phone number.");
+            return;
+        }
+
+        const normalizedPhone = phone.replace(/\s+/g, "");
+
+        if (!/^01\d{9}$/.test(normalizedPhone)) {
+            toast.error("Please enter a valid Bangladesh phone number.");
             return;
         }
 
@@ -208,6 +219,11 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
 
         if (!postalCode.trim()) {
             toast.error("Please enter your postal code.");
+            return;
+        }
+
+        if (!/^\d{4}$/.test(postalCode.trim())) {
+            toast.error("Please enter a valid 4-digit postal code.");
             return;
         }
 
@@ -461,6 +477,7 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                             <input
                                 id="phone"
                                 type="tel"
+                                inputMode="numeric"
                                 value={phone}
                                 onChange={(event) =>
                                     updateAddressField(
@@ -564,6 +581,7 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                             <input
                                 id="postalCode"
                                 type="text"
+                                inputMode="numeric"
                                 value={postalCode}
                                 onChange={(event) =>
                                     updateAddressField(
@@ -590,6 +608,7 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                             <input
                                 id="country"
                                 type="text"
+                                inputMode="text"
                                 value={country}
                                 onChange={(event) =>
                                     updateAddressField(
