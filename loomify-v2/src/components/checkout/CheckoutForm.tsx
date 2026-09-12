@@ -690,53 +690,83 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                         </div>
 
                         {!appliedCoupon ? (
-                            <div className="mt-3 flex gap-2">
-                                <input
-                                    type="text"
-                                    value={couponCode}
-                                    onChange={(event) =>
-                                        setCouponCode(
-                                            event.target.value.toUpperCase(),
-                                        )
-                                    }
-                                    onKeyDown={(event) => {
-                                        if (event.key === "Enter") {
-                                            event.preventDefault();
-                                            handleApplyCoupon();
+                            <div className="mt-3">
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={couponCode}
+                                        onChange={(event) =>
+                                            setCouponCode(
+                                                event.target.value.toUpperCase(),
+                                            )
                                         }
-                                    }}
-                                    placeholder="Coupon code"
-                                    className="h-11 min-w-0 flex-1 border border-border px-3 text-sm uppercase outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/10"
-                                />
+                                        onKeyDown={(event) => {
+                                            if (event.key === "Enter") {
+                                                event.preventDefault();
+                                                handleApplyCoupon();
+                                            }
+                                        }}
+                                        placeholder="Enter coupon code"
+                                        disabled={couponLoading || loading}
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                        className="h-11 min-w-0 flex-1 border border-border px-3 text-sm uppercase outline-none transition placeholder:text-gray-400 focus:border-accent focus:ring-2 focus:ring-accent/10 disabled:cursor-not-allowed disabled:bg-stone-50 disabled:text-gray-400"
+                                    />
 
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    onClick={handleApplyCoupon}
-                                    disabled={couponLoading}
-                                >
-                                    {couponLoading ? "..." : "Apply"}
-                                </Button>
-                            </div>
-                        ) : (
-                            <div className="mt-3 flex items-center justify-between border border-accent/20 bg-accent/5 px-4 py-3">
-                                <div>
-                                    <p className="text-sm font-semibold text-primary">
-                                        {appliedCoupon}
-                                    </p>
-
-                                    <p className="mt-1 text-xs text-accent">
-                                        Coupon applied
-                                    </p>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={handleApplyCoupon}
+                                        disabled={
+                                            couponLoading ||
+                                            loading ||
+                                            !couponCode.trim()
+                                        }
+                                    >
+                                        {couponLoading
+                                            ? "Applying..."
+                                            : "Apply"}
+                                    </Button>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    onClick={handleRemoveCoupon}
-                                    className="text-xs font-medium text-gray-500 transition hover:text-red-500"
-                                >
-                                    Remove
-                                </button>
+                                <p className="mt-2 text-xs leading-5 text-gray-400">
+                                    Enter a valid coupon code to receive your
+                                    discount.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="mt-3 border border-accent/20 bg-accent/5 px-4 py-4">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-white">
+                                                <Check size={14} />
+                                            </div>
+
+                                            <p className="truncate text-sm font-semibold uppercase text-primary">
+                                                {appliedCoupon}
+                                            </p>
+                                        </div>
+
+                                        <p className="mt-2 text-xs leading-5 text-accent">
+                                            Coupon applied successfully.
+                                        </p>
+
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            You saved {formatCurrency(discount)}{" "}
+                                            on this order.
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleRemoveCoupon}
+                                        disabled={loading}
+                                        className="shrink-0 text-xs font-medium text-gray-500 transition hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
