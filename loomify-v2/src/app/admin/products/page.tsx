@@ -288,7 +288,7 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                         <>
                             <div className="hidden overflow-x-auto sm:block">
                                 <table className="w-full min-w-250">
-                                    <thead className="border-b border-border bg-stone-50/80">
+                                    <thead className="border-b border-border bg-stone-50/60">
                                         <tr>
                                             <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
                                                 Product
@@ -335,20 +335,21 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                                             return (
                                                 <tr
                                                     key={product.id}
-                                                    className="group transition hover:bg-stone-50/60"
+                                                    className="group transition-colors hover:bg-stone-50/70"
                                                 >
                                                     {/* Product */}
 
                                                     <td className="px-6 py-5">
-                                                        <div className="min-w-0">
+                                                        <div className="min-w-0 max-w-xs">
                                                             <Link
                                                                 href={`/admin/products/${product.id}`}
-                                                                className="font-semibold text-primary transition hover:text-accent"
+                                                                className="line-clamp-2 text-sm font-semibold leading-5 text-primary transition hover:text-accent"
                                                             >
                                                                 {product.name}
                                                             </Link>
 
                                                             <p className="mt-1 text-xs text-gray-400">
+                                                                SKU:{" "}
                                                                 {product.sku}
                                                             </p>
                                                         </div>
@@ -357,7 +358,7 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                                                     {/* Category */}
 
                                                     <td className="px-6 py-5">
-                                                        <span className="inline-flex rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-medium text-gray-700">
+                                                        <span className="inline-flex rounded-full border border-border bg-stone-50 px-3 py-1 text-xs font-medium text-gray-600">
                                                             {
                                                                 product.category
                                                                     .name
@@ -368,7 +369,7 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                                                     {/* Price */}
 
                                                     <td className="px-6 py-5 text-right">
-                                                        <p className="text-sm font-semibold text-primary">
+                                                        <p className="whitespace-nowrap text-sm font-semibold text-primary">
                                                             {formatCurrency(
                                                                 Number(
                                                                     product.price,
@@ -382,7 +383,7 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                                                     <td className="px-6 py-5 text-center">
                                                         <div className="flex flex-col items-center gap-1.5">
                                                             <span
-                                                                className={`inline-flex min-w-10 items-center justify-center rounded-lg px-2.5 py-1.5 text-sm font-semibold ${
+                                                                className={`inline-flex min-w-10 items-center justify-center rounded-full px-2.5 py-1 text-sm font-semibold ${
                                                                     isOutOfStock
                                                                         ? "bg-red-50 text-red-700"
                                                                         : isLowStock
@@ -421,7 +422,7 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                                                     {/* Actions */}
 
                                                     <td className="px-6 py-5">
-                                                        <div className="flex items-center justify-end gap-2">
+                                                        <div className="flex items-center justify-end gap-2 whitespace-nowrap">
                                                             <Button
                                                                 asChild
                                                                 variant="outline"
