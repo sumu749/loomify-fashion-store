@@ -21,11 +21,16 @@ const CouponForm = () => {
     const [active, setActive] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const today = new Date().toISOString().split("T")[0];
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         const normalizedCode = code.trim().toUpperCase();
         const discountValue = Number(value);
+        const minimumOrder = minOrderAmount ? Number(minOrderAmount) : null;
+        const maximumDiscount = maxDiscount ? Number(maxDiscount) : null;
+        const limit = usageLimit ? Number(usageLimit) : null;
 
         if (!normalizedCode) {
             toast.error("Coupon code is required");
@@ -43,26 +48,29 @@ const CouponForm = () => {
         }
 
         if (
-            minOrderAmount &&
-            (Number.isNaN(Number(minOrderAmount)) || Number(minOrderAmount) < 0)
+            minimumOrder !== null &&
+            (Number.isNaN(minimumOrder) || minimumOrder < 0)
         ) {
             toast.error("Minimum order amount is invalid");
             return;
         }
 
         if (
-            maxDiscount &&
-            (Number.isNaN(Number(maxDiscount)) || Number(maxDiscount) <= 0)
+            type === "PERCENTAGE" &&
+            maximumDiscount !== null &&
+            (Number.isNaN(maximumDiscount) || maximumDiscount <= 0)
         ) {
-            toast.error("Maximum discount is invalid");
+            toast.error("Maximum discount must be greater than 0");
             return;
         }
 
-        if (
-            usageLimit &&
-            (!Number.isInteger(Number(usageLimit)) || Number(usageLimit) <= 0)
-        ) {
+        if (limit !== null && (!Number.isInteger(limit) || limit <= 0)) {
             toast.error("Usage limit must be a positive integer");
+            return;
+        }
+
+        if (expiresAt && expiresAt < today) {
+            toast.error("Expiry date cannot be in the past");
             return;
         }
 
@@ -79,11 +87,9 @@ const CouponForm = () => {
                     code: normalizedCode,
                     type,
                     value: discountValue,
-                    minOrderAmount: minOrderAmount
-                        ? Number(minOrderAmount)
-                        : null,
-                    maxDiscount: maxDiscount ? Number(maxDiscount) : null,
-                    usageLimit: usageLimit ? Number(usageLimit) : null,
+                    minOrderAmount: minimumOrder,
+                    maxDiscount: type === "PERCENTAGE" ? maximumDiscount : null,
+                    usageLimit: limit,
                     active,
                     expiresAt: expiresAt
                         ? new Date(`${expiresAt}T23:59:59`).toISOString()
@@ -115,7 +121,7 @@ const CouponForm = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Coupon Details */}
 
-            <section className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <section className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                 <div className="mb-6">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
                         Coupon Details
@@ -143,6 +149,7 @@ const CouponForm = () => {
 
                         <input
                             id="coupon-code"
+                            name="code"
                             type="text"
                             value={code}
                             onChange={(event) =>
@@ -150,7 +157,9 @@ const CouponForm = () => {
                             }
                             placeholder="e.g. SUMMER20"
                             maxLength={50}
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm font-medium tracking-wide text-primary uppercase outline-none transition placeholder:font-normal placeholder:tracking-normal placeholder:text-gray-400 focus:border-accent"
+                            required
+                            autoComplete="off"
+                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm font-medium tracking-wide text-primary uppercase outline-none transition placeholder:font-normal placeholder:tracking-normal placeholder:text-gray-400 focus:border-accent focus:ring-1 focus:ring-accent/20"
                         />
 
                         <p className="mt-2 text-xs text-gray-400">
@@ -171,11 +180,12 @@ const CouponForm = () => {
 
                         <select
                             id="discount-type"
+                            name="type"
                             value={type}
                             onChange={(event) =>
                                 setType(event.target.value as DiscountType)
                             }
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent focus:ring-1 focus:ring-accent/20"
                         >
                             <option value="PERCENTAGE">Percentage</option>
 
@@ -197,8 +207,10 @@ const CouponForm = () => {
                         <div className="relative">
                             <input
                                 id="discount-value"
+                                name="value"
                                 type="number"
-                                min="0"
+                                min="0.01"
+                                max={type === "PERCENTAGE" ? "100" : undefined}
                                 step="0.01"
                                 value={value}
                                 onChange={(event) =>
@@ -207,7 +219,8 @@ const CouponForm = () => {
                                 placeholder={
                                     type === "PERCENTAGE" ? "20" : "500"
                                 }
-                                className="h-12 w-full rounded-xl border border-border bg-white px-4 pr-12 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent"
+                                required
+                                className="h-12 w-full rounded-xl border border-border bg-white px-4 pr-14 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent focus:ring-1 focus:ring-accent/20"
                             />
 
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400">
@@ -226,7 +239,7 @@ const CouponForm = () => {
 
             {/* Order Rules */}
 
-            <section className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <section className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                 <div className="mb-6">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
                         Discount Rules
@@ -252,18 +265,25 @@ const CouponForm = () => {
                             Minimum Order Amount
                         </label>
 
-                        <input
-                            id="min-order"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={minOrderAmount}
-                            onChange={(event) =>
-                                setMinOrderAmount(event.target.value)
-                            }
-                            placeholder="1000"
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent"
-                        />
+                        <div className="relative">
+                            <input
+                                id="min-order"
+                                name="minOrderAmount"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={minOrderAmount}
+                                onChange={(event) =>
+                                    setMinOrderAmount(event.target.value)
+                                }
+                                placeholder="1000"
+                                className="h-12 w-full rounded-xl border border-border bg-white px-4 pr-14 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent focus:ring-1 focus:ring-accent/20"
+                            />
+
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400">
+                                BDT
+                            </span>
+                        </div>
 
                         <p className="mt-2 text-xs text-gray-400">
                             Leave empty if there is no minimum order.
@@ -272,31 +292,40 @@ const CouponForm = () => {
 
                     {/* Maximum Discount */}
 
-                    <div>
-                        <label
-                            htmlFor="max-discount"
-                            className="mb-2 block text-sm font-medium text-primary"
-                        >
-                            Maximum Discount
-                        </label>
+                    {type === "PERCENTAGE" && (
+                        <div>
+                            <label
+                                htmlFor="max-discount"
+                                className="mb-2 block text-sm font-medium text-primary"
+                            >
+                                Maximum Discount
+                            </label>
 
-                        <input
-                            id="max-discount"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={maxDiscount}
-                            onChange={(event) =>
-                                setMaxDiscount(event.target.value)
-                            }
-                            placeholder="500"
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent"
-                        />
+                            <div className="relative">
+                                <input
+                                    id="max-discount"
+                                    name="maxDiscount"
+                                    type="number"
+                                    min="0.01"
+                                    step="0.01"
+                                    value={maxDiscount}
+                                    onChange={(event) =>
+                                        setMaxDiscount(event.target.value)
+                                    }
+                                    placeholder="500"
+                                    className="h-12 w-full rounded-xl border border-border bg-white px-4 pr-14 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent focus:ring-1 focus:ring-accent/20"
+                                />
 
-                        <p className="mt-2 text-xs text-gray-400">
-                            Useful for limiting percentage discounts.
-                        </p>
-                    </div>
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400">
+                                    BDT
+                                </span>
+                            </div>
+
+                            <p className="mt-2 text-xs text-gray-400">
+                                Caps the discount for percentage coupons.
+                            </p>
+                        </div>
+                    )}
 
                     {/* Usage Limit */}
 
@@ -310,6 +339,7 @@ const CouponForm = () => {
 
                         <input
                             id="usage-limit"
+                            name="usageLimit"
                             type="number"
                             min="1"
                             step="1"
@@ -318,7 +348,7 @@ const CouponForm = () => {
                                 setUsageLimit(event.target.value)
                             }
                             placeholder="100"
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition placeholder:text-gray-400 focus:border-accent focus:ring-1 focus:ring-accent/20"
                         />
 
                         <p className="mt-2 text-xs text-gray-400">
@@ -338,12 +368,14 @@ const CouponForm = () => {
 
                         <input
                             id="expires-at"
+                            name="expiresAt"
                             type="date"
+                            min={today}
                             value={expiresAt}
                             onChange={(event) =>
                                 setExpiresAt(event.target.value)
                             }
-                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent"
+                            className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm text-primary outline-none transition focus:border-accent focus:ring-1 focus:ring-accent/20"
                         />
 
                         <p className="mt-2 text-xs text-gray-400">
@@ -355,7 +387,7 @@ const CouponForm = () => {
 
             {/* Status */}
 
-            <section className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <section className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -381,7 +413,7 @@ const CouponForm = () => {
                             className="peer sr-only"
                         />
 
-                        <span className="relative h-6 w-11 rounded-full bg-gray-200 transition peer-checked:bg-primary">
+                        <span className="relative h-6 w-11 shrink-0 rounded-full bg-gray-200 transition peer-checked:bg-primary">
                             <span className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5" />
                         </span>
 
@@ -400,11 +432,16 @@ const CouponForm = () => {
                     variant="outline"
                     onClick={() => router.push("/admin/coupons")}
                     disabled={isSubmitting}
+                    className="w-full sm:w-auto"
                 >
                     Cancel
                 </Button>
 
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full sm:w-auto"
+                >
                     {isSubmitting ? "Creating..." : "Create Coupon"}
                 </Button>
             </div>
