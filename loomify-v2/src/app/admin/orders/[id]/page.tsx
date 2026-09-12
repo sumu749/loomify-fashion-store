@@ -1,5 +1,6 @@
 /* eslint-disable indent */
 import Link from "next/link";
+import { CreditCard, MapPin, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
@@ -259,7 +260,7 @@ const AdminOrderDetailsPage = async ({
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* Customer */}
 
-                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition hover:shadow-md">
+                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-colors hover:border-gray-300">
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -271,8 +272,8 @@ const AdminOrderDetailsPage = async ({
                             </h2>
                         </div>
 
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-sm font-bold text-primary">
-                            C
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-primary">
+                            <UserRound size={19} />
                         </div>
                     </div>
 
@@ -311,7 +312,7 @@ const AdminOrderDetailsPage = async ({
 
                 {/* Shipping */}
 
-                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition hover:shadow-md">
+                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-colors hover:border-gray-300">
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -323,16 +324,16 @@ const AdminOrderDetailsPage = async ({
                             </h2>
                         </div>
 
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-sm font-bold text-primary">
-                            S
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-primary">
+                            <MapPin size={19} />
                         </div>
                     </div>
 
-                    <div className="mt-6 space-y-2.5 text-sm leading-6 text-gray-600">
+                    <div className="mt-6 space-y-3 text-sm leading-6 text-gray-600">
                         {Object.entries(
                             order.shippingAddress as Record<string, unknown>,
                         ).map(([key, value]) => (
-                            <p key={key}>
+                            <p key={key} className="break-words">
                                 <span className="font-medium capitalize text-primary">
                                     {key.replaceAll("_", " ")}:
                                 </span>{" "}
@@ -344,7 +345,7 @@ const AdminOrderDetailsPage = async ({
 
                 {/* Payment */}
 
-                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition hover:shadow-md">
+                <section className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-colors hover:border-gray-300">
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
@@ -356,8 +357,8 @@ const AdminOrderDetailsPage = async ({
                             </h2>
                         </div>
 
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-sm font-bold text-primary">
-                            $
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-primary">
+                            <CreditCard size={19} />
                         </div>
                     </div>
 
