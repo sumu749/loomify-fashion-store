@@ -525,7 +525,7 @@ export default async function AdminPage() {
 
             {/* ================= Top Products ================= */}
 
-            <section className="mt-6 rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+            <section className="w-full rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8">
                 <div className="flex items-start justify-between gap-4">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
@@ -550,7 +550,7 @@ export default async function AdminPage() {
                 </div>
 
                 {topProducts.length > 0 ? (
-                    <div className="mt-7 space-y-5">
+                    <div className="mt-6 space-y-4">
                         {topProducts.map((product, index) => {
                             const maxSold = Math.max(
                                 ...topProducts.map((item) => item.sold),
@@ -565,61 +565,55 @@ export default async function AdminPage() {
                                 <Link
                                     key={product.id}
                                     href={`/admin/products/${product.id}`}
-                                    className="group block"
+                                    className="group flex items-center gap-3 rounded-xl border border-border p-3 transition hover:border-accent hover:bg-stone-50 sm:gap-4 sm:p-4"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        {/* Rank */}
-                                        <span className="w-6 shrink-0 text-xs font-semibold tracking-wider text-gray-300">
-                                            {String(index + 1).padStart(2, "0")}
-                                        </span>
+                                    {/* Product Image */}
+                                    <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-stone-100 sm:h-12 sm:w-12">
+                                        {product.image ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                        ) : (
+                                            <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
+                                                No image
+                                            </div>
+                                        )}
+                                    </div>
 
-                                        {/* Product Image */}
-                                        <div className="h-14 w-11 shrink-0 overflow-hidden bg-stone-100">
-                                            {product.image ? (
-                                                // eslint-disable-next-line @next/next/no-img-element
-                                                <img
-                                                    src={product.image}
-                                                    alt={product.name}
-                                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                />
-                                            ) : (
-                                                <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
-                                                    No image
-                                                </div>
-                                            )}
+                                    {/* Product Info */}
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <p className="truncate text-sm font-medium text-primary">
+                                                {product.name}
+                                            </p>
+
+                                            <span className="shrink-0 text-xs font-medium text-gray-500">
+                                                {product.sold} sold
+                                            </span>
                                         </div>
 
-                                        {/* Product Info */}
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-center justify-between gap-4">
-                                                <p className="truncate text-sm font-medium text-primary transition-colors group-hover:text-accent">
-                                                    {product.name}
-                                                </p>
-
-                                                <span className="shrink-0 text-sm font-semibold text-primary">
-                                                    {product.sold} sold
-                                                </span>
-                                            </div>
-
-                                            <div className="mt-2 h-1.5 overflow-hidden bg-stone-100">
-                                                <div
-                                                    className="h-full bg-accent transition-all duration-700 group-hover:bg-primary"
-                                                    style={{
-                                                        width: `${percentage}%`,
-                                                    }}
-                                                />
-                                            </div>
+                                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-100">
+                                            <div
+                                                className="h-full rounded-full bg-primary"
+                                                style={{
+                                                    width: `${percentage}%`,
+                                                }}
+                                            />
                                         </div>
+                                    </div>
 
-                                        {/* Price */}
-                                        <span className="hidden w-20 shrink-0 text-right text-sm text-gray-500 sm:block">
-                                            {formatCurrency(product.price)}
-                                        </span>
+                                    {/* Price */}
+                                    <div className="shrink-0 text-right">
+                                        <p className="text-sm font-semibold text-primary">
+                                            ${Number(product.price).toFixed(2)}
+                                        </p>
 
-                                        <ArrowRight
-                                            size={16}
-                                            className="shrink-0 text-gray-300 transition duration-300 group-hover:translate-x-1 group-hover:text-primary"
-                                        />
+                                        <p className="mt-1 text-xs text-gray-400">
+                                            #{index + 1}
+                                        </p>
                                     </div>
                                 </Link>
                             );
