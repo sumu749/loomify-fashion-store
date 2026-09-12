@@ -11,10 +11,12 @@ interface AddToCartPayload {
 
 interface CartState {
     items: CartItem[];
+    version: number;
 }
 
 const initialState: CartState = {
     items: [],
+    version: 0,
 };
 
 const cartSlice = createSlice({
@@ -32,6 +34,7 @@ const cartSlice = createSlice({
 
             if (existingItem) {
                 existingItem.quantity += quantity;
+                state.version += 1;
                 return;
             }
 
@@ -40,6 +43,8 @@ const cartSlice = createSlice({
                 quantity,
                 variantId,
             });
+
+            state.version += 1;
         },
 
         removeFromCart: (
@@ -54,6 +59,8 @@ const cartSlice = createSlice({
             state.items = state.items.filter(
                 (item) => !(item.id === id && item.variantId === variantId),
             );
+
+            state.version += 1;
         },
 
         increaseQuantity: (
@@ -71,6 +78,7 @@ const cartSlice = createSlice({
 
             if (item) {
                 item.quantity += 1;
+                state.version += 1;
             }
         },
 
@@ -89,11 +97,13 @@ const cartSlice = createSlice({
 
             if (item) {
                 item.quantity = Math.max(1, item.quantity - 1);
+                state.version += 1;
             }
         },
 
         clearCart: (state) => {
             state.items = [];
+            state.version += 1;
         },
 
         restoreCart: (state, action: PayloadAction<CartItem[]>) => {
