@@ -5,7 +5,7 @@
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Check, MapPin, ShieldCheck, Tag, Truck } from "lucide-react";
 
@@ -35,6 +35,11 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
 
     const cartItems = useAppSelector((state) => state.cart.items);
     const cartVersion = useAppSelector((state) => state.cart.version);
+    const cartVersionRef = useRef(cartVersion);
+
+    useEffect(() => {
+        cartVersionRef.current = cartVersion;
+    }, [cartVersion]);
 
     const [selectedAddressId, setSelectedAddressId] = useState("");
     const [district, setDistrict] = useState("");
@@ -91,6 +96,13 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     }, [cartVersion, couponCartVersion, appliedCoupon]);
 
     const handleApplyCoupon = async () => {
+        const code = couponCode.trim().toUpperCase();
+        const requestCartVersion = cartVersionRef.current;
+
+        if (!code) {
+            toast.error("Please enter a coupon code.");
+            return;
+        }
         const normalizedCode = couponCode.trim().toUpperCase();
 
         if (!normalizedCode) {
@@ -119,12 +131,23 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
 
             const result = await response.json();
 
+            if (cartVersionRef.current !== requestCartVersion) {
+                setAppliedCoupon(null);
+                setDiscount(0);
+                setCouponCartVersion(null);
+
+                toast.error(
+                    "Cart changed while applying the coupon. Please try again.",
+                );
+                return;
+            }
+
             if (!response.ok) {
                 setAppliedCoupon(null);
                 setDiscount(0);
+                setCouponCartVersion(null);
 
-                toast.error(result.message || "Unable to apply coupon.");
-
+                toast.error(result.message || "Invalid coupon.");
                 return;
             }
 
