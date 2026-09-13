@@ -29,9 +29,9 @@ const validStatuses: OrderStatus[] = [
 
 const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
     PENDING: ["CONFIRMED", "CANCELLED"],
-    CONFIRMED: ["PROCESSING", "CANCELLED"],
-    PROCESSING: ["SHIPPED", "CANCELLED"],
-    SHIPPED: ["DELIVERED", "CANCELLED"],
+    CONFIRMED: ["PROCESSING"],
+    PROCESSING: ["SHIPPED"],
+    SHIPPED: ["DELIVERED"],
     DELIVERED: [],
     CANCELLED: [],
 };
