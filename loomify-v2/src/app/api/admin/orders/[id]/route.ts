@@ -27,6 +27,15 @@ const validStatuses: OrderStatus[] = [
     "CANCELLED",
 ];
 
+const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
+    PENDING: ["CONFIRMED", "CANCELLED"],
+    CONFIRMED: ["PROCESSING", "CANCELLED"],
+    PROCESSING: ["SHIPPED", "CANCELLED"],
+    SHIPPED: ["DELIVERED", "CANCELLED"],
+    DELIVERED: [],
+    CANCELLED: [],
+};
+
 export async function PATCH(request: Request, { params }: OrderRouteParams) {
     try {
         const session = await auth.api.getSession({
@@ -85,6 +94,20 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
                     message: "Order not found.",
                 },
                 { status: 404 },
+            );
+        }
+
+        if (
+            !allowedTransitions[existingOrder.status as OrderStatus].includes(
+                status,
+            )
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: `Order cannot be changed from ${existingOrder.status} to ${status}.`,
+                },
+                { status: 400 },
             );
         }
 
