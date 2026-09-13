@@ -59,6 +59,21 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         }
 
         const cancelledOrder = await prisma.$transaction(async (tx) => {
+            const updatedOrder = await tx.order.updateMany({
+                where: {
+                    id: order.id,
+                    userId: session.user.id,
+                    status: "PENDING",
+                },
+                data: {
+                    status: "CANCELLED",
+                },
+            });
+
+            if (updatedOrder.count !== 1) {
+                throw new Error("This order can no longer be cancelled.");
+            }
+
             for (const item of order.items) {
                 await tx.productVariant.update({
                     where: {
@@ -72,16 +87,11 @@ export async function PATCH(request: Request, { params }: RouteContext) {
                 });
             }
 
-            const updatedOrder = await tx.order.update({
+            return tx.order.findUniqueOrThrow({
                 where: {
                     id: order.id,
                 },
-                data: {
-                    status: "CANCELLED",
-                },
             });
-
-            return updatedOrder;
         });
 
         return NextResponse.json(
