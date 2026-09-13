@@ -315,7 +315,7 @@ export async function POST(request: Request) {
                     orderId: createdOrder.id,
                     provider: "COD",
                     amount: total,
-                    currency: "USD",
+                    currency: "BDT",
                     status: "PENDING",
                 },
             });
