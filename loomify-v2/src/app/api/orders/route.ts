@@ -381,6 +381,16 @@ export async function POST(request: Request) {
                 }
             }
 
+            if (couponId) {
+                await tx.couponUsage.create({
+                    data: {
+                        couponId,
+                        userId: session.user.id,
+                        orderId: createdOrder.id,
+                    },
+                });
+            }
+
             /*
              * Create order items using a snapshot of
              * product + variant information at purchase time.
