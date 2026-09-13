@@ -99,6 +99,29 @@ export async function POST(request: Request) {
             );
         }
 
+        const normalizedPhone = shippingAddress.phone.replace(/\s+/g, "");
+        const normalizedPostalCode = shippingAddress.postalCode.trim();
+
+        if (!/^01\d{9}$/.test(normalizedPhone)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Please enter a valid Bangladesh phone number.",
+                },
+                { status: 400 },
+            );
+        }
+
+        if (!/^\d{4}$/.test(normalizedPostalCode)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Please enter a valid 4-digit postal code.",
+                },
+                { status: 400 },
+            );
+        }
+
         for (const item of items) {
             if (
                 !item.productId ||
@@ -320,7 +343,11 @@ export async function POST(request: Request) {
                     discount,
                     total,
                     couponCode: appliedCouponCode,
-                    shippingAddress,
+                    shippingAddress: {
+                        ...shippingAddress,
+                        phone: normalizedPhone,
+                        postalCode: normalizedPostalCode,
+                    },
                 },
             });
 
