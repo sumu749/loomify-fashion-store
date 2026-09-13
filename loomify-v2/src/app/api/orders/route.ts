@@ -202,6 +202,7 @@ export async function POST(request: Request) {
             let discount = 0;
             let appliedCouponCode: string | null = null;
             let couponId: string | null = null;
+            let couponUsedCount: number | null = null;
 
             if (couponCode?.trim()) {
                 const normalizedCouponCode = couponCode.trim().toUpperCase();
@@ -230,6 +231,8 @@ export async function POST(request: Request) {
                 ) {
                     throw new Error("This coupon has reached its usage limit.");
                 }
+
+                couponUsedCount = coupon.usedCount;
 
                 if (
                     coupon.minOrderAmount !== null &&
@@ -320,31 +323,11 @@ export async function POST(request: Request) {
                 },
             });
 
-            if (couponId) {
-                const coupon = await tx.coupon.findUnique({
+            if (couponId && couponUsedCount !== null) {
+                const updatedCoupon = await tx.coupon.updateMany({
                     where: {
                         id: couponId,
-                    },
-                    select: {
-                        usageLimit: true,
-                        usedCount: true,
-                    },
-                });
-
-                if (!coupon) {
-                    throw new Error("Coupon no longer exists.");
-                }
-
-                if (
-                    coupon.usageLimit !== null &&
-                    coupon.usedCount >= coupon.usageLimit
-                ) {
-                    throw new Error("This coupon has reached its usage limit.");
-                }
-
-                await tx.coupon.update({
-                    where: {
-                        id: couponId,
+                        usedCount: couponUsedCount,
                     },
                     data: {
                         usedCount: {
@@ -352,6 +335,10 @@ export async function POST(request: Request) {
                         },
                     },
                 });
+
+                if (updatedCoupon.count !== 1) {
+                    throw new Error("This coupon has reached its usage limit.");
+                }
             }
 
             /*
