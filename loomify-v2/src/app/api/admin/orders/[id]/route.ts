@@ -73,9 +73,8 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
             where: {
                 id,
             },
-            select: {
-                id: true,
-                status: true,
+            include: {
+                items: true,
             },
         });
 
@@ -89,17 +88,56 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
             );
         }
 
-        const updatedOrder = await prisma.order.update({
-            where: {
-                id,
-            },
-            data: {
-                status,
-            },
-            select: {
-                id: true,
-                status: true,
-            },
+        const updatedOrder = await prisma.$transaction(async (tx) => {
+            if (status === "CANCELLED") {
+                const cancelledOrder = await tx.order.updateMany({
+                    where: {
+                        id,
+                        status: {
+                            not: "CANCELLED",
+                        },
+                    },
+                    data: {
+                        status: "CANCELLED",
+                    },
+                });
+
+                if (cancelledOrder.count !== 1) {
+                    throw new Error("This order is already cancelled.");
+                }
+
+                for (const item of existingOrder.items) {
+                    await tx.productVariant.update({
+                        where: {
+                            id: item.variantId,
+                        },
+                        data: {
+                            stock: {
+                                increment: item.quantity,
+                            },
+                        },
+                    });
+                }
+            } else {
+                await tx.order.update({
+                    where: {
+                        id,
+                    },
+                    data: {
+                        status,
+                    },
+                });
+            }
+
+            return tx.order.findUniqueOrThrow({
+                where: {
+                    id,
+                },
+                select: {
+                    id: true,
+                    status: true,
+                },
+            });
         });
 
         return NextResponse.json({
