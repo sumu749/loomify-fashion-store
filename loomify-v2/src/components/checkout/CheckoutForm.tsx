@@ -29,6 +29,9 @@ interface CheckoutFormProps {
     addresses: SavedAddress[];
 }
 
+const FREE_SHIPPING_THRESHOLD = 100;
+const SHIPPING_COST = 15;
+
 const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
     const router = useRouter();
     const dispatch = useAppDispatch();
@@ -73,7 +76,7 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
         return total + price * item.quantity;
     }, 0);
 
-    const shipping = subtotal > 100 ? 0 : 15;
+    const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
 
     const total = Math.max(subtotal + shipping - discount, 0);
     useEffect(() => {

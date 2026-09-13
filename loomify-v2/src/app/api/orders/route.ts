@@ -4,6 +4,9 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+const FREE_SHIPPING_THRESHOLD = 100;
+const SHIPPING_COST = 15;
+
 interface CartItemInput {
     productId: string;
     variantId: string;
@@ -19,6 +22,13 @@ interface ShippingAddress {
     district: string;
     postalCode: string;
     country: string;
+}
+
+class OrderValidationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "OrderValidationError";
+    }
 }
 
 export async function POST(request: Request) {
@@ -84,6 +94,29 @@ export async function POST(request: Request) {
                 {
                     success: false,
                     message: "Complete shipping information is required.",
+                },
+                { status: 400 },
+            );
+        }
+
+        const normalizedPhone = shippingAddress.phone.replace(/\s+/g, "");
+        const normalizedPostalCode = shippingAddress.postalCode.trim();
+
+        if (!/^01\d{9}$/.test(normalizedPhone)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Please enter a valid Bangladesh phone number.",
+                },
+                { status: 400 },
+            );
+        }
+
+        if (!/^\d{4}$/.test(normalizedPostalCode)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Please enter a valid 4-digit postal code.",
                 },
                 { status: 400 },
             );
@@ -166,15 +199,17 @@ export async function POST(request: Request) {
             );
 
             if (!variant) {
-                throw new Error("Selected variant not found.");
+                throw new OrderValidationError("Selected variant not found.");
             }
 
             if (variant.product.id !== item.productId) {
-                throw new Error("Invalid product variant relationship.");
+                throw new OrderValidationError(
+                    "Invalid product variant relationship.",
+                );
             }
 
             if (!variant.product.published) {
-                throw new Error(
+                throw new OrderValidationError(
                     `${variant.product.name} is not available for purchase.`,
                 );
             }
@@ -193,7 +228,8 @@ export async function POST(request: Request) {
             };
         });
 
-        const shippingCost = subtotal > 100 ? 0 : 15;
+        const shippingCost =
+            subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
 
         /*
          * Everything below happens in one transaction.
@@ -202,6 +238,7 @@ export async function POST(request: Request) {
             let discount = 0;
             let appliedCouponCode: string | null = null;
             let couponId: string | null = null;
+            let couponUsedCount: number | null = null;
 
             if (couponCode?.trim()) {
                 const normalizedCouponCode = couponCode.trim().toUpperCase();
@@ -230,6 +267,8 @@ export async function POST(request: Request) {
                 ) {
                     throw new Error("This coupon has reached its usage limit.");
                 }
+
+                couponUsedCount = coupon.usedCount;
 
                 if (
                     coupon.minOrderAmount !== null &&
@@ -304,7 +343,11 @@ export async function POST(request: Request) {
                     discount,
                     total,
                     couponCode: appliedCouponCode,
-                    shippingAddress,
+                    shippingAddress: {
+                        ...shippingAddress,
+                        phone: normalizedPhone,
+                        postalCode: normalizedPostalCode,
+                    },
                 },
             });
 
@@ -315,41 +358,35 @@ export async function POST(request: Request) {
                     orderId: createdOrder.id,
                     provider: "COD",
                     amount: total,
-                    currency: "USD",
+                    currency: "BDT",
                     status: "PENDING",
                 },
             });
 
-            if (couponId) {
-                const coupon = await tx.coupon.findUnique({
+            if (couponId && couponUsedCount !== null) {
+                const updatedCoupon = await tx.coupon.updateMany({
                     where: {
                         id: couponId,
-                    },
-                    select: {
-                        usageLimit: true,
-                        usedCount: true,
-                    },
-                });
-
-                if (!coupon) {
-                    throw new Error("Coupon no longer exists.");
-                }
-
-                if (
-                    coupon.usageLimit !== null &&
-                    coupon.usedCount >= coupon.usageLimit
-                ) {
-                    throw new Error("This coupon has reached its usage limit.");
-                }
-
-                await tx.coupon.update({
-                    where: {
-                        id: couponId,
+                        usedCount: couponUsedCount,
                     },
                     data: {
                         usedCount: {
                             increment: 1,
                         },
+                    },
+                });
+
+                if (updatedCoupon.count !== 1) {
+                    throw new Error("This coupon has reached its usage limit.");
+                }
+            }
+
+            if (couponId) {
+                await tx.couponUsage.create({
+                    data: {
+                        couponId,
+                        userId: session.user.id,
+                        orderId: createdOrder.id,
                     },
                 });
             }
@@ -403,6 +440,16 @@ export async function POST(request: Request) {
         );
     } catch (error) {
         console.error("Failed to create order:", error);
+
+        if (error instanceof OrderValidationError) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: error.message,
+                },
+                { status: 400 },
+            );
+        }
 
         return NextResponse.json(
             {

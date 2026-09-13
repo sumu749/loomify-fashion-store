@@ -27,6 +27,15 @@ const validStatuses: OrderStatus[] = [
     "CANCELLED",
 ];
 
+const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
+    PENDING: ["CONFIRMED", "CANCELLED"],
+    CONFIRMED: ["PROCESSING"],
+    PROCESSING: ["SHIPPED"],
+    SHIPPED: ["DELIVERED"],
+    DELIVERED: [],
+    CANCELLED: [],
+};
+
 export async function PATCH(request: Request, { params }: OrderRouteParams) {
     try {
         const session = await auth.api.getSession({
@@ -73,9 +82,8 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
             where: {
                 id,
             },
-            select: {
-                id: true,
-                status: true,
+            include: {
+                items: true,
             },
         });
 
@@ -89,17 +97,80 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
             );
         }
 
-        const updatedOrder = await prisma.order.update({
-            where: {
-                id,
-            },
-            data: {
+        if (
+            !allowedTransitions[existingOrder.status as OrderStatus].includes(
                 status,
-            },
-            select: {
-                id: true,
-                status: true,
-            },
+            )
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: `Order cannot be changed from ${existingOrder.status} to ${status}.`,
+                },
+                { status: 400 },
+            );
+        }
+
+        const updatedOrder = await prisma.$transaction(async (tx) => {
+            if (status === "CANCELLED") {
+                const cancelledOrder = await tx.order.updateMany({
+                    where: {
+                        id,
+                        status: {
+                            not: "CANCELLED",
+                        },
+                    },
+                    data: {
+                        status: "CANCELLED",
+                    },
+                });
+
+                if (cancelledOrder.count !== 1) {
+                    throw new Error("This order is already cancelled.");
+                }
+
+                await tx.payment.updateMany({
+                    where: {
+                        orderId: id,
+                        status: "PENDING",
+                    },
+                    data: {
+                        status: "CANCELLED",
+                    },
+                });
+
+                for (const item of existingOrder.items) {
+                    await tx.productVariant.update({
+                        where: {
+                            id: item.variantId,
+                        },
+                        data: {
+                            stock: {
+                                increment: item.quantity,
+                            },
+                        },
+                    });
+                }
+            } else {
+                await tx.order.update({
+                    where: {
+                        id,
+                    },
+                    data: {
+                        status,
+                    },
+                });
+            }
+
+            return tx.order.findUniqueOrThrow({
+                where: {
+                    id,
+                },
+                select: {
+                    id: true,
+                    status: true,
+                },
+            });
         });
 
         return NextResponse.json({
