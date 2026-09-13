@@ -4,6 +4,9 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+const FREE_SHIPPING_THRESHOLD = 100;
+const SHIPPING_COST = 15;
+
 interface CartItemInput {
     productId: string;
     variantId: string;
@@ -202,7 +205,8 @@ export async function POST(request: Request) {
             };
         });
 
-        const shippingCost = subtotal > 100 ? 0 : 15;
+        const shippingCost =
+            subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
 
         /*
          * Everything below happens in one transaction.
