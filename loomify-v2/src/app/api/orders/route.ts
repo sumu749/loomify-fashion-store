@@ -21,6 +21,13 @@ interface ShippingAddress {
     country: string;
 }
 
+class OrderValidationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "OrderValidationError";
+    }
+}
+
 export async function POST(request: Request) {
     try {
         const session = await auth.api.getSession({
@@ -166,15 +173,17 @@ export async function POST(request: Request) {
             );
 
             if (!variant) {
-                throw new Error("Selected variant not found.");
+                throw new OrderValidationError("Selected variant not found.");
             }
 
             if (variant.product.id !== item.productId) {
-                throw new Error("Invalid product variant relationship.");
+                throw new OrderValidationError(
+                    "Invalid product variant relationship.",
+                );
             }
 
             if (!variant.product.published) {
-                throw new Error(
+                throw new OrderValidationError(
                     `${variant.product.name} is not available for purchase.`,
                 );
             }
@@ -390,6 +399,16 @@ export async function POST(request: Request) {
         );
     } catch (error) {
         console.error("Failed to create order:", error);
+
+        if (error instanceof OrderValidationError) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: error.message,
+                },
+                { status: 400 },
+            );
+        }
 
         return NextResponse.json(
             {
