@@ -129,6 +129,16 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
                     throw new Error("This order is already cancelled.");
                 }
 
+                await tx.payment.updateMany({
+                    where: {
+                        orderId: id,
+                        status: "PENDING",
+                    },
+                    data: {
+                        status: "CANCELLED",
+                    },
+                });
+
                 for (const item of existingOrder.items) {
                     await tx.productVariant.update({
                         where: {

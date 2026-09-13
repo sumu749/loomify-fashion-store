@@ -74,6 +74,16 @@ export async function PATCH(request: Request, { params }: RouteContext) {
                 throw new Error("This order can no longer be cancelled.");
             }
 
+            await tx.payment.updateMany({
+                where: {
+                    orderId: order.id,
+                    status: "PENDING",
+                },
+                data: {
+                    status: "CANCELLED",
+                },
+            });
+
             for (const item of order.items) {
                 await tx.productVariant.update({
                     where: {
