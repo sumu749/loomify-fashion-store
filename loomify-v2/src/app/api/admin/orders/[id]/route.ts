@@ -183,14 +183,21 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
                     });
                 }
             } else {
-                await tx.order.update({
+                const updatedOrder = await tx.order.updateMany({
                     where: {
                         id,
+                        status: existingOrder.status,
                     },
                     data: {
                         status,
                     },
                 });
+
+                if (updatedOrder.count !== 1) {
+                    throw new Error(
+                        "The order status changed before this update could be completed.",
+                    );
+                }
 
                 if (status === "DELIVERED") {
                     await tx.payment.updateMany({
