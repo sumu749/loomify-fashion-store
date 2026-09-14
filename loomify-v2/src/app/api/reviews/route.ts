@@ -174,6 +174,31 @@ export async function POST(request: Request) {
             );
         }
 
+        const hasPurchased = await prisma.orderItem.findFirst({
+            where: {
+                productId,
+                order: {
+                    userId: session.user.id,
+                    status: {
+                        in: ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"],
+                    },
+                },
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        if (!hasPurchased) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "You can only review products you have purchased.",
+                },
+                { status: 403 },
+            );
+        }
+
         // Check whether this user already reviewed this product
         const existingReview = await prisma.review.findUnique({
             where: {

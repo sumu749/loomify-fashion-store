@@ -84,6 +84,11 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
             },
             include: {
                 items: true,
+                couponUsage: {
+                    select: {
+                        couponId: true,
+                    },
+                },
             },
         });
 
@@ -139,6 +144,32 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
                     },
                 });
 
+                if (existingOrder.couponUsage) {
+                    const updatedCoupon = await tx.coupon.updateMany({
+                        where: {
+                            id: existingOrder.couponUsage.couponId,
+                            usedCount: {
+                                gt: 0,
+                            },
+                        },
+                        data: {
+                            usedCount: {
+                                decrement: 1,
+                            },
+                        },
+                    });
+
+                    if (updatedCoupon.count !== 1) {
+                        throw new Error("Unable to restore coupon usage.");
+                    }
+
+                    await tx.couponUsage.delete({
+                        where: {
+                            orderId: id,
+                        },
+                    });
+                }
+
                 for (const item of existingOrder.items) {
                     await tx.productVariant.update({
                         where: {
@@ -152,14 +183,34 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
                     });
                 }
             } else {
-                await tx.order.update({
+                const updatedOrder = await tx.order.updateMany({
                     where: {
                         id,
+                        status: existingOrder.status,
                     },
                     data: {
                         status,
                     },
                 });
+
+                if (updatedOrder.count !== 1) {
+                    throw new Error(
+                        "The order status changed before this update could be completed.",
+                    );
+                }
+
+                if (status === "DELIVERED") {
+                    await tx.payment.updateMany({
+                        where: {
+                            orderId: id,
+                            status: "PENDING",
+                        },
+                        data: {
+                            status: "PAID",
+                            paidAt: new Date(),
+                        },
+                    });
+                }
             }
 
             return tx.order.findUniqueOrThrow({
