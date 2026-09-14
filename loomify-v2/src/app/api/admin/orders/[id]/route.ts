@@ -191,6 +191,19 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
                         status,
                     },
                 });
+
+                if (status === "DELIVERED") {
+                    await tx.payment.updateMany({
+                        where: {
+                            orderId: id,
+                            status: "PENDING",
+                        },
+                        data: {
+                            status: "PAID",
+                            paidAt: new Date(),
+                        },
+                    });
+                }
             }
 
             return tx.order.findUniqueOrThrow({
