@@ -84,6 +84,11 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
             },
             include: {
                 items: true,
+                couponUsage: {
+                    select: {
+                        couponId: true,
+                    },
+                },
             },
         });
 
@@ -138,6 +143,32 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
                         status: "CANCELLED",
                     },
                 });
+
+                if (existingOrder.couponUsage) {
+                    const updatedCoupon = await tx.coupon.updateMany({
+                        where: {
+                            id: existingOrder.couponUsage.couponId,
+                            usedCount: {
+                                gt: 0,
+                            },
+                        },
+                        data: {
+                            usedCount: {
+                                decrement: 1,
+                            },
+                        },
+                    });
+
+                    if (updatedCoupon.count !== 1) {
+                        throw new Error("Unable to restore coupon usage.");
+                    }
+
+                    await tx.couponUsage.delete({
+                        where: {
+                            orderId: id,
+                        },
+                    });
+                }
 
                 for (const item of existingOrder.items) {
                     await tx.productVariant.update({

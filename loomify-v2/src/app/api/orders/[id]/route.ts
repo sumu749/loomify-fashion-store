@@ -35,6 +35,11 @@ export async function PATCH(request: Request, { params }: RouteContext) {
             },
             include: {
                 items: true,
+                couponUsage: {
+                    select: {
+                        couponId: true,
+                    },
+                },
             },
         });
 
@@ -72,6 +77,32 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
             if (updatedOrder.count !== 1) {
                 throw new Error("This order can no longer be cancelled.");
+            }
+
+            if (order.couponUsage) {
+                const updatedCoupon = await tx.coupon.updateMany({
+                    where: {
+                        id: order.couponUsage.couponId,
+                        usedCount: {
+                            gt: 0,
+                        },
+                    },
+                    data: {
+                        usedCount: {
+                            decrement: 1,
+                        },
+                    },
+                });
+
+                if (updatedCoupon.count !== 1) {
+                    throw new Error("Unable to restore coupon usage.");
+                }
+
+                await tx.couponUsage.delete({
+                    where: {
+                        orderId: order.id,
+                    },
+                });
             }
 
             await tx.payment.updateMany({
