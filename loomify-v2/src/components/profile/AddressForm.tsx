@@ -60,6 +60,13 @@ const AddressForm = ({ address, returnTo = "/profile" }: AddressFormProps) => {
             return;
         }
 
+        const normalizedPhone = phone.replace(/\s+/g, "");
+
+        if (!/^01\d{9}$/.test(normalizedPhone)) {
+            toast.error("Please enter a valid Bangladesh phone number.");
+            return;
+        }
+
         if (!addressLine.trim()) {
             toast.error("Please enter your address.");
             return;
@@ -80,6 +87,13 @@ const AddressForm = ({ address, returnTo = "/profile" }: AddressFormProps) => {
             return;
         }
 
+        const normalizedPostalCode = postalCode.trim();
+
+        if (!/^\d{4}$/.test(normalizedPostalCode)) {
+            toast.error("Please enter a valid 4-digit postal code.");
+            return;
+        }
+
         if (!country.trim()) {
             toast.error("Please enter your country.");
             return;
@@ -97,11 +111,11 @@ const AddressForm = ({ address, returnTo = "/profile" }: AddressFormProps) => {
                     },
                     body: JSON.stringify({
                         fullName: fullName.trim(),
-                        phone: phone.trim(),
+                        phone: normalizedPhone,
                         addressLine: addressLine.trim(),
                         city: city.trim(),
                         district: district.trim(),
-                        postalCode: postalCode.trim(),
+                        postalCode: normalizedPostalCode,
                         country: country.trim(),
                     }),
                 },
@@ -168,6 +182,7 @@ const AddressForm = ({ address, returnTo = "/profile" }: AddressFormProps) => {
                         value={phone}
                         onChange={(event) => setPhone(event.target.value)}
                         autoComplete="tel"
+                        inputMode="numeric"
                         className="h-12 w-full rounded-xl border border-border px-4 text-sm outline-none transition focus:border-accent"
                     />
                 </div>
@@ -240,6 +255,7 @@ const AddressForm = ({ address, returnTo = "/profile" }: AddressFormProps) => {
                         value={postalCode}
                         onChange={(event) => setPostalCode(event.target.value)}
                         autoComplete="postal-code"
+                        inputMode="numeric"
                         className="h-12 w-full rounded-xl border border-border px-4 text-sm outline-none transition focus:border-accent"
                     />
                 </div>
