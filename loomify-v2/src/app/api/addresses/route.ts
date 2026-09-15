@@ -60,15 +60,38 @@ export async function POST(request: Request) {
             );
         }
 
+        const normalizedPhone = phone.replace(/\s+/g, "");
+        const normalizedPostalCode = postalCode.trim();
+
+        if (!/^01\d{9}$/.test(normalizedPhone)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Please enter a valid Bangladesh phone number.",
+                },
+                { status: 400 },
+            );
+        }
+
+        if (!/^\d{4}$/.test(normalizedPostalCode)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Please enter a valid 4-digit postal code.",
+                },
+                { status: 400 },
+            );
+        }
+
         const address = await prisma.address.create({
             data: {
                 userId: session.user.id,
                 fullName: fullName.trim(),
-                phone: phone.trim(),
+                phone: normalizedPhone,
                 addressLine: addressLine.trim(),
                 city: city.trim(),
                 district: district.trim(),
-                postalCode: postalCode.trim(),
+                postalCode: normalizedPostalCode,
                 country: country.trim(),
             },
         });
