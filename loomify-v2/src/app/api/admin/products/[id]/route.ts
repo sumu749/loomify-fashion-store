@@ -454,11 +454,20 @@ export async function DELETE(
                 },
             });
 
-            await tx.product.delete({
+            const deletedProduct = await tx.product.deleteMany({
                 where: {
                     id,
+                    orderItems: {
+                        none: {},
+                    },
                 },
             });
+
+            if (deletedProduct.count !== 1) {
+                throw new Error(
+                    "This product cannot be deleted because it exists in order history.",
+                );
+            }
         });
 
         return NextResponse.json({
@@ -467,6 +476,20 @@ export async function DELETE(
         });
     } catch (error) {
         console.error("Failed to delete product:", error);
+
+        if (
+            error instanceof Error &&
+            error.message ===
+                "This product cannot be deleted because it exists in order history."
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: error.message,
+                },
+                { status: 409 },
+            );
+        }
 
         return NextResponse.json(
             {
