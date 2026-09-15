@@ -30,6 +30,8 @@ const cartSlice = createSlice({
     reducers: {
         addToCart: (state, action: PayloadAction<AddToCartPayload>) => {
             const { product, variantId, quantity = 1 } = action.payload;
+            const safeQuantity =
+                Number.isInteger(quantity) && quantity > 0 ? quantity : 1;
 
             const existingItem = state.items.find(
                 (item) =>
@@ -37,14 +39,14 @@ const cartSlice = createSlice({
             );
 
             if (existingItem) {
-                existingItem.quantity += quantity;
+                existingItem.quantity += safeQuantity;
                 incrementCartVersion(state);
                 return;
             }
 
             state.items.push({
                 ...product,
-                quantity,
+                quantity: safeQuantity,
                 variantId,
             });
 
