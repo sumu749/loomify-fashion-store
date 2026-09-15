@@ -1,11 +1,27 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import { auth } from "@/lib/auth";
 
-export default function AdminLayout({
-    children,
-}: {
+interface AdminLayoutProps {
     children: React.ReactNode;
-}) {
+}
+
+const AdminLayout = async ({ children }: AdminLayoutProps) => {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    if (session.user.role !== "ADMIN") {
+        redirect("/unauthorized");
+    }
+
     return (
         <div className="min-h-screen w-full overflow-x-hidden bg-stone-50">
             <div className="flex min-h-screen w-full">
@@ -19,4 +35,6 @@ export default function AdminLayout({
             </div>
         </div>
     );
-}
+};
+
+export default AdminLayout;

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import Button from "@/components/common/Button";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 interface CancelOrderButtonProps {
     orderId: string;
@@ -14,16 +15,10 @@ const CancelOrderButton = ({ orderId }: CancelOrderButtonProps) => {
     const router = useRouter();
 
     const [loading, setLoading] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     const handleCancel = async () => {
-        const confirmed = window.confirm(
-            "Are you sure you want to cancel this order?",
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
+        setShowConfirm(false);
         setLoading(true);
 
         try {
@@ -51,14 +46,27 @@ const CancelOrderButton = ({ orderId }: CancelOrderButtonProps) => {
     };
 
     return (
-        <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={loading}
-        >
-            {loading ? "Cancelling..." : "Cancel Order"}
-        </Button>
+        <>
+            <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowConfirm(true)}
+                disabled={loading}
+            >
+                {loading ? "Cancelling..." : "Cancel Order"}
+            </Button>
+
+            <ConfirmDialog
+                open={showConfirm}
+                title="Cancel this order?"
+                description="Are you sure you want to cancel this order? This action will restore the reserved stock."
+                confirmLabel="Cancel Order"
+                cancelLabel="Keep Order"
+                loading={loading}
+                onConfirm={handleCancel}
+                onCancel={() => setShowConfirm(false)}
+            />
+        </>
     );
 };
 

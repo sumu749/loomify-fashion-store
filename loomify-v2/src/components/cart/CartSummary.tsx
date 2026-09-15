@@ -9,6 +9,18 @@ import formatCurrency from "@/utils/formatCurrency";
 const CartSummary = () => {
     const cartItems = useAppSelector((state) => state.cart.items);
 
+    const hasInvalidCartItem = cartItems.some((item) => {
+        const variant = item.variants.find(
+            (itemVariant) => itemVariant.id === item.variantId,
+        );
+
+        if (!variant) {
+            return true;
+        }
+
+        return item.quantity > variant.stock;
+    });
+
     const subtotal = cartItems.reduce((total, item) => {
         const variant = item.variants.find(
             (itemVariant) => itemVariant.id === item.variantId,
@@ -58,9 +70,21 @@ const CartSummary = () => {
             </div>
 
             <div className="mt-8 border-t border-border pt-6">
-                <Button asChild size="lg" className="w-full">
-                    <Link href="/checkout">Proceed to Checkout</Link>
-                </Button>
+                {hasInvalidCartItem ? (
+                    <Button type="button" size="lg" className="w-full" disabled>
+                        Review Cart Items
+                    </Button>
+                ) : (
+                    <Button asChild size="lg" className="w-full">
+                        <Link href="/checkout">Proceed to Checkout</Link>
+                    </Button>
+                )}
+                {hasInvalidCartItem && (
+                    <p className="mt-3 text-center text-xs leading-5 text-red-500">
+                        Some items are unavailable or exceed the current stock.
+                        Please update your cart before checkout.
+                    </p>
+                )}
 
                 <p className="mt-3 text-center text-xs text-gray-500">
                     Secure checkout • Fast & reliable delivery

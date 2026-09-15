@@ -21,9 +21,11 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
+
         const code =
             typeof body.code === "string" ? body.code.trim().toUpperCase() : "";
-        const subtotal = Number(body.subtotal);
+
+        const items = body.items;
 
         if (!code) {
             return NextResponse.json(
@@ -35,11 +37,43 @@ export async function POST(request: Request) {
             );
         }
 
-        if (!Number.isFinite(subtotal) || subtotal <= 0) {
+        if (!Array.isArray(items) || items.length === 0) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Invalid order subtotal.",
+                    message: "Your cart is empty.",
+                },
+                { status: 400 },
+            );
+        }
+
+        for (const item of items) {
+            if (
+                !item ||
+                typeof item.productId !== "string" ||
+                !item.productId ||
+                typeof item.variantId !== "string" ||
+                !item.variantId ||
+                !Number.isInteger(item.quantity) ||
+                item.quantity <= 0
+            ) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Invalid cart item.",
+                    },
+                    { status: 400 },
+                );
+            }
+        }
+
+        const uniqueVariantIds = new Set(items.map((item) => item.variantId));
+
+        if (uniqueVariantIds.size !== items.length) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Duplicate cart variants are not allowed.",
                 },
                 { status: 400 },
             );
@@ -50,6 +84,89 @@ export async function POST(request: Request) {
                 code,
             },
         });
+
+        const variants = await prisma.productVariant.findMany({
+            where: {
+                id: {
+                    in: items.map((item) => item.variantId),
+                },
+            },
+            include: {
+                product: {
+                    select: {
+                        id: true,
+                        price: true,
+                        published: true,
+                    },
+                },
+            },
+        });
+
+        if (variants.length !== items.length) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "One or more selected variants no longer exist.",
+                },
+                { status: 400 },
+            );
+        }
+
+        let subtotal = 0;
+
+        for (const item of items) {
+            const variant = variants.find(
+                (currentVariant) => currentVariant.id === item.variantId,
+            );
+
+            if (!variant) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Selected variant not found.",
+                    },
+                    { status: 400 },
+                );
+            }
+
+            if (variant.product.id !== item.productId) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Invalid product variant relationship.",
+                    },
+                    { status: 400 },
+                );
+            }
+
+            if (!variant.product.published) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message:
+                            "One or more products are no longer available.",
+                    },
+                    { status: 400 },
+                );
+            }
+
+            const price =
+                variant.price !== null
+                    ? Number(variant.price)
+                    : Number(variant.product.price);
+
+            subtotal += price * item.quantity;
+        }
+
+        if (subtotal <= 0) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid order subtotal.",
+                },
+                { status: 400 },
+            );
+        }
 
         if (!coupon) {
             return NextResponse.json(

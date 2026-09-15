@@ -19,6 +19,10 @@ const initialState: CartState = {
     version: 0,
 };
 
+const incrementCartVersion = (state: CartState) => {
+    state.version = (state.version ?? 0) + 1;
+};
+
 const cartSlice = createSlice({
     name: "cart",
     initialState,
@@ -26,6 +30,8 @@ const cartSlice = createSlice({
     reducers: {
         addToCart: (state, action: PayloadAction<AddToCartPayload>) => {
             const { product, variantId, quantity = 1 } = action.payload;
+            const safeQuantity =
+                Number.isInteger(quantity) && quantity > 0 ? quantity : 1;
 
             const existingItem = state.items.find(
                 (item) =>
@@ -33,18 +39,18 @@ const cartSlice = createSlice({
             );
 
             if (existingItem) {
-                existingItem.quantity += quantity;
-                state.version += 1;
+                existingItem.quantity += safeQuantity;
+                incrementCartVersion(state);
                 return;
             }
 
             state.items.push({
                 ...product,
-                quantity,
+                quantity: safeQuantity,
                 variantId,
             });
 
-            state.version += 1;
+            incrementCartVersion(state);
         },
 
         removeFromCart: (
@@ -60,7 +66,7 @@ const cartSlice = createSlice({
                 (item) => !(item.id === id && item.variantId === variantId),
             );
 
-            state.version += 1;
+            incrementCartVersion(state);
         },
 
         increaseQuantity: (
@@ -78,7 +84,7 @@ const cartSlice = createSlice({
 
             if (item) {
                 item.quantity += 1;
-                state.version += 1;
+                incrementCartVersion(state);
             }
         },
 
@@ -97,13 +103,13 @@ const cartSlice = createSlice({
 
             if (item) {
                 item.quantity = Math.max(1, item.quantity - 1);
-                state.version += 1;
+                incrementCartVersion(state);
             }
         },
 
         clearCart: (state) => {
             state.items = [];
-            state.version += 1;
+            incrementCartVersion(state);
         },
 
         restoreCart: (state, action: PayloadAction<CartItem[]>) => {

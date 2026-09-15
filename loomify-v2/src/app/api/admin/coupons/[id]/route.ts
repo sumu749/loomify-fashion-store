@@ -219,6 +219,21 @@ export async function PUT(request: Request, { params }: RouteContext) {
         }
 
         if (
+            type === "FIXED" &&
+            maxDiscount !== undefined &&
+            maxDiscount !== null
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "Maximum discount is only valid for percentage coupons",
+                },
+                { status: 400 },
+            );
+        }
+
+        if (
             minOrderAmount !== undefined &&
             minOrderAmount !== null &&
             (Number.isNaN(Number(minOrderAmount)) || Number(minOrderAmount) < 0)
@@ -290,6 +305,16 @@ export async function PUT(request: Request, { params }: RouteContext) {
                     { status: 400 },
                 );
             }
+
+            if (parsedExpiresAt <= new Date()) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Expiry date must be in the future",
+                    },
+                    { status: 400 },
+                );
+            }
         }
 
         // Normalize coupon code
@@ -332,7 +357,9 @@ export async function PUT(request: Request, { params }: RouteContext) {
                         ? Number(minOrderAmount)
                         : null,
                 maxDiscount:
-                    maxDiscount !== undefined && maxDiscount !== null
+                    type === "PERCENTAGE" &&
+                    maxDiscount !== undefined &&
+                    maxDiscount !== null
                         ? Number(maxDiscount)
                         : null,
                 usageLimit:

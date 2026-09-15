@@ -39,6 +39,14 @@ const statusLabels = {
     CANCELLED: "Cancelled",
 };
 
+const paymentStatusStyles = {
+    PENDING: "bg-amber-50 text-amber-700",
+    PAID: "bg-green-50 text-green-700",
+    FAILED: "bg-red-50 text-red-700",
+    CANCELLED: "bg-red-50 text-red-700",
+    REFUNDED: "bg-blue-50 text-blue-700",
+};
+
 const getStatusStepIndex = (status: string) => {
     return statusSteps.indexOf(status as (typeof statusSteps)[number]);
 };
@@ -380,7 +388,13 @@ const AdminOrderDetailsPage = async ({
                                 </p>
 
                                 <p className="mt-1">
-                                    <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                                    <span
+                                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                                            paymentStatusStyles[
+                                                order.payment.status
+                                            ]
+                                        }`}
+                                    >
                                         {order.payment.status}
                                     </span>
                                 </p>

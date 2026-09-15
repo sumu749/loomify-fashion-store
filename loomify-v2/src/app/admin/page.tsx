@@ -17,6 +17,7 @@ import { redirect } from "next/navigation";
 
 import Button from "@/components/common/Button";
 import { auth } from "@/lib/auth";
+import formatCurrency from "@/utils/formatCurrency";
 import {
     getAdminRecentOrders,
     getAdminSalesOverview,
@@ -174,7 +175,7 @@ export default async function AdminPage() {
 
                                         <p className="mt-3 text-2xl font-semibold tracking-tight text-primary sm:text-3xl">
                                             {card.label === "Total Revenue" &&
-                                                "$"}
+                                                "৳"}
                                             {card.value}
                                         </p>
                                     </div>
@@ -400,10 +401,9 @@ export default async function AdminPage() {
                                                 </td>
 
                                                 <td className="py-4 font-medium text-primary">
-                                                    $
-                                                    {Number(
-                                                        order.total,
-                                                    ).toFixed(2)}
+                                                    {formatCurrency(
+                                                        Number(order.total),
+                                                    )}
                                                 </td>
 
                                                 <td className="py-4">
@@ -491,10 +491,9 @@ export default async function AdminPage() {
                                                     Total
                                                 </p>
                                                 <p className="mt-0.5 font-semibold text-primary">
-                                                    $
-                                                    {Number(
-                                                        order.total,
-                                                    ).toFixed(2)}
+                                                    {formatCurrency(
+                                                        Number(order.total),
+                                                    )}
                                                 </p>
                                             </div>
 
@@ -608,7 +607,9 @@ export default async function AdminPage() {
                                     {/* Price */}
                                     <div className="shrink-0 text-right">
                                         <p className="text-sm font-semibold text-primary">
-                                            ${Number(product.price).toFixed(2)}
+                                            {formatCurrency(
+                                                Number(product.price),
+                                            )}
                                         </p>
 
                                         <p className="mt-1 text-xs text-gray-400">

@@ -91,10 +91,25 @@ const CartItem = ({ item }: CartItemProps) => {
                 </p>
 
                 {variant && (
-                    <p className="mt-1 text-xs text-gray-500">
-                        {variantStock > 0
-                            ? `${variantStock} available`
-                            : "Out of stock"}
+                    <div className="mt-1 space-y-1 text-xs">
+                        <p className="text-gray-500">
+                            {variantStock > 0
+                                ? `${variantStock} available`
+                                : "Out of stock"}
+                        </p>
+
+                        {item.quantity > variantStock && (
+                            <p className="font-medium text-red-500">
+                                Only {variantStock} available. Please reduce
+                                your quantity.
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                {!variant && (
+                    <p className="mt-1 text-xs font-medium text-red-500">
+                        This variant is no longer available.
                     </p>
                 )}
             </div>

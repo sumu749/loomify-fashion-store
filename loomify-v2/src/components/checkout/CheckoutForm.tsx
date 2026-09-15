@@ -128,7 +128,11 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                 },
                 body: JSON.stringify({
                     code: normalizedCode,
-                    subtotal,
+                    items: cartItems.map((item) => ({
+                        productId: item.id,
+                        variantId: item.variantId,
+                        quantity: item.quantity,
+                    })),
                 }),
             });
 

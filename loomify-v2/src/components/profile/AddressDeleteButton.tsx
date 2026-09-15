@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import ConfirmDialog from "@/components/common/ConfirmDialog";
+
 interface AddressDeleteButtonProps {
     addressId: string;
 }
@@ -13,16 +15,10 @@ const AddressDeleteButton = ({ addressId }: AddressDeleteButtonProps) => {
     const router = useRouter();
 
     const [loading, setLoading] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     const handleDelete = async () => {
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this address?",
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
+        setShowConfirm(false);
         setLoading(true);
 
         try {
@@ -50,16 +46,29 @@ const AddressDeleteButton = ({ addressId }: AddressDeleteButtonProps) => {
     };
 
     return (
-        <button
-            type="button"
-            onClick={handleDelete}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-            <Trash2 size={16} />
+        <>
+            <button
+                type="button"
+                onClick={() => setShowConfirm(true)}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+                <Trash2 size={16} />
 
-            {loading ? "Deleting..." : "Delete"}
-        </button>
+                {loading ? "Deleting..." : "Delete"}
+            </button>
+
+            <ConfirmDialog
+                open={showConfirm}
+                title="Delete this address?"
+                description="Are you sure you want to delete this saved address? This action cannot be undone."
+                confirmLabel="Delete Address"
+                cancelLabel="Keep Address"
+                loading={loading}
+                onConfirm={handleDelete}
+                onCancel={() => setShowConfirm(false)}
+            />
+        </>
     );
 };
 

@@ -10,6 +10,13 @@ interface RouteContext {
     }>;
 }
 
+class OrderCancellationConflictError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "OrderCancellationConflictError";
+    }
+}
+
 export async function PATCH(request: Request, { params }: RouteContext) {
     try {
         const session = await auth.api.getSession({
@@ -54,12 +61,8 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         }
 
         if (order.status !== "PENDING") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "This order can no longer be cancelled.",
-                },
-                { status: 400 },
+            throw new OrderCancellationConflictError(
+                "This order can no longer be cancelled.",
             );
         }
 
@@ -76,7 +79,9 @@ export async function PATCH(request: Request, { params }: RouteContext) {
             });
 
             if (updatedOrder.count !== 1) {
-                throw new Error("This order can no longer be cancelled.");
+                throw new OrderCancellationConflictError(
+                    "This order can no longer be cancelled.",
+                );
             }
 
             if (order.couponUsage) {
@@ -95,7 +100,9 @@ export async function PATCH(request: Request, { params }: RouteContext) {
                 });
 
                 if (updatedCoupon.count !== 1) {
-                    throw new Error("Unable to restore coupon usage.");
+                    throw new OrderCancellationConflictError(
+                        "Unable to restore coupon usage.",
+                    );
                 }
 
                 await tx.couponUsage.delete({
@@ -147,6 +154,16 @@ export async function PATCH(request: Request, { params }: RouteContext) {
             { status: 200 },
         );
     } catch (error) {
+        if (error instanceof OrderCancellationConflictError) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: error.message,
+                },
+                { status: 409 },
+            );
+        }
+
         console.error("Failed to cancel order:", error);
 
         return NextResponse.json(

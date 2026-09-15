@@ -1,8 +1,7 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 
 interface ProductRouteParams {
     params: Promise<{
@@ -14,28 +13,10 @@ interface ProductRouteParams {
 
 export async function PUT(request: Request, { params }: ProductRouteParams) {
     try {
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
-        }
-
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
         const { id } = await params;
@@ -101,6 +82,20 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
             );
         }
 
+        const orderedVariantIds = await prisma.orderItem.findMany({
+            where: {
+                productId: id,
+            },
+            select: {
+                variantId: true,
+            },
+            distinct: ["variantId"],
+        });
+
+        const orderedVariantIdSet = new Set(
+            orderedVariantIds.map((item) => item.variantId),
+        );
+
         const category = await prisma.category.findUnique({
             where: {
                 id: categoryId,
@@ -159,23 +154,29 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
                 }
             }
 
-            const existingVariantStock = new Map(
+            const existingVariants = new Map(
                 existingProduct.variants.map((variant) => [
                     `${variant.color.trim().toLowerCase()}-${variant.size.trim().toLowerCase()}`,
-                    variant.stock,
+                    variant,
                 ]),
             );
 
-            await tx.productVariant.deleteMany({
-                where: {
-                    productId: id,
-                },
-            });
+            const requestedVariantKeys = new Set<string>();
 
             for (const color of colors) {
                 for (const size of sizes) {
                     const normalizedColor = String(color).trim();
                     const normalizedSize = String(size).trim();
+
+                    const variantKey = `${normalizedColor.toLowerCase()}-${normalizedSize.toLowerCase()}`;
+
+                    if (requestedVariantKeys.has(variantKey)) {
+                        continue;
+                    }
+
+                    requestedVariantKeys.add(variantKey);
+
+                    const existingVariant = existingVariants.get(variantKey);
 
                     const colorCode = normalizedColor
                         .replace(/\s+/g, "-")
@@ -183,18 +184,59 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
 
                     const variantSku = `${sku.trim()}-${colorCode}-${normalizedSize}`;
 
-                    const previousStock =
-                        existingVariantStock.get(
-                            `${normalizedColor.toLowerCase()}-${normalizedSize.toLowerCase()}`,
-                        ) ?? 0;
+                    if (existingVariant) {
+                        await tx.productVariant.update({
+                            where: {
+                                id: existingVariant.id,
+                            },
+                            data: {
+                                sku: variantSku,
+                                size: normalizedSize,
+                                color: normalizedColor,
+                            },
+                        });
+                    } else {
+                        await tx.productVariant.create({
+                            data: {
+                                productId: id,
+                                sku: variantSku,
+                                size: normalizedSize,
+                                color: normalizedColor,
+                                stock: 0,
+                            },
+                        });
+                    }
+                }
+            }
 
-                    await tx.productVariant.create({
+            for (const variant of existingProduct.variants) {
+                const variantKey = `${variant.color.trim().toLowerCase()}-${variant.size.trim().toLowerCase()}`;
+
+                const isRequested = requestedVariantKeys.has(variantKey);
+                const wasOrdered = orderedVariantIdSet.has(variant.id);
+
+                if (!isRequested && wasOrdered) {
+                    await tx.productVariant.update({
+                        where: {
+                            id: variant.id,
+                        },
                         data: {
-                            productId: id,
-                            sku: variantSku,
-                            size: normalizedSize,
-                            color: normalizedColor,
-                            stock: previousStock,
+                            stock: 0,
+                        },
+                    });
+                }
+            }
+
+            for (const variant of existingProduct.variants) {
+                const variantKey = `${variant.color.trim().toLowerCase()}-${variant.size.trim().toLowerCase()}`;
+
+                const isRequested = requestedVariantKeys.has(variantKey);
+                const wasOrdered = orderedVariantIdSet.has(variant.id);
+
+                if (!isRequested && !wasOrdered) {
+                    await tx.productVariant.delete({
+                        where: {
+                            id: variant.id,
                         },
                     });
                 }
@@ -222,28 +264,10 @@ export async function PUT(request: Request, { params }: ProductRouteParams) {
 
 export async function PATCH(request: Request, { params }: ProductRouteParams) {
     try {
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
-        }
-
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
         const { id } = await params;
@@ -300,28 +324,10 @@ export async function DELETE(
     { params }: ProductRouteParams,
 ) {
     try {
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
-        }
-
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
         const { id } = await params;
@@ -393,11 +399,20 @@ export async function DELETE(
                 },
             });
 
-            await tx.product.delete({
+            const deletedProduct = await tx.product.deleteMany({
                 where: {
                     id,
+                    orderItems: {
+                        none: {},
+                    },
                 },
             });
+
+            if (deletedProduct.count !== 1) {
+                throw new Error(
+                    "This product cannot be deleted because it exists in order history.",
+                );
+            }
         });
 
         return NextResponse.json({
@@ -406,6 +421,20 @@ export async function DELETE(
         });
     } catch (error) {
         console.error("Failed to delete product:", error);
+
+        if (
+            error instanceof Error &&
+            error.message ===
+                "This product cannot be deleted because it exists in order history."
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: error.message,
+                },
+                { status: 409 },
+            );
+        }
 
         return NextResponse.json(
             {

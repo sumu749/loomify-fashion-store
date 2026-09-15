@@ -1,28 +1,30 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-    Menu,
-    X,
-    // Search,
-    ShoppingBag,
+    ClipboardList,
     Heart,
+    LayoutDashboard,
     LogIn,
     LogOut,
+    Menu,
+    ShoppingBag,
     UserRound,
-    LayoutDashboard,
-    ClipboardList,
+    X,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import Container from "../common/Container";
-import { navItems } from "@/constants/navigation";
-import { useAppSelector } from "@/store/hooks";
-import { authClient } from "@/lib/auth-client";
-import toast from "react-hot-toast";
 import Button from "../common/Button";
+import ConfirmDialog from "../common/ConfirmDialog";
+
+import { navItems } from "@/constants/navigation";
+import { authClient } from "@/lib/auth-client";
+import { useAppSelector } from "@/store/hooks";
 
 const Navbar = () => {
     const pathname = usePathname();
@@ -31,18 +33,8 @@ const Navbar = () => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
-
-    const handleLogout = async () => {
-        const { error } = await authClient.signOut();
-
-        if (error) {
-            toast.error("Failed to logout.");
-            return;
-        }
-
-        toast.success("Logged out successfully.");
-        setIsMenuOpen(false);
-    };
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const [logoutLoading, setLogoutLoading] = useState(false);
 
     const cartCount = useAppSelector((state) =>
         state.cart.items.reduce((total, item) => total + item.quantity, 0),
@@ -54,13 +46,21 @@ const Navbar = () => {
 
     useEffect(() => {
         const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20);
+            setIsScrolled(window.scrollY > 16);
         };
+
+        handleScroll();
 
         window.addEventListener("scroll", handleScroll);
 
-        return () => window.removeEventListener("scroll", handleScroll);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
     }, []);
+
+    useEffect(() => {
+        setIsMenuOpen(false);
+    }, [pathname]);
 
     const getNavLinkClass = (path: string) => {
         const isActive =
@@ -68,314 +68,161 @@ const Navbar = () => {
                 ? pathname === "/"
                 : pathname === path || pathname.startsWith(`${path}/`);
 
-        return `relative transition-colors duration-300 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:rounded-full after:bg-accent after:transition-all after:duration-300 ${
-            isActive
-                ? "text-accent after:w-full"
-                : "text-primary after:w-0 hover:text-accent hover:after:w-full"
+        return `relative text-sm font-medium transition-colors duration-200 ${
+            isActive ? "text-accent" : "text-primary hover:text-accent"
         }`;
     };
 
-    const handleNavigation = () => {
-        setIsMenuOpen(false);
+    const handleLogout = async () => {
+        setLogoutLoading(true);
+
+        try {
+            const { error } = await authClient.signOut();
+
+            if (error) {
+                toast.error("Failed to logout.");
+                return;
+            }
+
+            setShowLogoutConfirm(false);
+            setIsMenuOpen(false);
+
+            toast.success("Logged out successfully.");
+        } catch (error) {
+            console.error("Logout failed:", error);
+
+            toast.error("Something went wrong. Please try again.");
+        } finally {
+            setLogoutLoading(false);
+        }
     };
 
     return (
-        <header
-            className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-                isScrolled
-                    ? "border-b border-border bg-white/80 shadow-sm backdrop-blur-xl"
-                    : "bg-transparent"
-            }`}
-        >
-            <Container>
-                <nav
-                    className={`flex items-center justify-between transition-all duration-300 ${
-                        isScrolled ? "h-16" : "h-16 sm:h-20"
-                    }`}
-                >
-                    {/* Logo */}
+        <>
+            <header
+                className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+                    isScrolled
+                        ? "border-b border-border bg-white/95 shadow-sm backdrop-blur-xl"
+                        : "bg-white/90 backdrop-blur-md"
+                }`}
+            >
+                <Container>
+                    <nav className="flex h-16 items-center justify-between sm:h-18">
+                        {/* Logo */}
 
-                    <Link
-                        href="/"
-                        onClick={handleNavigation}
-                        className="text-2xl font-bold tracking-wide transition-transform duration-300 hover:scale-105 hover:tracking-wider sm:text-3xl"
-                    >
-                        <span className="text-accent">L</span>
-                        <span className="text-primary">oomify</span>
-                    </Link>
+                        <Link
+                            href="/"
+                            className="shrink-0 text-2xl font-bold tracking-wide sm:text-3xl"
+                            aria-label="Loomify home"
+                        >
+                            <span className="text-accent">L</span>
+                            <span className="text-primary">oomify</span>
+                        </Link>
 
-                    {/* Desktop Navigation */}
+                        {/* Desktop Navigation */}
 
-                    <ul className="hidden items-center gap-8 md:flex lg:gap-10">
-                        {navItems.map((item) => (
-                            <li key={item.path}>
+                        <div className="hidden items-center gap-8 lg:flex">
+                            {navItems.map((item) => (
                                 <Link
+                                    key={item.path}
                                     href={item.path}
                                     className={getNavLinkClass(item.path)}
-                                    onClick={handleNavigation}
                                 >
                                     {item.name}
                                 </Link>
-                            </li>
-                        ))}
+                            ))}
 
-                        {/* Customer Orders */}
-
-                        {session && (
-                            <li>
+                            {session && (
                                 <Link
                                     href="/orders"
                                     className={getNavLinkClass("/orders")}
                                 >
                                     Orders
                                 </Link>
-                            </li>
-                        )}
-                    </ul>
-
-                    {/* Right Side */}
-
-                    <div className="flex items-center gap-2 sm:gap-4">
-                        {/* Search
-
-                        <button
-                            type="button"
-                            className="rounded-full p-2 transition-all duration-300 hover:scale-110 hover:bg-accent hover:text-white"
-                            aria-label="Search"
-                        >
-                            <Search size={20} />
-                        </button> */}
-
-                        {/* Wishlist */}
-
-                        <Link
-                            href="/wishlist"
-                            aria-label="Wishlist"
-                            className="relative flex items-center transition hover:text-accent"
-                        >
-                            <Heart size={22} />
-
-                            {wishlistCount > 0 && (
-                                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-white">
-                                    {wishlistCount}
-                                </span>
-                            )}
-                        </Link>
-
-                        {/* Cart */}
-
-                        <Link
-                            href="/cart"
-                            aria-label="Shopping cart"
-                            className="relative flex items-center"
-                        >
-                            <ShoppingBag
-                                size={22}
-                                className="transition-transform duration-300 hover:scale-110"
-                            />
-
-                            <AnimatePresence>
-                                {cartCount > 0 && (
-                                    <motion.span
-                                        key={cartCount}
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        exit={{ scale: 0 }}
-                                        transition={{
-                                            type: "spring",
-                                            stiffness: 500,
-                                            damping: 18,
-                                        }}
-                                        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-white"
-                                    >
-                                        {cartCount}
-                                    </motion.span>
-                                )}
-                            </AnimatePresence>
-                        </Link>
-
-                        {/* Desktop Auth */}
-
-                        <div className="hidden items-center gap-3 md:flex">
-                            {isPending ? (
-                                <div className="h-9 w-20 animate-pulse rounded-full bg-gray-100" />
-                            ) : session ? (
-                                <>
-                                    {/* Admin Dashboard */}
-
-                                    {session.user.role === "ADMIN" && (
-                                        <Link
-                                            href="/admin"
-                                            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
-                                        >
-                                            <LayoutDashboard size={17} />
-                                            Admin
-                                        </Link>
-                                    )}
-
-                                    {/* Profile */}
-
-                                    <Link
-                                        href="/profile"
-                                        className="inline-flex max-w-36 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
-                                    >
-                                        <UserRound size={17} />
-
-                                        <span className="truncate">
-                                            {session.user.name}
-                                        </span>
-                                    </Link>
-
-                                    {/* Logout */}
-
-                                    <button
-                                        type="button"
-                                        onClick={handleLogout}
-                                        className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:border-red-300 hover:text-red-500"
-                                    >
-                                        <LogOut size={17} />
-                                        Logout
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <Link
-                                        href="/login"
-                                        className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
-                                    >
-                                        <LogIn size={17} />
-                                        Login
-                                    </Link>
-
-                                    <Button asChild size="sm">
-                                        <Link href="/register">Register</Link>
-                                    </Button>
-                                </>
                             )}
                         </div>
 
-                        {/* Mobile Menu Button */}
+                        {/* Actions */}
 
-                        <button
-                            type="button"
-                            onClick={() => setIsMenuOpen((prev) => !prev)}
-                            className="rounded-full p-2 transition hover:bg-gray-100 md:hidden"
-                            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                            aria-expanded={isMenuOpen}
-                        >
-                            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
-                        </button>
-                    </div>
-                </nav>
-
-                {/* Mobile Navigation */}
-
-                <div
-                    className={`overflow-hidden transition-all duration-300 md:hidden ${
-                        isMenuOpen
-                            ? "max-h-175 opacity-100"
-                            : "max-h-0 opacity-0"
-                    }`}
-                >
-                    <div className="border-t border-border py-5">
-                        <ul className="flex flex-col gap-2">
-                            {navItems.map((item) => (
-                                <li key={item.path}>
-                                    <Link
-                                        href={item.path}
-                                        className="flex items-center rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
-                                        onClick={handleNavigation}
-                                    >
-                                        {item.name}
-                                    </Link>
-                                </li>
-                            ))}
-
-                            {/* Orders */}
-
-                            {session && (
-                                <li>
-                                    <Link
-                                        href="/orders"
-                                        className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
-                                        onClick={handleNavigation}
-                                    >
-                                        <ClipboardList size={18} />
-                                        Orders
-                                    </Link>
-                                </li>
-                            )}
-
+                        <div className="flex items-center gap-2 sm:gap-3">
                             {/* Wishlist */}
 
-                            <li>
-                                <Link
-                                    href="/wishlist"
-                                    className="flex items-center justify-between rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
-                                    onClick={handleNavigation}
-                                >
-                                    <span className="flex items-center gap-3">
-                                        <Heart size={18} />
-                                        Wishlist
-                                    </span>
+                            <Link
+                                href="/wishlist"
+                                aria-label="Wishlist"
+                                className="relative flex h-10 w-10 items-center justify-center rounded-full text-primary transition hover:bg-stone-100 hover:text-accent"
+                            >
+                                <Heart size={20} />
 
-                                    {wishlistCount > 0 && (
-                                        <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold text-white">
-                                            {wishlistCount}
-                                        </span>
-                                    )}
-                                </Link>
-                            </li>
+                                {wishlistCount > 0 && (
+                                    <span className="absolute right-0.5 top-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
+                                        {wishlistCount > 99
+                                            ? "99+"
+                                            : wishlistCount}
+                                    </span>
+                                )}
+                            </Link>
 
                             {/* Cart */}
 
-                            <li>
-                                <Link
-                                    href="/cart"
-                                    className="flex items-center justify-between rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
-                                    onClick={handleNavigation}
-                                >
-                                    <span className="flex items-center gap-3">
-                                        <ShoppingBag size={18} />
-                                        Cart
-                                    </span>
+                            <Link
+                                href="/cart"
+                                aria-label="Shopping cart"
+                                className="relative flex h-10 w-10 items-center justify-center rounded-full text-primary transition hover:bg-stone-100 hover:text-accent"
+                            >
+                                <ShoppingBag size={20} />
 
+                                <AnimatePresence>
                                     {cartCount > 0 && (
-                                        <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold text-white">
-                                            {cartCount}
-                                        </span>
+                                        <motion.span
+                                            key={cartCount}
+                                            initial={{
+                                                scale: 0.7,
+                                                opacity: 0,
+                                            }}
+                                            animate={{
+                                                scale: 1,
+                                                opacity: 1,
+                                            }}
+                                            exit={{
+                                                scale: 0.7,
+                                                opacity: 0,
+                                            }}
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 450,
+                                                damping: 18,
+                                            }}
+                                            className="absolute right-0.5 top-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white"
+                                        >
+                                            {cartCount > 99 ? "99+" : cartCount}
+                                        </motion.span>
                                     )}
-                                </Link>
-                            </li>
+                                </AnimatePresence>
+                            </Link>
 
-                            {/* Admin */}
+                            {/* Desktop Auth */}
 
-                            {session?.user.role === "ADMIN" && (
-                                <li>
-                                    <Link
-                                        href="/admin"
-                                        className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
-                                        onClick={handleNavigation}
-                                    >
-                                        <LayoutDashboard size={18} />
-                                        Admin Dashboard
-                                    </Link>
-                                </li>
-                            )}
-
-                            {/* Auth */}
-
-                            <li className="mt-2 border-t border-border pt-4">
+                            <div className="ml-1 hidden items-center gap-2 lg:flex">
                                 {isPending ? (
-                                    <div className="h-10 w-24 animate-pulse rounded-full bg-gray-100" />
+                                    <div className="h-9 w-28 animate-pulse rounded-full bg-stone-100" />
                                 ) : session ? (
-                                    <div className="flex flex-col gap-3">
+                                    <>
+                                        {session.user.role === "ADMIN" && (
+                                            <Link
+                                                href="/admin"
+                                                className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
+                                            >
+                                                <LayoutDashboard size={16} />
+                                                Admin
+                                            </Link>
+                                        )}
+
                                         <Link
                                             href="/profile"
-                                            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
-                                            onClick={handleNavigation}
+                                            className="inline-flex h-10 max-w-36 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
                                         >
-                                            <UserRound size={18} />
+                                            <UserRound size={16} />
 
                                             <span className="truncate">
                                                 {session.user.name}
@@ -384,40 +231,223 @@ const Navbar = () => {
 
                                         <button
                                             type="button"
-                                            onClick={handleLogout}
-                                            className="flex items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-red-500 transition hover:bg-red-50"
+                                            onClick={() =>
+                                                setShowLogoutConfirm(true)
+                                            }
+                                            className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium text-primary transition hover:border-red-200 hover:text-red-500"
                                         >
-                                            <LogOut size={18} />
+                                            <LogOut size={16} />
                                             Logout
                                         </button>
-                                    </div>
+                                    </>
                                 ) : (
-                                    <div className="flex flex-col gap-2">
+                                    <>
                                         <Link
                                             href="/login"
-                                            onClick={handleNavigation}
-                                            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
+                                            className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
                                         >
-                                            <LogIn size={18} />
+                                            <LogIn size={16} />
                                             Login
                                         </Link>
 
-                                        <Link
-                                            href="/register"
-                                            onClick={handleNavigation}
-                                            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
-                                        >
-                                            <UserRound size={18} />
-                                            Register
-                                        </Link>
-                                    </div>
+                                        <Button asChild size="sm">
+                                            <Link href="/register">
+                                                Register
+                                            </Link>
+                                        </Button>
+                                    </>
                                 )}
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </Container>
-        </header>
+                            </div>
+
+                            {/* Mobile Menu Button */}
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setIsMenuOpen((previous) => !previous)
+                                }
+                                className="flex h-10 w-10 items-center justify-center rounded-full text-primary transition hover:bg-stone-100 hover:text-accent lg:hidden"
+                                aria-label={
+                                    isMenuOpen
+                                        ? "Close navigation menu"
+                                        : "Open navigation menu"
+                                }
+                                aria-expanded={isMenuOpen}
+                            >
+                                {isMenuOpen ? (
+                                    <X size={22} />
+                                ) : (
+                                    <Menu size={22} />
+                                )}
+                            </button>
+                        </div>
+                    </nav>
+
+                    {/* Mobile Menu */}
+
+                    <AnimatePresence>
+                        {isMenuOpen && (
+                            <motion.div
+                                initial={{
+                                    opacity: 0,
+                                    height: 0,
+                                }}
+                                animate={{
+                                    opacity: 1,
+                                    height: "auto",
+                                }}
+                                exit={{
+                                    opacity: 0,
+                                    height: 0,
+                                }}
+                                transition={{
+                                    duration: 0.2,
+                                    ease: "easeOut",
+                                }}
+                                className="overflow-hidden lg:hidden"
+                            >
+                                <div className="border-t border-border py-4">
+                                    {/* Main Navigation */}
+
+                                    <div className="space-y-1">
+                                        {navItems.map((item) => {
+                                            const isActive =
+                                                item.path === "/"
+                                                    ? pathname === "/"
+                                                    : pathname === item.path ||
+                                                      pathname.startsWith(
+                                                          `${item.path}/`,
+                                                      );
+
+                                            return (
+                                                <Link
+                                                    key={item.path}
+                                                    href={item.path}
+                                                    className={`flex min-h-12 items-center rounded-xl px-4 text-sm font-medium transition ${
+                                                        isActive
+                                                            ? "bg-stone-100 text-accent"
+                                                            : "text-primary hover:bg-stone-50 hover:text-accent"
+                                                    }`}
+                                                >
+                                                    {item.name}
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Account Links */}
+
+                                    {!isPending && session && (
+                                        <div className="mt-3 border-t border-border pt-3">
+                                            <p className="px-4 pb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
+                                                Account
+                                            </p>
+
+                                            <div className="space-y-1">
+                                                <Link
+                                                    href="/orders"
+                                                    className={`flex min-h-12 items-center gap-3 rounded-xl px-4 text-sm font-medium transition ${
+                                                        pathname.startsWith(
+                                                            "/orders",
+                                                        )
+                                                            ? "bg-stone-100 text-accent"
+                                                            : "text-primary hover:bg-stone-50 hover:text-accent"
+                                                    }`}
+                                                >
+                                                    <ClipboardList size={18} />
+                                                    Orders
+                                                </Link>
+
+                                                <Link
+                                                    href="/profile"
+                                                    className={`flex min-h-12 items-center gap-3 rounded-xl px-4 text-sm font-medium transition ${
+                                                        pathname.startsWith(
+                                                            "/profile",
+                                                        )
+                                                            ? "bg-stone-100 text-accent"
+                                                            : "text-primary hover:bg-stone-50 hover:text-accent"
+                                                    }`}
+                                                >
+                                                    <UserRound size={18} />
+                                                    <span className="truncate">
+                                                        {session.user.name}
+                                                    </span>
+                                                </Link>
+
+                                                {session.user.role ===
+                                                    "ADMIN" && (
+                                                    <Link
+                                                        href="/admin"
+                                                        className="flex min-h-12 items-center gap-3 rounded-xl px-4 text-sm font-medium text-primary transition hover:bg-stone-50 hover:text-accent"
+                                                    >
+                                                        <LayoutDashboard
+                                                            size={18}
+                                                        />
+                                                        Admin Dashboard
+                                                    </Link>
+                                                )}
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setShowLogoutConfirm(
+                                                            true,
+                                                        )
+                                                    }
+                                                    className="flex min-h-12 w-full items-center gap-3 rounded-xl px-4 text-left text-sm font-medium text-red-500 transition hover:bg-red-50"
+                                                >
+                                                    <LogOut size={18} />
+                                                    Logout
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Guest Actions */}
+
+                                    {!isPending && !session && (
+                                        <div className="mt-3 border-t border-border pt-3">
+                                            <div className="grid grid-cols-2 gap-3 px-1">
+                                                <Link
+                                                    href="/login"
+                                                    className="flex h-11 items-center justify-center rounded-xl border border-border text-sm font-medium text-primary transition hover:border-accent hover:text-accent"
+                                                >
+                                                    Login
+                                                </Link>
+
+                                                <Button
+                                                    asChild
+                                                    variant="primary"
+                                                    size="md"
+                                                    className="w-full bg-[#111827]! text-white! hover:bg-[#C8A96A]! hover:text-white!"
+                                                >
+                                                    <Link href="/register">
+                                                        Register
+                                                    </Link>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </Container>
+            </header>
+
+            {/* Logout Confirmation */}
+
+            <ConfirmDialog
+                open={showLogoutConfirm}
+                title="Log out of Loomify?"
+                description="You will need to sign in again to access your account and orders."
+                confirmLabel="Logout"
+                cancelLabel="Stay Signed In"
+                loading={logoutLoading}
+                onConfirm={handleLogout}
+                onCancel={() => setShowLogoutConfirm(false)}
+            />
+        </>
     );
 };
 

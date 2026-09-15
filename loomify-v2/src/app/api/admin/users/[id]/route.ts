@@ -1,8 +1,7 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 
 interface UserRouteParams {
     params: Promise<{
@@ -12,29 +11,13 @@ interface UserRouteParams {
 
 export async function PATCH(request: Request, { params }: UserRouteParams) {
     try {
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
-        }
+        const session = adminCheck.session!;
 
         const { id } = await params;
 
@@ -81,6 +64,24 @@ export async function PATCH(request: Request, { params }: UserRouteParams) {
                 },
                 { status: 404 },
             );
+        }
+
+        if (user.role === "ADMIN" && role === "USER") {
+            const adminCount = await prisma.user.count({
+                where: {
+                    role: "ADMIN",
+                },
+            });
+
+            if (adminCount <= 1) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "You cannot remove the last admin account.",
+                    },
+                    { status: 409 },
+                );
+            }
         }
 
         const updatedUser = await prisma.user.update({

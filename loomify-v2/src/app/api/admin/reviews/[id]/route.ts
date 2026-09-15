@@ -1,7 +1,6 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { prisma } from "@/lib/prisma";
 
 interface RouteContext {
@@ -12,30 +11,10 @@ interface RouteContext {
 
 export async function PATCH(request: Request, { params }: RouteContext) {
     try {
-        // Check authentication
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
-        }
-
-        // Check admin role
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
         const { id } = await params;
@@ -135,30 +114,10 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
     try {
-        // Check authentication
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
-        }
-
-        // Check admin role
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
         const { id } = await params;
