@@ -83,6 +83,24 @@ export async function PATCH(request: Request, { params }: UserRouteParams) {
             );
         }
 
+        if (user.role === "ADMIN" && role === "USER") {
+            const adminCount = await prisma.user.count({
+                where: {
+                    role: "ADMIN",
+                },
+            });
+
+            if (adminCount <= 1) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "You cannot remove the last admin account.",
+                    },
+                    { status: 409 },
+                );
+            }
+        }
+
         const updatedUser = await prisma.user.update({
             where: {
                 id,
