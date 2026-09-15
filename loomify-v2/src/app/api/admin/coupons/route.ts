@@ -1,36 +1,16 @@
 /* eslint-disable indent */
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 
 export async function GET(request: Request) {
     try {
         // Check authentication
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
-        }
-
-        // Check admin role
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
         // Read query parameters
@@ -124,29 +104,10 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         // Check authentication
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
-        }
-
-        // Check admin role
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
         // Read request body
@@ -229,6 +190,21 @@ export async function POST(request: Request) {
                 {
                     success: false,
                     message: "Invalid minimum order amount",
+                },
+                { status: 400 },
+            );
+        }
+
+        if (
+            type === "FIXED" &&
+            maxDiscount !== undefined &&
+            maxDiscount !== null
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "Maximum discount is only valid for percentage coupons",
                 },
                 { status: 400 },
             );
