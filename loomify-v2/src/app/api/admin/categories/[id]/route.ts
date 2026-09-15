@@ -195,11 +195,25 @@ export async function DELETE(
             );
         }
 
-        await prisma.category.delete({
+        const deletedCategory = await prisma.category.deleteMany({
             where: {
                 id,
+                products: {
+                    none: {},
+                },
             },
         });
+
+        if (deletedCategory.count !== 1) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "This category cannot be deleted because it has products.",
+                },
+                { status: 409 },
+            );
+        }
 
         return NextResponse.json({
             success: true,
