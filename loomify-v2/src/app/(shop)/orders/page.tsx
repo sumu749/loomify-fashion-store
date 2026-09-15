@@ -65,7 +65,8 @@ const OrdersPage = async () => {
                         </h2>
 
                         <p className="mt-2 text-sm text-gray-500">
-                            Your completed orders will appear here.
+                            Your orders and their current status will appear
+                            here.
                         </p>
 
                         <div className="mt-6">
