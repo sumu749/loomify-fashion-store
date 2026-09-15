@@ -12,6 +12,13 @@ type OrderStatus =
     | "DELIVERED"
     | "CANCELLED";
 
+class OrderStatusConflictError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "OrderStatusConflictError";
+    }
+}
+
 interface OrderRouteParams {
     params: Promise<{
         id: string;
@@ -121,9 +128,7 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
                 const cancelledOrder = await tx.order.updateMany({
                     where: {
                         id,
-                        status: {
-                            not: "CANCELLED",
-                        },
+                        status: existingOrder.status,
                     },
                     data: {
                         status: "CANCELLED",
@@ -131,7 +136,9 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
                 });
 
                 if (cancelledOrder.count !== 1) {
-                    throw new Error("This order is already cancelled.");
+                    throw new OrderStatusConflictError(
+                        "The order status changed before cancellation could be completed.",
+                    );
                 }
 
                 await tx.payment.updateMany({
@@ -194,7 +201,7 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
                 });
 
                 if (updatedOrder.count !== 1) {
-                    throw new Error(
+                    throw new OrderStatusConflictError(
                         "The order status changed before this update could be completed.",
                     );
                 }
@@ -230,6 +237,16 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
             data: updatedOrder,
         });
     } catch (error) {
+        if (error instanceof OrderStatusConflictError) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: error.message,
+                },
+                { status: 409 },
+            );
+        }
+
         console.error("Failed to update order status:", error);
 
         return NextResponse.json(
