@@ -253,6 +253,16 @@ export async function POST(request: Request) {
                     { status: 400 },
                 );
             }
+
+            if (parsedExpiresAt <= new Date()) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Expiry date must be in the future",
+                    },
+                    { status: 400 },
+                );
+            }
         }
 
         // Normalize coupon code

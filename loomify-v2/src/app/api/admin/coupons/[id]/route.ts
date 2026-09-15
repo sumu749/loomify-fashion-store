@@ -305,6 +305,16 @@ export async function PUT(request: Request, { params }: RouteContext) {
                     { status: 400 },
                 );
             }
+
+            if (parsedExpiresAt <= new Date()) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Expiry date must be in the future",
+                    },
+                    { status: 400 },
+                );
+            }
         }
 
         // Normalize coupon code
