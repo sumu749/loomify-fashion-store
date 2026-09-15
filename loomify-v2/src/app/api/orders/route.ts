@@ -31,6 +31,13 @@ class OrderValidationError extends Error {
     }
 }
 
+class OrderConflictError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "OrderConflictError";
+    }
+}
+
 export async function POST(request: Request) {
     try {
         const session = await auth.api.getSession({
@@ -331,7 +338,7 @@ export async function POST(request: Request) {
                 });
 
                 if (updatedVariant.count !== 1) {
-                    throw new Error(
+                    throw new OrderConflictError(
                         `${variant.product.name} (${variant.size}, ${variant.color}) is out of stock.`,
                     );
                 }
@@ -446,6 +453,16 @@ export async function POST(request: Request) {
         );
     } catch (error) {
         console.error("Failed to create order:", error);
+
+        if (error instanceof OrderConflictError) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: error.message,
+                },
+                { status: 409 },
+            );
+        }
 
         if (error instanceof OrderValidationError) {
             return NextResponse.json(
