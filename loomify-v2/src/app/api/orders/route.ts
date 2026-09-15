@@ -250,22 +250,28 @@ export async function POST(request: Request) {
                 });
 
                 if (!coupon) {
-                    throw new Error("Invalid coupon code.");
+                    throw new OrderValidationError("Invalid coupon code.");
                 }
 
                 if (!coupon.active) {
-                    throw new Error("This coupon is no longer active.");
+                    throw new OrderValidationError(
+                        "This coupon is no longer active.",
+                    );
                 }
 
                 if (coupon.expiresAt && coupon.expiresAt <= new Date()) {
-                    throw new Error("This coupon has expired.");
+                    throw new OrderValidationError(
+                        "This coupon has reached its usage limit.",
+                    );
                 }
 
                 if (
                     coupon.usageLimit !== null &&
                     coupon.usedCount >= coupon.usageLimit
                 ) {
-                    throw new Error("This coupon has reached its usage limit.");
+                    throw new OrderValidationError(
+                        "This coupon has reached its usage limit.",
+                    );
                 }
 
                 couponUsedCount = coupon.usedCount;
@@ -274,7 +280,7 @@ export async function POST(request: Request) {
                     coupon.minOrderAmount !== null &&
                     subtotal < Number(coupon.minOrderAmount)
                 ) {
-                    throw new Error(
+                    throw new OrderValidationError(
                         `Minimum order amount for this coupon is ${Number(
                             coupon.minOrderAmount,
                         ).toFixed(2)}.`,
