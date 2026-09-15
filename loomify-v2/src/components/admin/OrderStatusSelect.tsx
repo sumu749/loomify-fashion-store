@@ -17,19 +17,23 @@ interface OrderStatusSelectProps {
     status: OrderStatus;
 }
 
-const statuses: OrderStatus[] = [
-    "PENDING",
-    "CONFIRMED",
-    "PROCESSING",
-    "SHIPPED",
-    "DELIVERED",
-    "CANCELLED",
-];
+const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
+    PENDING: ["CONFIRMED", "CANCELLED"],
+    CONFIRMED: ["PROCESSING"],
+    PROCESSING: ["SHIPPED"],
+    SHIPPED: ["DELIVERED"],
+    DELIVERED: [],
+    CANCELLED: [],
+};
 
 const OrderStatusSelect = ({ orderId, status }: OrderStatusSelectProps) => {
     const router = useRouter();
 
     const [currentStatus, setCurrentStatus] = useState(status);
+    const availableStatuses = [
+        currentStatus,
+        ...allowedTransitions[currentStatus],
+    ];
 
     const [loading, setLoading] = useState(false);
 
@@ -83,7 +87,7 @@ const OrderStatusSelect = ({ orderId, status }: OrderStatusSelectProps) => {
                 }
                 className="h-11 rounded-xl border border-border bg-white px-4 text-sm font-medium outline-none transition focus:border-accent disabled:cursor-not-allowed disabled:opacity-60"
             >
-                {statuses.map((item) => (
+                {availableStatuses.map((item) => (
                     <option key={item} value={item}>
                         {item}
                     </option>
