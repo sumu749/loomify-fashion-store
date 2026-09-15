@@ -1,8 +1,7 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 
 interface CategoryRouteParams {
     params: Promise<{
@@ -12,28 +11,10 @@ interface CategoryRouteParams {
 
 export async function PUT(request: Request, { params }: CategoryRouteParams) {
     try {
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
-        }
-
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
         const { id } = await params;
@@ -135,28 +116,10 @@ export async function DELETE(
     { params }: CategoryRouteParams,
 ) {
     try {
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
-        }
-
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
         const { id } = await params;
