@@ -5,6 +5,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
+import ConfirmDialog from "@/components/common/ConfirmDialog";
+
 interface UserRoleToggleProps {
     userId: string;
     role: "USER" | "ADMIN";
@@ -19,6 +21,7 @@ const UserRoleToggle = ({
     const router = useRouter();
 
     const [loading, setLoading] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     const isCurrentUser = userId === currentUserId;
 
@@ -30,14 +33,7 @@ const UserRoleToggle = ({
             return;
         }
 
-        const confirmed = window.confirm(
-            `Change this user's role from ${role} to ${nextRole}?`,
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
+        setShowConfirm(false);
         setLoading(true);
 
         try {
@@ -79,18 +75,39 @@ const UserRoleToggle = ({
     }
 
     return (
-        <button
-            type="button"
-            onClick={handleChangeRole}
-            disabled={loading}
-            className="text-sm font-medium text-accent transition hover:underline disabled:cursor-not-allowed disabled:opacity-50"
-        >
-            {loading
-                ? "Updating..."
-                : role === "ADMIN"
-                  ? "Make User"
-                  : "Make Admin"}
-        </button>
+        <>
+            <button
+                type="button"
+                onClick={() => setShowConfirm(true)}
+                disabled={loading}
+                className="text-sm font-medium text-accent transition hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+            >
+                {loading
+                    ? "Updating..."
+                    : role === "ADMIN"
+                      ? "Make User"
+                      : "Make Admin"}
+            </button>
+
+            <ConfirmDialog
+                open={showConfirm}
+                title={
+                    nextRole === "ADMIN"
+                        ? "Make this user an admin?"
+                        : "Remove admin access?"
+                }
+                description={
+                    nextRole === "ADMIN"
+                        ? "This user will gain access to the Loomify admin panel and administrative features."
+                        : "This user will lose admin access and return to a regular customer account."
+                }
+                confirmLabel={nextRole === "ADMIN" ? "Make Admin" : "Make User"}
+                cancelLabel="Cancel"
+                loading={loading}
+                onConfirm={handleChangeRole}
+                onCancel={() => setShowConfirm(false)}
+            />
+        </>
     );
 };
 
