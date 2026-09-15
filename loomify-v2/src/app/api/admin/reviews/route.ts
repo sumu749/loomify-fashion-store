@@ -1,36 +1,15 @@
 /* eslint-disable indent */
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
     try {
-        // Check authentication
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+        const adminCheck = await requireAdmin();
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized",
-                },
-                { status: 401 },
-            );
-        }
-
-        // Check admin role
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Forbidden",
-                },
-                { status: 403 },
-            );
+        if (adminCheck.response) {
+            return adminCheck.response;
         }
 
         const { searchParams } = new URL(request.url);
