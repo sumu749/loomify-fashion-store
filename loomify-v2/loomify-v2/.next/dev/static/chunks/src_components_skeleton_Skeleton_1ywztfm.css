@@ -1,0 +1,23 @@
+/* [project]/src/components/skeleton/Skeleton.css [app-client] (css) */
+.skeleton {
+  background: var(--muted-background);
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton:after {
+  content: "";
+  background: linear-gradient(90deg, #0000, #ffffffb3, #0000);
+  animation: 1.4s infinite shimmer;
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/*# sourceMappingURL=src_components_skeleton_Skeleton_1ywztfm.css.map*/

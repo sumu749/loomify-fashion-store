@@ -1,10 +1,10 @@
 /* eslint-disable indent */
 "use client";
 
-import { SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+import AdminFilterSidebar from "@/components/admin/filters/AdminFilterSidebar";
 import Container from "@/components/common/Container";
 import ProductFilterSidebar from "@/components/products/ProductFilterSidebar";
 import ProductGrid from "@/components/products/ProductGrid";
@@ -68,7 +68,6 @@ export default function ProductsPage() {
         setCategory(matchedCategory ?? "all");
     }, [searchParams, categories, setCategory]);
 
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
     const PRODUCTS_PER_PAGE = 9;
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -143,10 +142,10 @@ export default function ProductsPage() {
                     </p>
                 </div>
 
-                {/* ================= Mobile Search ================= */}
+                {/* ================= Mobile Filters ================= */}
 
-                <div className="mb-6 lg:hidden">
-                    <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
+                <div className="mb-8 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] lg:hidden">
+                    <AdminFilterSidebar title="Shop Filters">
                         <ProductFilterSidebar
                             search={search}
                             setSearch={setSearch}
@@ -163,22 +162,9 @@ export default function ProductsPage() {
                             setSort={setSort}
                             onClear={clearFilters}
                         />
-                    </div>
-                </div>
+                    </AdminFilterSidebar>
 
-                {/* ================= Mobile Filter Button ================= */}
-
-                <div className="mb-8 flex gap-3 lg:hidden">
-                    <button
-                        type="button"
-                        onClick={() => setIsFilterOpen(true)}
-                        className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-medium text-primary shadow-sm transition hover:border-accent hover:text-accent"
-                    >
-                        <SlidersHorizontal size={17} />
-                        Filters
-                    </button>
-
-                    <div className="flex h-11 items-center rounded-xl border border-border bg-stone-50 px-4 text-sm text-gray-500">
+                    <div className="flex min-h-12 items-center rounded-2xl border border-border bg-stone-50 px-4 py-3 text-sm text-gray-500 sm:justify-center">
                         {filteredProducts.length}{" "}
                         {filteredProducts.length === 1 ? "product" : "products"}
                     </div>
@@ -265,74 +251,6 @@ export default function ProductsPage() {
                         />
                     </div>
                 </div>
-
-                {/* ================= Mobile Filter Drawer ================= */}
-
-                {isFilterOpen && (
-                    <div className="fixed inset-0 z-60 lg:hidden">
-                        {/* Backdrop */}
-
-                        <button
-                            type="button"
-                            aria-label="Close filters"
-                            onClick={() => setIsFilterOpen(false)}
-                            className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-                        />
-
-                        {/* Drawer */}
-
-                        <aside className="absolute bottom-0 left-0 right-0 max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white px-5 pb-8 pt-5 shadow-2xl sm:left-auto sm:w-95 sm:rounded-none sm:rounded-l-3xl sm:pb-8 sm:pt-6">
-                            <div className="mb-6 flex items-center justify-between border-b border-border pb-4">
-                                <div>
-                                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-                                        Refine
-                                    </p>
-
-                                    <h2 className="mt-1 text-xl font-semibold text-primary">
-                                        Shop Filters
-                                    </h2>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={() => setIsFilterOpen(false)}
-                                    className="rounded-full p-2 transition hover:bg-stone-100"
-                                    aria-label="Close filters"
-                                >
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <ProductFilterSidebar
-                                search={search}
-                                setSearch={setSearch}
-                                category={category}
-                                setCategory={setCategory}
-                                categories={categories}
-                                minPrice={minPrice}
-                                setMinPrice={setMinPrice}
-                                maxPrice={maxPrice}
-                                setMaxPrice={setMaxPrice}
-                                availability={availability}
-                                setAvailability={setAvailability}
-                                sort={sort}
-                                setSort={setSort}
-                                onClear={clearFilters}
-                            />
-
-                            <button
-                                type="button"
-                                onClick={() => setIsFilterOpen(false)}
-                                className="mt-7 h-12 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-white transition hover:bg-accent"
-                            >
-                                View {paginatedProducts.length}{" "}
-                                {paginatedProducts.length === 1
-                                    ? "Product"
-                                    : "Products"}
-                            </button>
-                        </aside>
-                    </div>
-                )}
             </Container>
         </section>
     );
