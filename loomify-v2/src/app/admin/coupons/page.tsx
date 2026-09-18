@@ -6,6 +6,7 @@ import AdminFilterSidebar from "@/components/admin/filters/AdminFilterSidebar";
 import Button from "@/components/common/Button";
 import formatCurrency from "@/utils/formatCurrency";
 import CouponFilters from "@/components/admin/coupons/CouponFilters";
+import AdminPagination from "@/components/admin/AdminPagination";
 
 interface AdminCouponsPageProps {
     searchParams: Promise<{
@@ -13,6 +14,7 @@ interface AdminCouponsPageProps {
         status?: string;
         type?: string;
         sort?: string;
+        page?: string;
     }>;
 }
 
@@ -23,6 +25,8 @@ const AdminCouponsPage = async ({ searchParams }: AdminCouponsPageProps) => {
     const status = params.status ?? "all";
     const type = params.type ?? "all";
     const sort = params.sort ?? "newest";
+    const currentPage = Math.max(1, Number(params.page) || 1);
+    const pageSize = 10;
 
     const where = {
         ...(search
@@ -73,6 +77,12 @@ const AdminCouponsPage = async ({ searchParams }: AdminCouponsPageProps) => {
     const percentageCoupons = coupons.filter(
         (coupon) => coupon.type === "PERCENTAGE",
     ).length;
+    const totalPages = Math.ceil(totalCoupons / pageSize);
+    const displayPage = Math.min(currentPage, Math.max(1, totalPages));
+    const paginatedCoupons = coupons.slice(
+        (displayPage - 1) * pageSize,
+        displayPage * pageSize,
+    );
 
     return (
         <div className="mx-auto max-w-7xl">
@@ -226,7 +236,7 @@ const AdminCouponsPage = async ({ searchParams }: AdminCouponsPageProps) => {
                                     </thead>
 
                                     <tbody className="divide-y divide-border">
-                                        {coupons.map((coupon) => {
+                                        {paginatedCoupons.map((coupon) => {
                                             const isExpired =
                                                 coupon.expiresAt &&
                                                 new Date(coupon.expiresAt) <
@@ -390,7 +400,7 @@ const AdminCouponsPage = async ({ searchParams }: AdminCouponsPageProps) => {
                             {/* Mobile Coupon Cards */}
 
                             <div className="space-y-3 p-4 sm:hidden">
-                                {coupons.map((coupon) => {
+                                {paginatedCoupons.map((coupon) => {
                                     const isExpired =
                                         coupon.expiresAt &&
                                         new Date(coupon.expiresAt) < new Date();
@@ -555,6 +565,11 @@ const AdminCouponsPage = async ({ searchParams }: AdminCouponsPageProps) => {
                                     );
                                 })}
                             </div>
+                            <AdminPagination
+                                currentPage={displayPage}
+                                totalPages={totalPages}
+                                query={params}
+                            />
                         </>
                     ) : (
                         <div className="px-6 py-20 text-center sm:px-8">

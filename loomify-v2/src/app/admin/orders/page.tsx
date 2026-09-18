@@ -5,6 +5,7 @@ import AdminFilterSidebar from "@/components/admin/filters/AdminFilterSidebar";
 import OrderFilters from "@/components/admin/orders/OrderFilters";
 import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
 import Button from "@/components/common/Button";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { prisma } from "@/lib/prisma";
 import formatCurrency from "@/utils/formatCurrency";
 
@@ -13,6 +14,7 @@ interface AdminOrdersPageProps {
         search?: string;
         status?: string;
         sort?: string;
+        page?: string;
     }>;
 }
 
@@ -49,6 +51,8 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
     const search = params.search?.trim() ?? "";
     const status = params.status;
     const sort = params.sort ?? "newest";
+    const currentPage = Math.max(1, Number(params.page) || 1);
+    const pageSize = 10;
 
     const selectedStatus = validStatuses.includes(
         status as (typeof validStatuses)[number],
@@ -132,6 +136,12 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
     const completedOrders = orders.filter(
         (order) => order.status === "DELIVERED",
     ).length;
+    const totalPages = Math.ceil(totalOrders / pageSize);
+    const displayPage = Math.min(currentPage, Math.max(1, totalPages));
+    const paginatedOrders = orders.slice(
+        (displayPage - 1) * pageSize,
+        displayPage * pageSize,
+    );
 
     return (
         <div className="mx-auto max-w-7xl">
@@ -293,7 +303,7 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
                                     </thead>
 
                                     <tbody className="divide-y divide-border">
-                                        {orders.map((order) => (
+                                        {paginatedOrders.map((order) => (
                                             <tr
                                                 key={order.id}
                                                 className="group transition-colors hover:bg-stone-50/70"
@@ -440,7 +450,7 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
 
                             {/* Mobile Orders */}
                             <div className="space-y-3 p-4 sm:hidden">
-                                {orders.map((order) => (
+                                {paginatedOrders.map((order) => (
                                     <div
                                         key={order.id}
                                         className="rounded-xl border border-border p-4 transition hover:border-accent"
@@ -557,6 +567,11 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
                                     </div>
                                 ))}
                             </div>
+                            <AdminPagination
+                                currentPage={displayPage}
+                                totalPages={totalPages}
+                                query={params}
+                            />
                         </>
                     ) : (
                         <div className="px-6 py-20 text-center sm:px-8">

@@ -5,6 +5,7 @@ import { MessageSquareText, Star, ThumbsUp, Clock3 } from "lucide-react";
 import AdminFilterSidebar from "@/components/admin/filters/AdminFilterSidebar";
 import ReviewFilters from "@/components/admin/reviews/ReviewFilters";
 import Button from "@/components/common/Button";
+import AdminPagination from "@/components/admin/AdminPagination";
 
 import { prisma } from "@/lib/prisma";
 
@@ -14,6 +15,7 @@ interface AdminReviewsPageProps {
         status?: string;
         rating?: string;
         sort?: string;
+        page?: string;
     }>;
 }
 
@@ -24,6 +26,8 @@ const AdminReviewsPage = async ({ searchParams }: AdminReviewsPageProps) => {
     const status = params.status ?? "all";
     const rating = params.rating ?? "all";
     const sort = params.sort ?? "newest";
+    const currentPage = Math.max(1, Number(params.page) || 1);
+    const pageSize = 10;
 
     const where = {
         ...(search
@@ -120,6 +124,12 @@ const AdminReviewsPage = async ({ searchParams }: AdminReviewsPageProps) => {
             ? reviews.reduce((total, review) => total + review.rating, 0) /
               totalReviews
             : 0;
+    const totalPages = Math.ceil(totalReviews / pageSize);
+    const displayPage = Math.min(currentPage, Math.max(1, totalPages));
+    const paginatedReviews = reviews.slice(
+        (displayPage - 1) * pageSize,
+        displayPage * pageSize,
+    );
 
     return (
         <div className="mx-auto max-w-7xl">
@@ -308,7 +318,7 @@ const AdminReviewsPage = async ({ searchParams }: AdminReviewsPageProps) => {
                                 </thead>
 
                                 <tbody className="divide-y divide-border">
-                                    {reviews.map((review) => (
+                                    {paginatedReviews.map((review) => (
                                         <tr
                                             key={review.id}
                                             className="group transition hover:bg-stone-50/60"
@@ -444,6 +454,11 @@ const AdminReviewsPage = async ({ searchParams }: AdminReviewsPageProps) => {
                                     ))}
                                 </tbody>
                             </table>
+                            <AdminPagination
+                                currentPage={displayPage}
+                                totalPages={totalPages}
+                                query={params}
+                            />
                         </div>
                     ) : (
                         <div className="px-6 py-20 text-center sm:px-8">

@@ -6,6 +6,7 @@ import AdminFilterSidebar from "@/components/admin/filters/AdminFilterSidebar";
 import ProductFilters from "@/components/admin/products/ProductFilters";
 import ProductStatusToggle from "@/components/admin/ProductStatusToggle";
 import ProductDeleteButton from "@/components/admin/ProductDeleteButton";
+import AdminPagination from "@/components/admin/AdminPagination";
 import Button from "@/components/common/Button";
 import { prisma } from "@/lib/prisma";
 import formatCurrency from "@/utils/formatCurrency";
@@ -17,6 +18,7 @@ interface AdminProductsPageProps {
         published?: string;
         stock?: string;
         sort?: string;
+        page?: string;
     }>;
 }
 
@@ -28,6 +30,8 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
     const published = params.published ?? "ALL";
     const stock = params.stock ?? "ALL";
     const sort = params.sort ?? "newest";
+    const currentPage = Math.max(1, Number(params.page) || 1);
+    const pageSize = 10;
 
     /*
      * Fetch categories for the filter sidebar.
@@ -163,6 +167,12 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                 0,
             ),
         0,
+    );
+    const totalPages = Math.ceil(totalProducts / pageSize);
+    const displayPage = Math.min(currentPage, Math.max(1, totalPages));
+    const paginatedProducts = products.slice(
+        (displayPage - 1) * pageSize,
+        displayPage * pageSize,
     );
 
     return (
@@ -317,7 +327,7 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                                     </thead>
 
                                     <tbody className="divide-y divide-border">
-                                        {products.map((product) => {
+                                        {paginatedProducts.map((product) => {
                                             const totalVariantStock =
                                                 product.variants.reduce(
                                                     (total, variant) =>
@@ -454,7 +464,7 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
 
                             {/* Mobile Products */}
                             <div className="space-y-3 p-4 sm:hidden">
-                                {products.map((product) => {
+                                {paginatedProducts.map((product) => {
                                     const totalVariantStock =
                                         product.variants.reduce(
                                             (total, variant) =>
@@ -573,6 +583,11 @@ const AdminProductsPage = async ({ searchParams }: AdminProductsPageProps) => {
                                     );
                                 })}
                             </div>
+                            <AdminPagination
+                                currentPage={displayPage}
+                                totalPages={totalPages}
+                                query={params}
+                            />
                         </>
                     ) : (
                         <div className="px-6 py-20 text-center sm:px-8">
