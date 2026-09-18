@@ -5,6 +5,7 @@ import AdminFilterSidebar from "@/components/admin/filters/AdminFilterSidebar";
 import UserFilters from "@/components/admin/users/UserFilters";
 import UserRoleToggle from "@/components/admin/UserRoleToggle";
 import Button from "@/components/common/Button";
+import AdminPagination from "@/components/admin/AdminPagination";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -13,6 +14,7 @@ interface AdminUsersPageProps {
         search?: string;
         role?: string;
         sort?: string;
+        page?: string;
     }>;
 }
 
@@ -42,6 +44,8 @@ const AdminUsersPage = async ({ searchParams }: AdminUsersPageProps) => {
     const search = params.search?.trim() ?? "";
     const role = params.role ?? "ALL";
     const sort = params.sort ?? "newest";
+    const currentPage = Math.max(1, Number(params.page) || 1);
+    const pageSize = 10;
 
     const selectedRole = validRoles.includes(
         role as (typeof validRoles)[number],
@@ -98,6 +102,12 @@ const AdminUsersPage = async ({ searchParams }: AdminUsersPageProps) => {
     const adminUsers = users.filter((user) => user.role === "ADMIN").length;
 
     const customerUsers = users.filter((user) => user.role === "USER").length;
+    const totalPages = Math.ceil(totalUsers / pageSize);
+    const displayPage = Math.min(currentPage, Math.max(1, totalPages));
+    const paginatedUsers = users.slice(
+        (displayPage - 1) * pageSize,
+        displayPage * pageSize,
+    );
 
     return (
         <div className="mx-auto max-w-7xl">
@@ -238,7 +248,7 @@ const AdminUsersPage = async ({ searchParams }: AdminUsersPageProps) => {
                                     </thead>
 
                                     <tbody className="divide-y divide-border">
-                                        {users.map((user) => {
+                                        {paginatedUsers.map((user) => {
                                             const initials =
                                                 user.name?.trim().charAt(0) ||
                                                 "U";
@@ -369,7 +379,7 @@ const AdminUsersPage = async ({ searchParams }: AdminUsersPageProps) => {
 
                             {/* Mobile Users */}
                             <div className="space-y-3 p-4 sm:hidden">
-                                {users.map((user) => {
+                                {paginatedUsers.map((user) => {
                                     const initials =
                                         user.name?.trim().charAt(0) || "U";
 
@@ -471,6 +481,11 @@ const AdminUsersPage = async ({ searchParams }: AdminUsersPageProps) => {
                                     );
                                 })}
                             </div>
+                            <AdminPagination
+                                currentPage={displayPage}
+                                totalPages={totalPages}
+                                query={params}
+                            />
                         </>
                     ) : (
                         <div className="px-6 py-20 text-center sm:px-8">

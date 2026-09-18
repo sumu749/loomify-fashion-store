@@ -7,11 +7,13 @@ import CategoryDeleteButton from "@/components/admin/CategoryDeleteButton";
 import Button from "@/components/common/Button";
 import { prisma } from "@/lib/prisma";
 import CategoryFilters from "@/components/admin/categories/CategoryFilters";
+import AdminPagination from "@/components/admin/AdminPagination";
 
 interface AdminCategoriesPageProps {
     searchParams: Promise<{
         search?: string;
         sort?: string;
+        page?: string;
     }>;
 }
 
@@ -22,6 +24,8 @@ const AdminCategoriesPage = async ({
 
     const search = params.search?.trim() ?? "";
     const sort = params.sort ?? "name_asc";
+    const currentPage = Math.max(1, Number(params.page) || 1);
+    const pageSize = 10;
 
     const categories = await prisma.category.findMany({
         where: search
@@ -76,6 +80,12 @@ const AdminCategoriesPage = async ({
     const emptyCategories = categories.filter(
         (category) => category._count.products === 0,
     ).length;
+    const totalPages = Math.ceil(totalCategories / pageSize);
+    const displayPage = Math.min(currentPage, Math.max(1, totalPages));
+    const paginatedCategories = categories.slice(
+        (displayPage - 1) * pageSize,
+        displayPage * pageSize,
+    );
 
     return (
         <div className="mx-auto max-w-7xl">
@@ -211,7 +221,7 @@ const AdminCategoriesPage = async ({
                                     </thead>
 
                                     <tbody className="divide-y divide-border">
-                                        {categories.map((category) => {
+                                        {paginatedCategories.map((category) => {
                                             const hasProducts =
                                                 category._count.products > 0;
 
@@ -311,7 +321,7 @@ const AdminCategoriesPage = async ({
 
                             {/* Mobile Categories */}
                             <div className="space-y-3 p-4 sm:hidden">
-                                {categories.map((category) => {
+                                {paginatedCategories.map((category) => {
                                     const hasProducts =
                                         category._count.products > 0;
 
@@ -401,6 +411,11 @@ const AdminCategoriesPage = async ({
                                     );
                                 })}
                             </div>
+                            <AdminPagination
+                                currentPage={displayPage}
+                                totalPages={totalPages}
+                                query={params}
+                            />
                         </>
                     ) : (
                         <div className="px-6 py-20 text-center sm:px-8">
