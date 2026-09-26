@@ -27,12 +27,16 @@ interface SavedAddress {
 
 interface CheckoutFormProps {
     addresses: SavedAddress[];
+    onlinePaymentEnabled: boolean;
 }
 
 const FREE_SHIPPING_THRESHOLD = 100;
 const SHIPPING_COST = 15;
 
-const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
+const CheckoutForm = ({
+    addresses,
+    onlinePaymentEnabled,
+}: CheckoutFormProps) => {
     const router = useRouter();
     const dispatch = useAppDispatch();
 
@@ -64,7 +68,9 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
         null,
     );
 
-    const [paymentMethod, setPaymentMethod] = useState<"COD">("COD");
+    const [paymentMethod, setPaymentMethod] = useState<"COD" | "SSLCOMMERZ">(
+        "COD",
+    );
 
     const subtotal = cartItems.reduce((total, item) => {
         const variant = item.variants.find(
@@ -326,6 +332,11 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
             }
 
             const orderId = result.data.orderId;
+
+            if (result.data.redirectUrl) {
+                window.location.assign(result.data.redirectUrl);
+                return;
+            }
 
             setAppliedCoupon(null);
             setCouponCode("");
@@ -728,6 +739,38 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                                 </p>
                             </div>
                         </label>
+
+                        {onlinePaymentEnabled && (
+                            <label
+                                className={`mt-3 flex cursor-pointer items-start gap-4 border p-5 transition ${
+                                    paymentMethod === "SSLCOMMERZ"
+                                        ? "border-primary bg-stone-50"
+                                        : "border-border hover:border-primary"
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentMethod"
+                                    value="SSLCOMMERZ"
+                                    checked={paymentMethod === "SSLCOMMERZ"}
+                                    onChange={() =>
+                                        setPaymentMethod("SSLCOMMERZ")
+                                    }
+                                    className="mt-1 h-4 w-4 accent-black"
+                                />
+
+                                <div>
+                                    <p className="font-semibold text-primary">
+                                        Online Payment
+                                    </p>
+
+                                    <p className="mt-1 text-sm leading-6 text-gray-500">
+                                        Pay securely with cards and supported
+                                        mobile banking.
+                                    </p>
+                                </div>
+                            </label>
+                        )}
                     </div>
 
                     {/* Place Order */}
@@ -739,7 +782,11 @@ const CheckoutForm = ({ addresses }: CheckoutFormProps) => {
                             className="w-full sm:w-auto"
                             disabled={loading}
                         >
-                            {loading ? "Placing Order..." : "Place Order"}
+                            {loading
+                                ? "Processing..."
+                                : paymentMethod === "SSLCOMMERZ"
+                                  ? "Continue to Payment"
+                                  : "Place Order"}
                         </Button>
 
                         <p className="mt-3 text-xs leading-5 text-gray-400">

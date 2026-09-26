@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import Button from "@/components/common/Button";
+import OrderSuccessReset from "@/components/orders/OrderSuccessReset";
 
 interface OrderSuccessPageProps {
     searchParams: Promise<{
@@ -13,6 +14,7 @@ const OrderSuccessPage = async ({ searchParams }: OrderSuccessPageProps) => {
 
     return (
         <section className="flex min-h-[70vh] items-center justify-center px-4 py-20">
+            <OrderSuccessReset />
             <div className="max-w-xl text-center">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-50 text-3xl">
                     ✓

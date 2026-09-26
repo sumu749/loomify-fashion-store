@@ -2,7 +2,12 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
+import { cancelPendingPayment } from "@/lib/cancelPendingPayment";
 import { prisma } from "@/lib/prisma";
+import {
+    initializeSslCommerzPayment,
+    isSslCommerzConfigured,
+} from "@/lib/sslcommerz";
 
 const FREE_SHIPPING_THRESHOLD = 100;
 const SHIPPING_COST = 15;
@@ -64,7 +69,7 @@ export async function POST(request: Request) {
         }: {
             items: CartItemInput[];
             shippingAddress: ShippingAddress;
-            paymentMethod: "COD";
+            paymentMethod: "COD" | "SSLCOMMERZ";
             couponCode?: string;
         } = body;
 
@@ -78,13 +83,23 @@ export async function POST(request: Request) {
             );
         }
 
-        if (paymentMethod !== "COD") {
+        if (paymentMethod !== "COD" && paymentMethod !== "SSLCOMMERZ") {
             return NextResponse.json(
                 {
                     success: false,
                     message: "Invalid payment method.",
                 },
                 { status: 400 },
+            );
+        }
+
+        if (paymentMethod === "SSLCOMMERZ" && !isSslCommerzConfigured()) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Online payment is not configured yet.",
+                },
+                { status: 503 },
             );
         }
 
@@ -237,6 +252,10 @@ export async function POST(request: Request) {
 
         const shippingCost =
             subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+        const transactionId =
+            paymentMethod === "SSLCOMMERZ" ? crypto.randomUUID() : null;
+        const callbackToken =
+            paymentMethod === "SSLCOMMERZ" ? crypto.randomUUID() : null;
 
         /*
          * Everything below happens in one transaction.
@@ -369,10 +388,12 @@ export async function POST(request: Request) {
             await tx.payment.create({
                 data: {
                     orderId: createdOrder.id,
-                    provider: "COD",
+                    provider: paymentMethod,
+                    transactionId,
                     amount: total,
                     currency: "BDT",
                     status: "PENDING",
+                    metadata: callbackToken ? { callbackToken } : undefined,
                 },
             });
 
@@ -436,6 +457,52 @@ export async function POST(request: Request) {
                 total,
             };
         });
+
+        if (paymentMethod === "SSLCOMMERZ" && transactionId && callbackToken) {
+            try {
+                const redirectUrl = await initializeSslCommerzPayment({
+                    amount: order.total,
+                    transactionId,
+                    callbackToken,
+                    customerName: shippingAddress.fullName,
+                    customerEmail: session.user.email,
+                    customerPhone: normalizedPhone,
+                    address: shippingAddress.address,
+                    city: shippingAddress.city,
+                    district: shippingAddress.district,
+                    postalCode: normalizedPostalCode,
+                    country: shippingAddress.country,
+                    itemCount: items.reduce(
+                        (count, item) => count + item.quantity,
+                        0,
+                    ),
+                });
+
+                return NextResponse.json(
+                    {
+                        success: true,
+                        message: "Continue to secure online payment.",
+                        data: {
+                            orderId: order.order.id,
+                            redirectUrl,
+                        },
+                    },
+                    { status: 201 },
+                );
+            } catch (error) {
+                console.error("Failed to initialize online payment:", error);
+                await cancelPendingPayment(order.order.id, "FAILED");
+
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message:
+                            "Unable to start online payment. Please try again.",
+                    },
+                    { status: 502 },
+                );
+            }
+        }
 
         return NextResponse.json(
             {
