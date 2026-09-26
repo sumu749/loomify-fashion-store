@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import formatCurrency from "@/utils/formatCurrency";
 import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
+import ShipmentForm from "@/components/admin/orders/ShipmentForm";
 
 interface AdminOrderDetailsPageProps {
     params: Promise<{
@@ -260,6 +261,33 @@ const AdminOrderDetailsPage = async ({
                             Cancelled
                         </span>
                     </div>
+                </section>
+            )}
+
+            {order.status !== "CANCELLED" && (
+                <section className="mb-8 rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+                        Delivery
+                    </p>
+                    <h2 className="mt-2 text-xl font-semibold text-primary">
+                        Shipment Tracking
+                    </h2>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Add courier details when fulfillment is being prepared.
+                    </p>
+                    {order.status === "PROCESSING" ||
+                    order.status === "SHIPPED" ? (
+                        <ShipmentForm
+                            orderId={order.id}
+                            shippingProvider={order.shippingProvider}
+                            trackingNumber={order.trackingNumber}
+                            trackingUrl={order.trackingUrl}
+                        />
+                    ) : (
+                        <p className="mt-4 text-sm text-gray-500">
+                            Shipment details become available during processing.
+                        </p>
+                    )}
                 </section>
             )}
 

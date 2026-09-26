@@ -259,6 +259,9 @@ model Order {
   total           Decimal     @db.Decimal(10, 2)
   couponCode      String?
   shippingAddress Json
+  shippingProvider String?
+  trackingNumber  String?
+  trackingUrl     String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 

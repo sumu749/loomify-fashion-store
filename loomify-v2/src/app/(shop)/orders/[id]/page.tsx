@@ -213,6 +213,36 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                     </section>
                 </div>
 
+                {order.shippingProvider && order.trackingNumber && (
+                    <section className="mt-6 rounded-card border border-border bg-white p-6">
+                        <h2 className="text-xl font-semibold text-primary">
+                            Delivery Tracking
+                        </h2>
+                        <p className="mt-4 text-sm text-gray-600">
+                            Courier:{" "}
+                            <strong className="text-primary">
+                                {order.shippingProvider}
+                            </strong>
+                        </p>
+                        <p className="mt-2 text-sm text-gray-600">
+                            Tracking number:{" "}
+                            <strong className="text-primary">
+                                {order.trackingNumber}
+                            </strong>
+                        </p>
+                        {order.trackingUrl && (
+                            <a
+                                href={order.trackingUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="mt-4 inline-block text-sm font-medium text-accent hover:underline"
+                            >
+                                Track delivery
+                            </a>
+                        )}
+                    </section>
+                )}
+
                 {/* Payment */}
 
                 {order.payment && (

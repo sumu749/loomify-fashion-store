@@ -54,6 +54,97 @@ export async function PATCH(request: Request, { params }: OrderRouteParams) {
 
         const body = await request.json();
 
+        if (
+            "shippingProvider" in body ||
+            "trackingNumber" in body ||
+            "trackingUrl" in body
+        ) {
+            const shippingProvider =
+                typeof body.shippingProvider === "string"
+                    ? body.shippingProvider.trim()
+                    : "";
+            const trackingNumber =
+                typeof body.trackingNumber === "string"
+                    ? body.trackingNumber.trim()
+                    : "";
+            const trackingUrl =
+                typeof body.trackingUrl === "string"
+                    ? body.trackingUrl.trim()
+                    : "";
+
+            if (!shippingProvider || !trackingNumber) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Courier and tracking number are required.",
+                    },
+                    { status: 400 },
+                );
+            }
+
+            if (trackingUrl) {
+                try {
+                    const parsedUrl = new URL(trackingUrl);
+
+                    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+                        throw new Error("Invalid tracking URL protocol.");
+                    }
+                } catch {
+                    return NextResponse.json(
+                        {
+                            success: false,
+                            message: "Enter a valid tracking URL.",
+                        },
+                        { status: 400 },
+                    );
+                }
+            }
+
+            const order = await prisma.order.findUnique({
+                where: { id },
+                select: { id: true, status: true },
+            });
+
+            if (!order) {
+                return NextResponse.json(
+                    { success: false, message: "Order not found." },
+                    { status: 404 },
+                );
+            }
+
+            if (!["PROCESSING", "SHIPPED"].includes(order.status)) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message:
+                            "Shipment details can be added while an order is being processed or shipped.",
+                    },
+                    { status: 409 },
+                );
+            }
+
+            const updatedOrder = await prisma.order.update({
+                where: { id },
+                data: {
+                    shippingProvider,
+                    trackingNumber,
+                    trackingUrl: trackingUrl || null,
+                },
+                select: {
+                    id: true,
+                    shippingProvider: true,
+                    trackingNumber: true,
+                    trackingUrl: true,
+                },
+            });
+
+            return NextResponse.json({
+                success: true,
+                message: "Shipment details saved successfully.",
+                data: updatedOrder,
+            });
+        }
+
         const status = body.status as OrderStatus;
 
         if (!validStatuses.includes(status)) {
