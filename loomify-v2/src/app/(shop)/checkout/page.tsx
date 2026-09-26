@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import CheckoutForm from "@/components/checkout/CheckoutForm";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isSslCommerzConfigured } from "@/lib/sslcommerz";
 
 const CheckoutPage = async () => {
     const session = await auth.api.getSession({
@@ -50,7 +51,10 @@ const CheckoutPage = async () => {
                     </p>
                 </div>
 
-                <CheckoutForm addresses={addresses} />
+                <CheckoutForm
+                    addresses={addresses}
+                    onlinePaymentEnabled={isSslCommerzConfigured()}
+                />
             </div>
         </section>
     );
