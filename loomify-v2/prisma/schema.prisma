@@ -42,6 +42,19 @@ enum DiscountType {
   FIXED
 }
 
+enum ReturnRequestStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  RECEIVED
+  COMPLETED
+}
+
+enum ReturnResolution {
+  REFUND
+  EXCHANGE
+}
+
 model User {
   id            String   @id
   name          String
@@ -63,6 +76,7 @@ model User {
   orders       Order[]
   reviews      Review[]
   couponUsages CouponUsage[]
+  returnRequests ReturnRequest[]
 
   @@map("user")
 }
@@ -269,6 +283,7 @@ model Order {
   items       OrderItem[]
   payment     Payment?
   couponUsage CouponUsage?
+  returnRequests ReturnRequest[]
 
   @@index([userId])
   @@index([status])
@@ -293,6 +308,7 @@ model OrderItem {
   order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product        @relation(fields: [productId], references: [id])
   variant ProductVariant @relation(fields: [variantId], references: [id])
+  returnRequests ReturnRequest[]
 
   @@index([orderId])
   @@index([productId])
@@ -364,4 +380,27 @@ model Review {
   @@unique([userId, productId])
   @@index([productId])
   @@index([approved])
+}
+
+model ReturnRequest {
+  id                  String              @id @default(cuid())
+  userId              String
+  orderId             String
+  orderItemId         String
+  quantity            Int
+  reason              String
+  requestedResolution ReturnResolution
+  status              ReturnRequestStatus @default(REQUESTED)
+  adminNote           String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([orderId])
+  @@index([orderItemId])
+  @@index([status, createdAt])
 }

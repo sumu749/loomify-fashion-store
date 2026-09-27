@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import formatCurrency from "@/utils/formatCurrency";
 import CancelOrderButton from "@/components/orders/CancelOrderButton";
+import ReturnRequestForm from "@/components/orders/ReturnRequestForm";
 
 interface OrderDetailsPageProps {
     params: Promise<{
@@ -39,7 +40,13 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
             userId: session.user.id,
         },
         include: {
-            items: true,
+            items: {
+                include: {
+                    returnRequests: {
+                        orderBy: { createdAt: "desc" },
+                    },
+                },
+            },
             payment: true,
         },
     });
@@ -47,6 +54,11 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
     if (!order) {
         notFound();
     }
+
+    const returnDeadline = new Date(order.updatedAt);
+    returnDeadline.setDate(returnDeadline.getDate() + 30);
+    const canRequestReturn =
+        order.status === "DELIVERED" && returnDeadline >= new Date();
 
     return (
         <section className="bg-stone-50 px-4 py-16 sm:px-6 lg:px-8">
@@ -131,6 +143,66 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
 
                                         <p>Quantity: {item.quantity}</p>
                                     </div>
+
+                                    {item.returnRequests.length > 0 && (
+                                        <div className="mt-4 space-y-2">
+                                            {item.returnRequests.map(
+                                                (request) => (
+                                                    <div
+                                                        key={request.id}
+                                                        className="border border-border bg-stone-50 px-3 py-2 text-xs"
+                                                    >
+                                                        <p className="font-semibold text-primary">
+                                                            {
+                                                                request.requestedResolution
+                                                            }{" "}
+                                                            · {request.status} ·
+                                                            Qty{" "}
+                                                            {request.quantity}
+                                                        </p>
+                                                        {request.adminNote && (
+                                                            <p className="mt-1 text-gray-600">
+                                                                Admin note:{" "}
+                                                                {
+                                                                    request.adminNote
+                                                                }
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {order.status === "DELIVERED" &&
+                                        canRequestReturn &&
+                                        (() => {
+                                            const usedQuantity =
+                                                item.returnRequests
+                                                    .filter(
+                                                        (request) =>
+                                                            request.status !==
+                                                            "REJECTED",
+                                                    )
+                                                    .reduce(
+                                                        (total, request) =>
+                                                            total +
+                                                            request.quantity,
+                                                        0,
+                                                    );
+                                            const remainingQuantity =
+                                                item.quantity - usedQuantity;
+
+                                            return remainingQuantity > 0 ? (
+                                                <ReturnRequestForm
+                                                    orderId={order.id}
+                                                    orderItemId={item.id}
+                                                    maxQuantity={
+                                                        remainingQuantity
+                                                    }
+                                                />
+                                            ) : null;
+                                        })()}
                                 </div>
 
                                 <p className="font-semibold text-primary">

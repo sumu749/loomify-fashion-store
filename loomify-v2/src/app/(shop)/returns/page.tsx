@@ -9,12 +9,17 @@ export default function ReturnsPage() {
                 {
                     heading: "Return window",
                     content:
-                        "Contact us within 30 days of delivery to request a return for an eligible item.",
+                        "Submit a return or exchange request from your order details within 30 days after delivery. Only delivered orders are eligible.",
                 },
                 {
                     heading: "Condition",
                     content:
-                        "Items should be unworn, unwashed, and returned with their original tags.",
+                        "Items should be unworn, unwashed, and returned with their original tags. Include the affected item, quantity, preferred resolution, and reason in your request.",
+                },
+                {
+                    heading: "Review and resolution",
+                    content:
+                        "Our team will review your request and update its status in your order details. Refunds and exchanges are handled by our team after the returned item is received; submitting a request does not automatically issue a refund or replacement.",
                 },
             ]}
         />
