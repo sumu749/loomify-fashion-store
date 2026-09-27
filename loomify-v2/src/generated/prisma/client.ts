@@ -136,3 +136,8 @@ export type CouponUsage = Prisma.CouponUsageModel
  * 
  */
 export type Review = Prisma.ReviewModel
+/**
+ * Model ReturnRequest
+ * 
+ */
+export type ReturnRequest = Prisma.ReturnRequestModel

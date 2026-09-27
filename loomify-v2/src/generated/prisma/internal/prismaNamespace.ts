@@ -415,7 +415,8 @@ export const ModelName = {
   Payment: 'Payment',
   Coupon: 'Coupon',
   CouponUsage: 'CouponUsage',
-  Review: 'Review'
+  Review: 'Review',
+  ReturnRequest: 'ReturnRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -431,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "address" | "category" | "product" | "productVariant" | "productImage" | "cart" | "cartItem" | "wishlist" | "wishlistItem" | "order" | "orderItem" | "payment" | "coupon" | "couponUsage" | "review"
+    modelProps: "user" | "session" | "account" | "verification" | "address" | "category" | "product" | "productVariant" | "productImage" | "cart" | "cartItem" | "wishlist" | "wishlistItem" | "order" | "orderItem" | "payment" | "coupon" | "couponUsage" | "review" | "returnRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1841,6 +1842,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ReturnRequest: {
+      payload: Prisma.$ReturnRequestPayload<ExtArgs>
+      fields: Prisma.ReturnRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReturnRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReturnRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.ReturnRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReturnRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload>
+        }
+        findMany: {
+          args: Prisma.ReturnRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload>[]
+        }
+        create: {
+          args: Prisma.ReturnRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload>
+        }
+        createMany: {
+          args: Prisma.ReturnRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReturnRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.ReturnRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload>
+        }
+        update: {
+          args: Prisma.ReturnRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReturnRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReturnRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReturnRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReturnRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReturnRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.ReturnRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReturnRequest>
+        }
+        groupBy: {
+          args: Prisma.ReturnRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReturnRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReturnRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReturnRequestCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2060,6 +2135,9 @@ export const OrderScalarFieldEnum = {
   total: 'total',
   couponCode: 'couponCode',
   shippingAddress: 'shippingAddress',
+  shippingProvider: 'shippingProvider',
+  trackingNumber: 'trackingNumber',
+  trackingUrl: 'trackingUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2141,6 +2219,23 @@ export const ReviewScalarFieldEnum = {
 } as const
 
 export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
+
+
+export const ReturnRequestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  orderId: 'orderId',
+  orderItemId: 'orderItemId',
+  quantity: 'quantity',
+  reason: 'reason',
+  requestedResolution: 'requestedResolution',
+  status: 'status',
+  adminNote: 'adminNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReturnRequestScalarFieldEnum = (typeof ReturnRequestScalarFieldEnum)[keyof typeof ReturnRequestScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2345,6 +2440,34 @@ export type ListEnumDiscountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
 
 
 /**
+ * Reference to a field of type 'ReturnResolution'
+ */
+export type EnumReturnResolutionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReturnResolution'>
+    
+
+
+/**
+ * Reference to a field of type 'ReturnResolution[]'
+ */
+export type ListEnumReturnResolutionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReturnResolution[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ReturnRequestStatus'
+ */
+export type EnumReturnRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReturnRequestStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ReturnRequestStatus[]'
+ */
+export type ListEnumReturnRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReturnRequestStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2527,6 +2650,7 @@ export type GlobalOmitConfig = {
   coupon?: Prisma.CouponOmit
   couponUsage?: Prisma.CouponUsageOmit
   review?: Prisma.ReviewOmit
+  returnRequest?: Prisma.ReturnRequestOmit
 }
 
 /* Types for Logging */

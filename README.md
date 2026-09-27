@@ -56,6 +56,9 @@ Create a `.env` file in this directory:
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+SSLCOMMERZ_STORE_ID="your-sandbox-store-id"
+SSLCOMMERZ_STORE_PASSWORD="your-sandbox-store-password"
+SSLCOMMERZ_IS_LIVE="false"
 ```
 
 Apply the Prisma migrations and generate the client:
@@ -70,6 +73,23 @@ Seed the database with sample categories, products, variants, and images:
 ```bash
 npx prisma db seed
 ```
+
+The SSLCommerz sandbox option appears at checkout when both store credentials
+are configured. For gateway callbacks to reach your local machine, use a
+public HTTPS tunnel and set `NEXT_PUBLIC_APP_URL` to that public URL. Set
+`SSLCOMMERZ_IS_LIVE="true"` only after replacing the sandbox credentials with
+your live merchant credentials.
+
+Apply the latest schema changes, including order delivery tracking fields, with:
+
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+Admins can add a courier name, tracking number, and tracking URL to orders in
+`PROCESSING` or `SHIPPED` status. Customers can view those details from their
+order detail page.
 
 Start the development server:
 

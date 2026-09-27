@@ -69,7 +69,8 @@ export const ModelName = {
   Payment: 'Payment',
   Coupon: 'Coupon',
   CouponUsage: 'CouponUsage',
-  Review: 'Review'
+  Review: 'Review',
+  ReturnRequest: 'ReturnRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -268,6 +269,9 @@ export const OrderScalarFieldEnum = {
   total: 'total',
   couponCode: 'couponCode',
   shippingAddress: 'shippingAddress',
+  shippingProvider: 'shippingProvider',
+  trackingNumber: 'trackingNumber',
+  trackingUrl: 'trackingUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -349,6 +353,23 @@ export const ReviewScalarFieldEnum = {
 } as const
 
 export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
+
+
+export const ReturnRequestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  orderId: 'orderId',
+  orderItemId: 'orderItemId',
+  quantity: 'quantity',
+  reason: 'reason',
+  requestedResolution: 'requestedResolution',
+  status: 'status',
+  adminNote: 'adminNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReturnRequestScalarFieldEnum = (typeof ReturnRequestScalarFieldEnum)[keyof typeof ReturnRequestScalarFieldEnum]
 
 
 export const SortOrder = {

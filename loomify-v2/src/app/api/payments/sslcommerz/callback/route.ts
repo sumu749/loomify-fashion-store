@@ -47,6 +47,7 @@ export async function POST(request: Request) {
     if (payment.status === "PAID") {
         return NextResponse.redirect(
             new URL(`/order-success?orderId=${payment.orderId}`, appUrl),
+            { status: 303 },
         );
     }
 
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
 
         return NextResponse.redirect(
             new URL(`/checkout?payment=${result}`, appUrl),
+            { status: 303 },
         );
     }
 
@@ -122,6 +124,7 @@ export async function POST(request: Request) {
 
         return NextResponse.redirect(
             new URL(`/order-success?orderId=${payment.orderId}`, appUrl),
+            { status: 303 },
         );
     } catch (error) {
         console.error("Failed to validate SSLCommerz payment:", error);

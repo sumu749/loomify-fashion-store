@@ -57,3 +57,22 @@ export const DiscountType = {
 } as const
 
 export type DiscountType = (typeof DiscountType)[keyof typeof DiscountType]
+
+
+export const ReturnRequestStatus = {
+  REQUESTED: 'REQUESTED',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  RECEIVED: 'RECEIVED',
+  COMPLETED: 'COMPLETED'
+} as const
+
+export type ReturnRequestStatus = (typeof ReturnRequestStatus)[keyof typeof ReturnRequestStatus]
+
+
+export const ReturnResolution = {
+  REFUND: 'REFUND',
+  EXCHANGE: 'EXCHANGE'
+} as const
+
+export type ReturnResolution = (typeof ReturnResolution)[keyof typeof ReturnResolution]

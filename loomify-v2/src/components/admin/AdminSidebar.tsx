@@ -8,6 +8,7 @@ import {
     FolderKanban,
     LayoutDashboard,
     MessageSquare,
+    RotateCcw,
     TicketPercent,
     Users,
 } from "lucide-react";
@@ -33,6 +34,11 @@ export const adminNavItems = [
         href: "/admin/orders",
         label: "Orders",
         icon: ClipboardList,
+    },
+    {
+        href: "/admin/returns",
+        label: "Returns",
+        icon: RotateCcw,
     },
     {
         href: "/admin/users",
