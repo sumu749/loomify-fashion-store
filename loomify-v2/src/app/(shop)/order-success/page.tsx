@@ -6,11 +6,15 @@ import OrderSuccessReset from "@/components/orders/OrderSuccessReset";
 interface OrderSuccessPageProps {
     searchParams: Promise<{
         orderId?: string;
+        access?: string;
     }>;
 }
 
 const OrderSuccessPage = async ({ searchParams }: OrderSuccessPageProps) => {
-    const { orderId } = await searchParams;
+    const { orderId, access } = await searchParams;
+    const orderDetailsUrl = orderId
+        ? `/orders/${orderId}${access ? `?access=${encodeURIComponent(access)}` : ""}`
+        : "/orders";
 
     return (
         <section className="flex min-h-[70vh] items-center justify-center px-4 py-20">
@@ -41,13 +45,22 @@ const OrderSuccessPage = async ({ searchParams }: OrderSuccessPageProps) => {
                     </p>
                 )}
 
+                {access && (
+                    <p className="mt-4 text-sm leading-6 text-gray-500">
+                        Save this private link to view your order later. Anyone
+                        with the link can access its details.
+                    </p>
+                )}
+
                 <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                     <Button asChild>
                         <Link href="/products">Continue Shopping</Link>
                     </Button>
 
                     <Button asChild variant="outline">
-                        <Link href="/orders">View Orders</Link>
+                        <Link href={orderDetailsUrl}>
+                            {access ? "View This Order" : "View Orders"}
+                        </Link>
                     </Button>
                 </div>
             </div>

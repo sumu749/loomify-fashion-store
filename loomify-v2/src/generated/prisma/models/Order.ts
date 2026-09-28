@@ -43,6 +43,8 @@ export type OrderSumAggregateOutputType = {
 export type OrderMinAggregateOutputType = {
   id: string | null
   userId: string | null
+  guestEmail: string | null
+  guestTokenHash: string | null
   status: $Enums.OrderStatus | null
   subtotal: runtime.Decimal | null
   shippingCost: runtime.Decimal | null
@@ -59,6 +61,8 @@ export type OrderMinAggregateOutputType = {
 export type OrderMaxAggregateOutputType = {
   id: string | null
   userId: string | null
+  guestEmail: string | null
+  guestTokenHash: string | null
   status: $Enums.OrderStatus | null
   subtotal: runtime.Decimal | null
   shippingCost: runtime.Decimal | null
@@ -75,6 +79,8 @@ export type OrderMaxAggregateOutputType = {
 export type OrderCountAggregateOutputType = {
   id: number
   userId: number
+  guestEmail: number
+  guestTokenHash: number
   status: number
   subtotal: number
   shippingCost: number
@@ -108,6 +114,8 @@ export type OrderSumAggregateInputType = {
 export type OrderMinAggregateInputType = {
   id?: true
   userId?: true
+  guestEmail?: true
+  guestTokenHash?: true
   status?: true
   subtotal?: true
   shippingCost?: true
@@ -124,6 +132,8 @@ export type OrderMinAggregateInputType = {
 export type OrderMaxAggregateInputType = {
   id?: true
   userId?: true
+  guestEmail?: true
+  guestTokenHash?: true
   status?: true
   subtotal?: true
   shippingCost?: true
@@ -140,6 +150,8 @@ export type OrderMaxAggregateInputType = {
 export type OrderCountAggregateInputType = {
   id?: true
   userId?: true
+  guestEmail?: true
+  guestTokenHash?: true
   status?: true
   subtotal?: true
   shippingCost?: true
@@ -243,7 +255,9 @@ export type OrderGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type OrderGroupByOutputType = {
   id: string
-  userId: string
+  userId: string | null
+  guestEmail: string | null
+  guestTokenHash: string | null
   status: $Enums.OrderStatus
   subtotal: runtime.Decimal
   shippingCost: runtime.Decimal
@@ -283,7 +297,9 @@ export type OrderWhereInput = {
   OR?: Prisma.OrderWhereInput[]
   NOT?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
   id?: Prisma.StringFilter<"Order"> | string
-  userId?: Prisma.StringFilter<"Order"> | string
+  userId?: Prisma.StringNullableFilter<"Order"> | string | null
+  guestEmail?: Prisma.StringNullableFilter<"Order"> | string | null
+  guestTokenHash?: Prisma.StringNullableFilter<"Order"> | string | null
   status?: Prisma.EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -296,7 +312,7 @@ export type OrderWhereInput = {
   trackingUrl?: Prisma.StringNullableFilter<"Order"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   items?: Prisma.OrderItemListRelationFilter
   payment?: Prisma.XOR<Prisma.PaymentNullableScalarRelationFilter, Prisma.PaymentWhereInput> | null
   couponUsage?: Prisma.XOR<Prisma.CouponUsageNullableScalarRelationFilter, Prisma.CouponUsageWhereInput> | null
@@ -305,7 +321,9 @@ export type OrderWhereInput = {
 
 export type OrderOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  guestEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  guestTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   subtotal?: Prisma.SortOrder
   shippingCost?: Prisma.SortOrder
@@ -327,10 +345,12 @@ export type OrderOrderByWithRelationInput = {
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  guestTokenHash?: string
   AND?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
   OR?: Prisma.OrderWhereInput[]
   NOT?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
-  userId?: Prisma.StringFilter<"Order"> | string
+  userId?: Prisma.StringNullableFilter<"Order"> | string | null
+  guestEmail?: Prisma.StringNullableFilter<"Order"> | string | null
   status?: Prisma.EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -343,16 +363,18 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   trackingUrl?: Prisma.StringNullableFilter<"Order"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   items?: Prisma.OrderItemListRelationFilter
   payment?: Prisma.XOR<Prisma.PaymentNullableScalarRelationFilter, Prisma.PaymentWhereInput> | null
   couponUsage?: Prisma.XOR<Prisma.CouponUsageNullableScalarRelationFilter, Prisma.CouponUsageWhereInput> | null
   returnRequests?: Prisma.ReturnRequestListRelationFilter
-}, "id">
+}, "id" | "guestTokenHash">
 
 export type OrderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  guestEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  guestTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   subtotal?: Prisma.SortOrder
   shippingCost?: Prisma.SortOrder
@@ -377,7 +399,9 @@ export type OrderScalarWhereWithAggregatesInput = {
   OR?: Prisma.OrderScalarWhereWithAggregatesInput[]
   NOT?: Prisma.OrderScalarWhereWithAggregatesInput | Prisma.OrderScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Order"> | string
-  userId?: Prisma.StringWithAggregatesFilter<"Order"> | string
+  userId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  guestEmail?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  guestTokenHash?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   status?: Prisma.EnumOrderStatusWithAggregatesFilter<"Order"> | $Enums.OrderStatus
   subtotal?: Prisma.DecimalWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -394,6 +418,8 @@ export type OrderScalarWhereWithAggregatesInput = {
 
 export type OrderCreateInput = {
   id?: string
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -406,7 +432,7 @@ export type OrderCreateInput = {
   trackingUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  user?: Prisma.UserCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   payment?: Prisma.PaymentCreateNestedOneWithoutOrderInput
   couponUsage?: Prisma.CouponUsageCreateNestedOneWithoutOrderInput
@@ -415,7 +441,9 @@ export type OrderCreateInput = {
 
 export type OrderUncheckedCreateInput = {
   id?: string
-  userId: string
+  userId?: string | null
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -436,6 +464,8 @@ export type OrderUncheckedCreateInput = {
 
 export type OrderUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -448,7 +478,7 @@ export type OrderUpdateInput = {
   trackingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  user?: Prisma.UserUpdateOneWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   payment?: Prisma.PaymentUpdateOneWithoutOrderNestedInput
   couponUsage?: Prisma.CouponUsageUpdateOneWithoutOrderNestedInput
@@ -457,7 +487,9 @@ export type OrderUpdateInput = {
 
 export type OrderUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -478,7 +510,9 @@ export type OrderUncheckedUpdateInput = {
 
 export type OrderCreateManyInput = {
   id?: string
-  userId: string
+  userId?: string | null
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -495,6 +529,8 @@ export type OrderCreateManyInput = {
 
 export type OrderUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -511,7 +547,9 @@ export type OrderUpdateManyMutationInput = {
 
 export type OrderUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -539,6 +577,8 @@ export type OrderOrderByRelationAggregateInput = {
 export type OrderCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  guestEmail?: Prisma.SortOrder
+  guestTokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
   subtotal?: Prisma.SortOrder
   shippingCost?: Prisma.SortOrder
@@ -563,6 +603,8 @@ export type OrderAvgOrderByAggregateInput = {
 export type OrderMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  guestEmail?: Prisma.SortOrder
+  guestTokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
   subtotal?: Prisma.SortOrder
   shippingCost?: Prisma.SortOrder
@@ -579,6 +621,8 @@ export type OrderMaxOrderByAggregateInput = {
 export type OrderMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  guestEmail?: Prisma.SortOrder
+  guestTokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
   subtotal?: Prisma.SortOrder
   shippingCost?: Prisma.SortOrder
@@ -708,6 +752,8 @@ export type OrderUpdateOneRequiredWithoutReturnRequestsNestedInput = {
 
 export type OrderCreateWithoutUserInput = {
   id?: string
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -728,6 +774,8 @@ export type OrderCreateWithoutUserInput = {
 
 export type OrderUncheckedCreateWithoutUserInput = {
   id?: string
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -777,7 +825,9 @@ export type OrderScalarWhereInput = {
   OR?: Prisma.OrderScalarWhereInput[]
   NOT?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
   id?: Prisma.StringFilter<"Order"> | string
-  userId?: Prisma.StringFilter<"Order"> | string
+  userId?: Prisma.StringNullableFilter<"Order"> | string | null
+  guestEmail?: Prisma.StringNullableFilter<"Order"> | string | null
+  guestTokenHash?: Prisma.StringNullableFilter<"Order"> | string | null
   status?: Prisma.EnumOrderStatusFilter<"Order"> | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -794,6 +844,8 @@ export type OrderScalarWhereInput = {
 
 export type OrderCreateWithoutItemsInput = {
   id?: string
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -806,7 +858,7 @@ export type OrderCreateWithoutItemsInput = {
   trackingUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  user?: Prisma.UserCreateNestedOneWithoutOrdersInput
   payment?: Prisma.PaymentCreateNestedOneWithoutOrderInput
   couponUsage?: Prisma.CouponUsageCreateNestedOneWithoutOrderInput
   returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutOrderInput
@@ -814,7 +866,9 @@ export type OrderCreateWithoutItemsInput = {
 
 export type OrderUncheckedCreateWithoutItemsInput = {
   id?: string
-  userId: string
+  userId?: string | null
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -850,6 +904,8 @@ export type OrderUpdateToOneWithWhereWithoutItemsInput = {
 
 export type OrderUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -862,7 +918,7 @@ export type OrderUpdateWithoutItemsInput = {
   trackingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  user?: Prisma.UserUpdateOneWithoutOrdersNestedInput
   payment?: Prisma.PaymentUpdateOneWithoutOrderNestedInput
   couponUsage?: Prisma.CouponUsageUpdateOneWithoutOrderNestedInput
   returnRequests?: Prisma.ReturnRequestUpdateManyWithoutOrderNestedInput
@@ -870,7 +926,9 @@ export type OrderUpdateWithoutItemsInput = {
 
 export type OrderUncheckedUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -890,6 +948,8 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
 
 export type OrderCreateWithoutPaymentInput = {
   id?: string
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -902,7 +962,7 @@ export type OrderCreateWithoutPaymentInput = {
   trackingUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  user?: Prisma.UserCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   couponUsage?: Prisma.CouponUsageCreateNestedOneWithoutOrderInput
   returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutOrderInput
@@ -910,7 +970,9 @@ export type OrderCreateWithoutPaymentInput = {
 
 export type OrderUncheckedCreateWithoutPaymentInput = {
   id?: string
-  userId: string
+  userId?: string | null
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -946,6 +1008,8 @@ export type OrderUpdateToOneWithWhereWithoutPaymentInput = {
 
 export type OrderUpdateWithoutPaymentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -958,7 +1022,7 @@ export type OrderUpdateWithoutPaymentInput = {
   trackingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  user?: Prisma.UserUpdateOneWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   couponUsage?: Prisma.CouponUsageUpdateOneWithoutOrderNestedInput
   returnRequests?: Prisma.ReturnRequestUpdateManyWithoutOrderNestedInput
@@ -966,7 +1030,9 @@ export type OrderUpdateWithoutPaymentInput = {
 
 export type OrderUncheckedUpdateWithoutPaymentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -986,6 +1052,8 @@ export type OrderUncheckedUpdateWithoutPaymentInput = {
 
 export type OrderCreateWithoutCouponUsageInput = {
   id?: string
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -998,7 +1066,7 @@ export type OrderCreateWithoutCouponUsageInput = {
   trackingUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  user?: Prisma.UserCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   payment?: Prisma.PaymentCreateNestedOneWithoutOrderInput
   returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutOrderInput
@@ -1006,7 +1074,9 @@ export type OrderCreateWithoutCouponUsageInput = {
 
 export type OrderUncheckedCreateWithoutCouponUsageInput = {
   id?: string
-  userId: string
+  userId?: string | null
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1042,6 +1112,8 @@ export type OrderUpdateToOneWithWhereWithoutCouponUsageInput = {
 
 export type OrderUpdateWithoutCouponUsageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1054,7 +1126,7 @@ export type OrderUpdateWithoutCouponUsageInput = {
   trackingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  user?: Prisma.UserUpdateOneWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   payment?: Prisma.PaymentUpdateOneWithoutOrderNestedInput
   returnRequests?: Prisma.ReturnRequestUpdateManyWithoutOrderNestedInput
@@ -1062,7 +1134,9 @@ export type OrderUpdateWithoutCouponUsageInput = {
 
 export type OrderUncheckedUpdateWithoutCouponUsageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1082,6 +1156,8 @@ export type OrderUncheckedUpdateWithoutCouponUsageInput = {
 
 export type OrderCreateWithoutReturnRequestsInput = {
   id?: string
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1094,7 +1170,7 @@ export type OrderCreateWithoutReturnRequestsInput = {
   trackingUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  user?: Prisma.UserCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   payment?: Prisma.PaymentCreateNestedOneWithoutOrderInput
   couponUsage?: Prisma.CouponUsageCreateNestedOneWithoutOrderInput
@@ -1102,7 +1178,9 @@ export type OrderCreateWithoutReturnRequestsInput = {
 
 export type OrderUncheckedCreateWithoutReturnRequestsInput = {
   id?: string
-  userId: string
+  userId?: string | null
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1138,6 +1216,8 @@ export type OrderUpdateToOneWithWhereWithoutReturnRequestsInput = {
 
 export type OrderUpdateWithoutReturnRequestsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1150,7 +1230,7 @@ export type OrderUpdateWithoutReturnRequestsInput = {
   trackingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  user?: Prisma.UserUpdateOneWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   payment?: Prisma.PaymentUpdateOneWithoutOrderNestedInput
   couponUsage?: Prisma.CouponUsageUpdateOneWithoutOrderNestedInput
@@ -1158,7 +1238,9 @@ export type OrderUpdateWithoutReturnRequestsInput = {
 
 export type OrderUncheckedUpdateWithoutReturnRequestsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1178,6 +1260,8 @@ export type OrderUncheckedUpdateWithoutReturnRequestsInput = {
 
 export type OrderCreateManyUserInput = {
   id?: string
+  guestEmail?: string | null
+  guestTokenHash?: string | null
   status?: $Enums.OrderStatus
   subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1194,6 +1278,8 @@ export type OrderCreateManyUserInput = {
 
 export type OrderUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1214,6 +1300,8 @@ export type OrderUpdateWithoutUserInput = {
 
 export type OrderUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1234,6 +1322,8 @@ export type OrderUncheckedUpdateWithoutUserInput = {
 
 export type OrderUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guestEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
   subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   shippingCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1291,6 +1381,8 @@ export type OrderCountOutputTypeCountReturnRequestsArgs<ExtArgs extends runtime.
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  guestEmail?: boolean
+  guestTokenHash?: boolean
   status?: boolean
   subtotal?: boolean
   shippingCost?: boolean
@@ -1303,7 +1395,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   trackingUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Order$userArgs<ExtArgs>
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   payment?: boolean | Prisma.Order$paymentArgs<ExtArgs>
   couponUsage?: boolean | Prisma.Order$couponUsageArgs<ExtArgs>
@@ -1314,6 +1406,8 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  guestEmail?: boolean
+  guestTokenHash?: boolean
   status?: boolean
   subtotal?: boolean
   shippingCost?: boolean
@@ -1326,12 +1420,14 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   trackingUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Order$userArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  guestEmail?: boolean
+  guestTokenHash?: boolean
   status?: boolean
   subtotal?: boolean
   shippingCost?: boolean
@@ -1344,12 +1440,14 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   trackingUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Order$userArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectScalar = {
   id?: boolean
   userId?: boolean
+  guestEmail?: boolean
+  guestTokenHash?: boolean
   status?: boolean
   subtotal?: boolean
   shippingCost?: boolean
@@ -1364,9 +1462,9 @@ export type OrderSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "status" | "subtotal" | "shippingCost" | "discount" | "total" | "couponCode" | "shippingAddress" | "shippingProvider" | "trackingNumber" | "trackingUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "guestEmail" | "guestTokenHash" | "status" | "subtotal" | "shippingCost" | "discount" | "total" | "couponCode" | "shippingAddress" | "shippingProvider" | "trackingNumber" | "trackingUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Order$userArgs<ExtArgs>
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   payment?: boolean | Prisma.Order$paymentArgs<ExtArgs>
   couponUsage?: boolean | Prisma.Order$couponUsageArgs<ExtArgs>
@@ -1374,16 +1472,16 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Order$userArgs<ExtArgs>
 }
 export type OrderIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Order$userArgs<ExtArgs>
 }
 
 export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Order"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs> | null
     items: Prisma.$OrderItemPayload<ExtArgs>[]
     payment: Prisma.$PaymentPayload<ExtArgs> | null
     couponUsage: Prisma.$CouponUsagePayload<ExtArgs> | null
@@ -1391,7 +1489,9 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    userId: string
+    userId: string | null
+    guestEmail: string | null
+    guestTokenHash: string | null
     status: $Enums.OrderStatus
     subtotal: runtime.Decimal
     shippingCost: runtime.Decimal
@@ -1798,7 +1898,7 @@ readonly fields: OrderFieldRefs;
  */
 export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.Order$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.Order$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   payment<T extends Prisma.Order$paymentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$paymentArgs<ExtArgs>>): Prisma.Prisma__PaymentClient<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   couponUsage<T extends Prisma.Order$couponUsageArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$couponUsageArgs<ExtArgs>>): Prisma.Prisma__CouponUsageClient<runtime.Types.Result.GetResult<Prisma.$CouponUsagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -1834,6 +1934,8 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
 export interface OrderFieldRefs {
   readonly id: Prisma.FieldRef<"Order", 'String'>
   readonly userId: Prisma.FieldRef<"Order", 'String'>
+  readonly guestEmail: Prisma.FieldRef<"Order", 'String'>
+  readonly guestTokenHash: Prisma.FieldRef<"Order", 'String'>
   readonly status: Prisma.FieldRef<"Order", 'OrderStatus'>
   readonly subtotal: Prisma.FieldRef<"Order", 'Decimal'>
   readonly shippingCost: Prisma.FieldRef<"Order", 'Decimal'>
@@ -2244,6 +2346,25 @@ export type OrderDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Limit how many Orders to delete.
    */
   limit?: number
+}
+
+/**
+ * Order.user
+ */
+export type Order$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

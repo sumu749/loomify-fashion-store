@@ -7,10 +7,14 @@ import { prisma } from "@/lib/prisma";
 import formatCurrency from "@/utils/formatCurrency";
 import CancelOrderButton from "@/components/orders/CancelOrderButton";
 import ReturnRequestForm from "@/components/orders/ReturnRequestForm";
+import { hashGuestOrderToken } from "@/lib/guestOrderAccess";
 
 interface OrderDetailsPageProps {
     params: Promise<{
         id: string;
+    }>;
+    searchParams: Promise<{
+        access?: string;
     }>;
 }
 
@@ -23,21 +27,33 @@ const statusStyles = {
     CANCELLED: "bg-red-50 text-red-700",
 };
 
-const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
+const OrderDetailsPage = async ({
+    params,
+    searchParams,
+}: OrderDetailsPageProps) => {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
+    const { id } = await params;
+    const { access } = await searchParams;
 
-    if (!session) {
+    if (!session && !access) {
         redirect("/login");
     }
-
-    const { id } = await params;
 
     const order = await prisma.order.findFirst({
         where: {
             id,
-            userId: session.user.id,
+            ...(session && access
+                ? {
+                      OR: [
+                          { userId: session.user.id },
+                          { guestTokenHash: hashGuestOrderToken(access) },
+                      ],
+                  }
+                : session
+                  ? { userId: session.user.id }
+                  : { guestTokenHash: hashGuestOrderToken(access!) }),
         },
         include: {
             items: {
@@ -64,7 +80,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
         <section className="bg-stone-50 px-4 py-16 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-6xl">
                 <Link
-                    href="/orders"
+                    href={session ? "/orders" : "/products"}
                     className="text-sm font-medium text-accent hover:underline"
                 >
                     ← Back to Orders
@@ -98,7 +114,7 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                             {order.status}
                         </span>
 
-                        {order.status === "PENDING" && (
+                        {order.status === "PENDING" && session && (
                             <CancelOrderButton orderId={order.id} />
                         )}
                     </div>
@@ -199,6 +215,11 @@ const OrderDetailsPage = async ({ params }: OrderDetailsPageProps) => {
                                                     orderItemId={item.id}
                                                     maxQuantity={
                                                         remainingQuantity
+                                                    }
+                                                    accessToken={
+                                                        order.userId
+                                                            ? undefined
+                                                            : access
                                                     }
                                                 />
                                             ) : null;

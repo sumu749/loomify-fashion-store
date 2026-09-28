@@ -95,6 +95,10 @@ const AdminOrderDetailsPage = async ({
         notFound();
     }
 
+    const shippingContact = order.shippingAddress as {
+        fullName?: string;
+        phone?: string;
+    };
     const currentStepIndex = getStatusStepIndex(order.status);
 
     return (
@@ -320,7 +324,9 @@ const AdminOrderDetailsPage = async ({
                             </p>
 
                             <p className="mt-1 font-medium text-primary">
-                                {order.user.name}
+                                {order.user?.name ??
+                                    shippingContact.fullName ??
+                                    "Guest customer"}
                             </p>
                         </div>
 
@@ -330,7 +336,7 @@ const AdminOrderDetailsPage = async ({
                             </p>
 
                             <p className="mt-1 break-all text-sm font-medium text-gray-700">
-                                {order.user.email}
+                                {order.user?.email ?? order.guestEmail ?? ""}
                             </p>
                         </div>
 
@@ -340,7 +346,7 @@ const AdminOrderDetailsPage = async ({
                             </p>
 
                             <p className="mt-1 break-all text-xs text-gray-500">
-                                {order.user.id}
+                                {order.user?.id ?? "Guest checkout"}
                             </p>
                         </div>
                     </div>

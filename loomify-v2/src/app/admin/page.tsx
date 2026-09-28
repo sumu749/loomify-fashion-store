@@ -391,11 +391,20 @@ export default async function AdminPage() {
                                                 <td className="py-4">
                                                     <div>
                                                         <p className="font-medium text-primary">
-                                                            {order.user.name}
+                                                            {order.user?.name ??
+                                                                (
+                                                                    order.shippingAddress as {
+                                                                        fullName?: string;
+                                                                    }
+                                                                ).fullName ??
+                                                                "Guest customer"}
                                                         </p>
 
                                                         <p className="text-xs text-gray-400">
-                                                            {order.user.email}
+                                                            {order.user
+                                                                ?.email ??
+                                                                order.guestEmail ??
+                                                                ""}
                                                         </p>
                                                     </div>
                                                 </td>
@@ -457,11 +466,19 @@ export default async function AdminPage() {
                                                 </p>
 
                                                 <p className="mt-1 truncate text-sm text-gray-600">
-                                                    {order.user.name}
+                                                    {order.user?.name ??
+                                                        (
+                                                            order.shippingAddress as {
+                                                                fullName?: string;
+                                                            }
+                                                        ).fullName ??
+                                                        "Guest customer"}
                                                 </p>
 
                                                 <p className="truncate text-xs text-gray-400">
-                                                    {order.user.email}
+                                                    {order.user?.email ??
+                                                        order.guestEmail ??
+                                                        ""}
                                                 </p>
                                             </div>
 

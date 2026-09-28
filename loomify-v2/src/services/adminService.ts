@@ -73,6 +73,8 @@ export const getAdminRecentOrders = async () => {
             status: true,
             total: true,
             createdAt: true,
+            guestEmail: true,
+            shippingAddress: true,
             user: {
                 select: {
                     id: true,

@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
+import { hashGuestOrderToken } from "@/lib/guestOrderAccess";
 import { prisma } from "@/lib/prisma";
 
 interface RouteContext {
@@ -24,17 +25,20 @@ export async function POST(request: Request, { params }: RouteContext) {
             headers: await headers(),
         });
 
-        if (!session) {
+        const { id: orderId } = await params;
+        const requestUrl = new URL(request.url);
+        const access = requestUrl.searchParams.get("access");
+
+        if (!session && !access) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Please login to request a return.",
+                    message: "Please login or use your private order link.",
                 },
                 { status: 401 },
             );
         }
 
-        const { id: orderId } = await params;
         const body = await request.json();
         const orderItemId =
             typeof body?.orderItemId === "string"
@@ -65,12 +69,23 @@ export async function POST(request: Request, { params }: RouteContext) {
         const order = await prisma.order.findFirst({
             where: {
                 id: orderId,
-                userId: session.user.id,
                 status: "DELIVERED",
+                ...(session && access
+                    ? {
+                          OR: [
+                              { userId: session.user.id },
+                              { guestTokenHash: hashGuestOrderToken(access) },
+                          ],
+                      }
+                    : session
+                      ? { userId: session.user.id }
+                      : { guestTokenHash: hashGuestOrderToken(access!) }),
             },
             select: {
                 id: true,
                 updatedAt: true,
+                userId: true,
+                guestEmail: true,
             },
         });
 
@@ -140,7 +155,8 @@ export async function POST(request: Request, { params }: RouteContext) {
 
         const returnRequest = await prisma.returnRequest.create({
             data: {
-                userId: session.user.id,
+                userId: session?.user.id,
+                guestEmail: session ? null : order.guestEmail,
                 orderId: order.id,
                 orderItemId: orderItem.id,
                 quantity,

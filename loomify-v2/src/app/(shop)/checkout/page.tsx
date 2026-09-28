@@ -1,5 +1,5 @@
+/* eslint-disable indent */
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 import CheckoutForm from "@/components/checkout/CheckoutForm";
 import { auth } from "@/lib/auth";
@@ -11,28 +11,26 @@ const CheckoutPage = async () => {
         headers: await headers(),
     });
 
-    if (!session) {
-        redirect("/login");
-    }
-
-    const addresses = await prisma.address.findMany({
-        where: {
-            userId: session.user.id,
-        },
-        orderBy: {
-            createdAt: "desc",
-        },
-        select: {
-            id: true,
-            fullName: true,
-            phone: true,
-            addressLine: true,
-            city: true,
-            district: true,
-            postalCode: true,
-            country: true,
-        },
-    });
+    const addresses = session
+        ? await prisma.address.findMany({
+              where: {
+                  userId: session.user.id,
+              },
+              orderBy: {
+                  createdAt: "desc",
+              },
+              select: {
+                  id: true,
+                  fullName: true,
+                  phone: true,
+                  addressLine: true,
+                  city: true,
+                  district: true,
+                  postalCode: true,
+                  country: true,
+              },
+          })
+        : [];
 
     return (
         <section className="bg-stone-50 px-4 py-16 sm:px-6 lg:px-8">
@@ -54,6 +52,7 @@ const CheckoutPage = async () => {
                 <CheckoutForm
                     addresses={addresses}
                     onlinePaymentEnabled={isSslCommerzConfigured()}
+                    guestCheckout={!session}
                 />
             </div>
         </section>

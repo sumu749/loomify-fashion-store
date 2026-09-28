@@ -28,6 +28,7 @@ interface SavedAddress {
 interface CheckoutFormProps {
     addresses: SavedAddress[];
     onlinePaymentEnabled: boolean;
+    guestCheckout: boolean;
 }
 
 const FREE_SHIPPING_THRESHOLD = 100;
@@ -36,6 +37,7 @@ const SHIPPING_COST = 15;
 const CheckoutForm = ({
     addresses,
     onlinePaymentEnabled,
+    guestCheckout,
 }: CheckoutFormProps) => {
     const router = useRouter();
     const dispatch = useAppDispatch();
@@ -52,6 +54,7 @@ const CheckoutForm = ({
     const [district, setDistrict] = useState("");
 
     const [fullName, setFullName] = useState("");
+    const [guestEmail, setGuestEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [address, setAddress] = useState("");
     const [city, setCity] = useState("");
@@ -252,6 +255,14 @@ const CheckoutForm = ({
             return;
         }
 
+        if (
+            guestCheckout &&
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim())
+        ) {
+            toast.error("Please enter a valid email address.");
+            return;
+        }
+
         if (!phone.trim()) {
             toast.error("Please enter your phone number.");
             return;
@@ -321,6 +332,7 @@ const CheckoutForm = ({
 
                     paymentMethod,
                     couponCode: appliedCoupon || undefined,
+                    guestEmail: guestCheckout ? guestEmail.trim() : undefined,
                 }),
             });
 
@@ -332,6 +344,10 @@ const CheckoutForm = ({
             }
 
             const orderId = result.data.orderId;
+            const guestAccessToken = result.data.guestAccessToken as
+                | string
+                | null
+                | undefined;
 
             if (result.data.redirectUrl) {
                 window.location.assign(result.data.redirectUrl);
@@ -347,7 +363,15 @@ const CheckoutForm = ({
 
             toast.success("Order placed successfully!");
 
-            router.push(`/order-success?orderId=${orderId}`);
+            const successUrl = new URL(
+                "/order-success",
+                window.location.origin,
+            );
+            successUrl.searchParams.set("orderId", orderId);
+            if (guestAccessToken) {
+                successUrl.searchParams.set("access", guestAccessToken);
+            }
+            router.push(`${successUrl.pathname}${successUrl.search}`);
         } catch (error) {
             console.error("Checkout request failed:", error);
 
@@ -369,7 +393,17 @@ const CheckoutForm = ({
             <div className="min-w-0 space-y-6">
                 {/* ================= Saved Addresses ================= */}
 
-                {addresses.length === 0 ? (
+                {guestCheckout ? (
+                    <section className="border border-dashed border-border bg-white p-5 sm:p-6">
+                        <p className="font-semibold text-primary">
+                            Guest checkout
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-gray-500">
+                            Enter your delivery details below. You do not need
+                            an account to place this order.
+                        </p>
+                    </section>
+                ) : addresses.length === 0 ? (
                     <section className="border border-dashed border-border bg-white p-5 sm:p-6">
                         <div className="flex items-start gap-4">
                             <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-accent/10 text-accent">
@@ -508,6 +542,33 @@ const CheckoutForm = ({
                             delivered.
                         </p>
                     </div>
+
+                    {guestCheckout && (
+                        <div className="mt-6">
+                            <label
+                                htmlFor="guestEmail"
+                                className="mb-2 block text-sm font-medium text-primary"
+                            >
+                                Email address
+                            </label>
+                            <input
+                                id="guestEmail"
+                                type="email"
+                                value={guestEmail}
+                                onChange={(event) =>
+                                    setGuestEmail(event.target.value)
+                                }
+                                placeholder="you@example.com"
+                                autoComplete="email"
+                                required
+                                className="h-12 w-full border border-border px-4 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/10"
+                            />
+                            <p className="mt-2 text-xs text-gray-500">
+                                Keep the private order link shown after checkout
+                                to view your order.
+                            </p>
+                        </div>
+                    )}
 
                     <div className="mt-8 grid gap-5 sm:grid-cols-2">
                         {/* Full Name */}
@@ -939,8 +1000,9 @@ const CheckoutForm = ({
                                         </p>
 
                                         <p className="mt-1 text-xs text-gray-500">
-                                            You saved {formatCurrency(discount)}{" "}
-                                            on this order.
+                                            Keep the private order link shown
+                                            after checkout to view your order
+                                            later. on this order.
                                         </p>
                                     </div>
 

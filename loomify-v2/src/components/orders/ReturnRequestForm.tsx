@@ -10,12 +10,14 @@ interface ReturnRequestFormProps {
     orderId: string;
     orderItemId: string;
     maxQuantity: number;
+    accessToken?: string;
 }
 
 const ReturnRequestForm = ({
     orderId,
     orderItemId,
     maxQuantity,
+    accessToken,
 }: ReturnRequestFormProps) => {
     const router = useRouter();
     const [quantity, setQuantity] = useState(1);
@@ -30,16 +32,27 @@ const ReturnRequestForm = ({
         setLoading(true);
 
         try {
-            const response = await fetch(`/api/orders/${orderId}/returns`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    orderItemId,
-                    quantity,
-                    reason,
-                    resolution,
-                }),
-            });
+            const endpoint = new URL(
+                `/api/orders/${orderId}/returns`,
+                window.location.origin,
+            );
+            if (accessToken) {
+                endpoint.searchParams.set("access", accessToken);
+            }
+
+            const response = await fetch(
+                `${endpoint.pathname}${endpoint.search}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        orderItemId,
+                        quantity,
+                        reason,
+                        resolution,
+                    }),
+                },
+            );
             const result = await response.json();
 
             if (!response.ok) {

@@ -17,6 +17,7 @@ interface PaymentDetails {
     postalCode: string;
     country: string;
     itemCount: number;
+    guestAccessToken?: string;
 }
 
 const getConfig = (): SslCommerzConfig => {
@@ -51,6 +52,9 @@ export const initializeSslCommerzPayment = async (details: PaymentDetails) => {
         const url = new URL(callbackUrl);
         url.searchParams.set("result", result);
         url.searchParams.set("token", details.callbackToken);
+        if (details.guestAccessToken) {
+            url.searchParams.set("access", details.guestAccessToken);
+        }
         return url.toString();
     };
 

@@ -89,6 +89,12 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
                         },
                     },
                 },
+                {
+                    guestEmail: {
+                        contains: search,
+                        mode: "insensitive" as const,
+                    },
+                },
             ],
         }),
     };
@@ -331,24 +337,33 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
                                                 <td className="px-6 py-5">
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-stone-100 text-sm font-bold text-primary">
-                                                            {order.user.name
+                                                            {(
+                                                                order.user
+                                                                    ?.name ??
+                                                                "Guest customer"
+                                                            )
                                                                 .charAt(0)
                                                                 .toUpperCase()}
                                                         </div>
 
                                                         <div className="min-w-0">
                                                             <p className="truncate text-sm font-medium text-primary">
-                                                                {
-                                                                    order.user
-                                                                        .name
-                                                                }
+                                                                {order.user
+                                                                    ?.name ??
+                                                                    (
+                                                                        order.shippingAddress as {
+                                                                            fullName?: string;
+                                                                        }
+                                                                    )
+                                                                        .fullName ??
+                                                                    "Guest customer"}
                                                             </p>
 
                                                             <p className="mt-1 max-w-50 truncate text-xs text-gray-500">
-                                                                {
-                                                                    order.user
-                                                                        .email
-                                                                }
+                                                                {order.user
+                                                                    ?.email ??
+                                                                    order.guestEmail ??
+                                                                    ""}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -469,7 +484,13 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
                                                 </Link>
 
                                                 <p className="mt-1 truncate text-xs text-gray-400">
-                                                    {order.user.name}
+                                                    {order.user?.name ??
+                                                        (
+                                                            order.shippingAddress as {
+                                                                fullName?: string;
+                                                            }
+                                                        ).fullName ??
+                                                        "Guest customer"}
                                                 </p>
                                             </div>
 
@@ -488,11 +509,19 @@ const AdminOrdersPage = async ({ searchParams }: AdminOrdersPageProps) => {
                                             </p>
 
                                             <p className="mt-1 text-sm font-medium text-primary">
-                                                {order.user.name}
+                                                {order.user?.name ??
+                                                    (
+                                                        order.shippingAddress as {
+                                                            fullName?: string;
+                                                        }
+                                                    ).fullName ??
+                                                    "Guest customer"}
                                             </p>
 
                                             <p className="mt-0.5 truncate text-xs text-gray-500">
-                                                {order.user.email}
+                                                {order.user?.email ??
+                                                    order.guestEmail ??
+                                                    ""}
                                             </p>
                                         </div>
 

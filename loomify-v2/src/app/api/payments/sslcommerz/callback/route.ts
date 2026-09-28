@@ -13,6 +13,7 @@ export async function POST(request: Request) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? requestUrl.origin;
     const result = requestUrl.searchParams.get("result");
     const callbackToken = requestUrl.searchParams.get("token");
+    const guestAccessToken = requestUrl.searchParams.get("access");
     const formData = await request.formData();
     const transactionId = String(formData.get("tran_id") ?? "");
 
@@ -45,10 +46,14 @@ export async function POST(request: Request) {
     }
 
     if (payment.status === "PAID") {
-        return NextResponse.redirect(
-            new URL(`/order-success?orderId=${payment.orderId}`, appUrl),
-            { status: 303 },
+        const successUrl = new URL(
+            `/order-success?orderId=${payment.orderId}`,
+            appUrl,
         );
+        if (guestAccessToken) {
+            successUrl.searchParams.set("access", guestAccessToken);
+        }
+        return NextResponse.redirect(successUrl, { status: 303 });
     }
 
     if (result === "failed" || result === "cancelled") {
@@ -122,10 +127,14 @@ export async function POST(request: Request) {
             });
         });
 
-        return NextResponse.redirect(
-            new URL(`/order-success?orderId=${payment.orderId}`, appUrl),
-            { status: 303 },
+        const successUrl = new URL(
+            `/order-success?orderId=${payment.orderId}`,
+            appUrl,
         );
+        if (guestAccessToken) {
+            successUrl.searchParams.set("access", guestAccessToken);
+        }
+        return NextResponse.redirect(successUrl, { status: 303 });
     } catch (error) {
         console.error("Failed to validate SSLCommerz payment:", error);
 

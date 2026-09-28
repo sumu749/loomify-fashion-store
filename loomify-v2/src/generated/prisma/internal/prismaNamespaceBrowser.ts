@@ -262,6 +262,8 @@ export type WishlistItemScalarFieldEnum = (typeof WishlistItemScalarFieldEnum)[k
 export const OrderScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  guestEmail: 'guestEmail',
+  guestTokenHash: 'guestTokenHash',
   status: 'status',
   subtotal: 'subtotal',
   shippingCost: 'shippingCost',
@@ -334,6 +336,7 @@ export const CouponUsageScalarFieldEnum = {
   id: 'id',
   couponId: 'couponId',
   userId: 'userId',
+  guestEmail: 'guestEmail',
   orderId: 'orderId',
   createdAt: 'createdAt'
 } as const
@@ -358,6 +361,7 @@ export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof 
 export const ReturnRequestScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  guestEmail: 'guestEmail',
   orderId: 'orderId',
   orderItemId: 'orderItemId',
   quantity: 'quantity',

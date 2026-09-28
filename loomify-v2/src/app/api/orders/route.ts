@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { cancelPendingPayment } from "@/lib/cancelPendingPayment";
+import {
+    createGuestOrderToken,
+    hashGuestOrderToken,
+} from "@/lib/guestOrderAccess";
 import { prisma } from "@/lib/prisma";
 import {
     initializeSslCommerzPayment,
@@ -49,16 +53,6 @@ export async function POST(request: Request) {
             headers: await headers(),
         });
 
-        if (!session) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Please login before placing an order.",
-                },
-                { status: 401 },
-            );
-        }
-
         const body = await request.json();
 
         const {
@@ -66,12 +60,33 @@ export async function POST(request: Request) {
             shippingAddress,
             paymentMethod,
             couponCode,
+            guestEmail,
         }: {
             items: CartItemInput[];
             shippingAddress: ShippingAddress;
             paymentMethod: "COD" | "SSLCOMMERZ";
             couponCode?: string;
+            guestEmail?: string;
         } = body;
+
+        const normalizedGuestEmail =
+            typeof guestEmail === "string"
+                ? guestEmail.trim().toLowerCase()
+                : "";
+
+        if (
+            !session &&
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedGuestEmail)
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "Enter a valid email address for your order confirmation.",
+                },
+                { status: 400 },
+            );
+        }
 
         if (!Array.isArray(items) || items.length === 0) {
             return NextResponse.json(
@@ -256,6 +271,7 @@ export async function POST(request: Request) {
             paymentMethod === "SSLCOMMERZ" ? crypto.randomUUID() : null;
         const callbackToken =
             paymentMethod === "SSLCOMMERZ" ? crypto.randomUUID() : null;
+        const guestAccessToken = session ? null : createGuestOrderToken();
 
         /*
          * Everything below happens in one transaction.
@@ -368,7 +384,11 @@ export async function POST(request: Request) {
              */
             const createdOrder = await tx.order.create({
                 data: {
-                    userId: session.user.id,
+                    userId: session?.user.id,
+                    guestEmail: session ? null : normalizedGuestEmail,
+                    guestTokenHash: guestAccessToken
+                        ? hashGuestOrderToken(guestAccessToken)
+                        : null,
                     status: "PENDING",
                     subtotal,
                     shippingCost,
@@ -419,7 +439,8 @@ export async function POST(request: Request) {
                 await tx.couponUsage.create({
                     data: {
                         couponId,
-                        userId: session.user.id,
+                        userId: session?.user.id,
+                        guestEmail: session ? null : normalizedGuestEmail,
                         orderId: createdOrder.id,
                     },
                 });
@@ -465,13 +486,14 @@ export async function POST(request: Request) {
                     transactionId,
                     callbackToken,
                     customerName: shippingAddress.fullName,
-                    customerEmail: session.user.email,
+                    customerEmail: session?.user.email ?? normalizedGuestEmail,
                     customerPhone: normalizedPhone,
                     address: shippingAddress.address,
                     city: shippingAddress.city,
                     district: shippingAddress.district,
                     postalCode: normalizedPostalCode,
                     country: shippingAddress.country,
+                    guestAccessToken: guestAccessToken ?? undefined,
                     itemCount: items.reduce(
                         (count, item) => count + item.quantity,
                         0,
@@ -485,6 +507,7 @@ export async function POST(request: Request) {
                         data: {
                             orderId: order.order.id,
                             redirectUrl,
+                            guestAccessToken,
                         },
                     },
                     { status: 201 },
@@ -510,6 +533,7 @@ export async function POST(request: Request) {
                 message: "Order created successfully.",
                 data: {
                     orderId: order.order.id,
+                    guestAccessToken,
                     subtotal,
                     shippingCost,
                     discount: order.discount,

@@ -78,10 +78,14 @@ const AdminReturnsPage = async () => {
                                 </div>
                                 <div className="text-sm sm:text-right">
                                     <p className="font-medium text-primary">
-                                        {returnRequest.user.name}
+                                        {returnRequest.user?.name ??
+                                            returnRequest.guestEmail ??
+                                            "Guest customer"}
                                     </p>
                                     <p className="text-gray-500">
-                                        {returnRequest.user.email}
+                                        {returnRequest.user?.email ??
+                                            returnRequest.guestEmail ??
+                                            ""}
                                     </p>
                                     <p className="mt-1 text-xs text-gray-400">
                                         Order #
